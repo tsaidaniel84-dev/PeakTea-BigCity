@@ -192,7 +192,7 @@ td.day{text-align:center!important}
     <div class="row"><button class="btn" id="btnAddItem">＋ 新增品項</button></div>
     
   </div>
-  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v12</div>
+  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v13</div>
   <details class="card sync" id="syncBox">
     <summary>☁ 同步設定</summary>
     <div class="body">
@@ -241,7 +241,8 @@ const $=id=>document.getElementById(id);
 const clone=o=>JSON.parse(JSON.stringify(o));
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),2400)}
-const hasVal=v=>v!==''&&v!==null&&v!==undefined;
+const hasVal=v=>(typeof v==='number'&&isFinite(v))||(typeof v==='string'&&v.trim()!==''&&isFinite(Number(v)));
+const BOOT_AT=Date.now();
 
 /* ---------- 狀態 ---------- */
 let S={items:clone(DEFAULT_ITEMS),nextId:100,days:{}};
@@ -429,7 +430,7 @@ function syncFromRemote(){
   S.items.forEach(it=>{
     const c=cards[it.id];if(!c)return;
     const v=valOf(curDate,it.id),sv=hasVal(v)?String(v):'';
-    if(document.activeElement!==c.inp&&c.inp.value!==sv){c.inp.value=sv;c.inp.classList.remove('flash');void c.inp.offsetWidth;c.inp.classList.add('flash')}
+    if(document.activeElement!==c.inp&&c.inp.value!==sv){c.inp.value=sv;if(Date.now()-BOOT_AT>4000){c.inp.classList.remove('flash');void c.inp.offsetWidth;c.inp.classList.add('flash')}}
     refreshCard(it.id);
   });
   syncMeta(true);renderChips();updateProg();
@@ -438,7 +439,7 @@ function syncMeta(flash){
   const r=S.days[curDate]||{};
   [['staff','staff'],['note','note']].forEach(([id,k])=>{
     const el=$(id),v=r[k]||'';
-    if(document.activeElement!==el&&el.value!==v){el.value=v;if(flash){el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')}}
+    if(document.activeElement!==el&&el.value!==v){el.value=v;if(flash&&Date.now()-BOOT_AT>4000){el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')}}
   });
   $('metaSum').textContent=r.staff||'';
 }
