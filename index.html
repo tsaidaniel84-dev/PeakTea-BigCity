@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>每日盤點表</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{
+  --bg:#f4f5f2;--card:#ffffff;--ink:#1d2320;--muted:#6b756f;--line:#dfe3de;
+  --accent:#1f7a55;--accent-ink:#ffffff;--accent-soft:#e3f2eb;
+  --warn:#b4570a;--warn-soft:#fdf0e1;--up:#1f7a55;--down:#c0392b;--input:#fbfcfb;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#131714;--card:#1b211d;--ink:#e8ede9;--muted:#93a097;--line:#2c352f;
+    --accent:#4cc38a;--accent-ink:#0b1a12;--accent-soft:#1f3a2c;
+    --warn:#f0a35a;--warn-soft:#3a2a17;--up:#4cc38a;--down:#ff8a7a;--input:#161b18;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#131714;--card:#1b211d;--ink:#e8ede9;--muted:#93a097;--line:#2c352f;
+  --accent:#4cc38a;--accent-ink:#0b1a12;--accent-soft:#1f3a2c;
+  --warn:#f0a35a;--warn-soft:#3a2a17;--up:#4cc38a;--down:#ff8a7a;--input:#161b18;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);
+  font-family:-apple-system,"PingFang TC","Noto Sans TC","Microsoft JhengHei",system-ui,sans-serif;font-size:16px;line-height:1.5}
+.wrap{max-width:860px;margin:0 auto;padding:16px 14px 90px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:10px;margin-bottom:14px}
+h1{font-size:20px;margin:0;font-weight:700}
+.clock{font-size:13px;color:var(--muted)}
+.tabs{display:flex;gap:4px;background:var(--line);padding:4px;border-radius:12px;margin-bottom:14px}
+.tabs button{flex:1;border:0;background:transparent;color:var(--muted);padding:9px 6px;border-radius:9px;font:inherit;font-size:14px;font-weight:600;cursor:pointer}
+.tabs button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.datebox{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.bigdate{font-size:22px;font-weight:700}
+.pill{font-size:12px;padding:2px 9px;border-radius:99px;background:var(--accent-soft);color:var(--accent);font-weight:600}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+button.btn,label.btn{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:8px 13px;border-radius:10px;font:inherit;font-size:14px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px}
+button.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+button.btn.danger{color:var(--down)}
+button.btn:disabled{opacity:.5;cursor:default}
+input,select{font:inherit;color:var(--ink);background:var(--input);border:1px solid var(--line);border-radius:9px;padding:8px 10px;min-width:0}
+input:focus{outline:2px solid var(--accent);outline-offset:0}
+.field{display:flex;flex-direction:column;gap:3px;flex:1;min-width:130px}
+.field span{font-size:12px;color:var(--muted)}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%}
+th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{font-size:12px;color:var(--muted);font-weight:600;position:sticky;top:0;background:var(--card)}
+td.num,th.num{text-align:right}
+td.name{font-weight:700;font-size:17px}
+td input.qty{width:88px;text-align:right;font-size:18px;font-weight:700;padding:7px 9px}
+.diff.up{color:var(--up)}.diff.down{color:var(--down)}.diff{font-weight:600}
+.muted{color:var(--muted);font-size:13px}
+.savebar{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);
+  padding:10px 14px calc(10px + env(safe-area-inset-bottom,0px));display:flex;gap:10px;justify-content:center;align-items:center;z-index:5}
+.savebar .inner{max-width:860px;width:100%;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.grow{flex:1}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(84px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);
+  padding:9px 16px;border-radius:99px;font-size:14px;z-index:9;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%}
+.toast.show{opacity:1}
+.hidden{display:none!important}
+.banner{background:var(--warn-soft);color:var(--warn);padding:9px 12px;border-radius:10px;font-size:14px;margin-bottom:12px}
+.hist td.day{font-weight:700;cursor:pointer;color:var(--accent)}
+.hist tr.has td{background:var(--accent-soft)}
+.hist tr.cur td{outline:2px solid var(--accent);outline-offset:-2px}
+.itemrow{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.itemrow input.n{flex:1}.itemrow input.u{width:70px}
+.icon{padding:7px 10px}
+h2{font-size:16px;margin:0 0 10px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>每日盤點表</h1>
+      <div class="clock" id="clock"></div>
+    </div>
+    <div class="row">
+      <button class="btn" id="btnExport">⬇ 匯出 Excel</button>
+    </div>
+  </header>
+
+  <div class="banner hidden" id="storageWarn">⚠ 此瀏覽器無法寫入儲存空間，資料重新整理後會消失。請常用「匯出 Excel」或「備份」保存資料。</div>
+
+  <div class="tabs" id="tabs">
+    <button data-t="daily" class="on">今日盤點</button>
+    <button data-t="history">歷史紀錄</button>
+    <button data-t="items">品項設定</button>
+  </div>
+
+  <!-- 每日盤點 -->
+  <section id="tab-daily">
+    <div class="card">
+      <div class="datebox">
+        <div class="bigdate" id="dateLabel"></div>
+        <span class="pill" id="statusPill"></span>
+        <span class="grow"></span>
+        <input type="date" id="datePick" aria-label="選擇日期">
+        <button class="btn" id="btnToday">回到今天</button>
+      </div>
+      <div class="row" style="margin-top:12px">
+        <label class="field"><span>盤點人員</span><input id="staff" placeholder="姓名"></label>
+        <label class="field" style="flex:2"><span>備註</span><input id="note" placeholder=""></label>
+      </div>
+    </div>
+    <div class="card">
+      <div class="scroll">
+        <table>
+          <thead><tr><th>品項</th><th class="num" id="prevHead">前次</th><th class="num">今日盤點</th><th class="num">增減</th></tr></thead>
+          <tbody id="dailyBody"></tbody>
+        </table>
+      </div>
+      <div class="muted" style="margin-top:8px">輸入數字後按 Enter 會跳到下一項。「前次」為此日期之前最近一次的盤點紀錄。</div>
+    </div>
+    <div class="row">
+      <button class="btn" id="btnCopyPrev">帶入前次數量</button>
+      <button class="btn" id="btnClear">清空本日</button>
+      <button class="btn danger hidden" id="btnDelete">刪除此日紀錄</button>
+    </div>
+  </section>
+
+  <!-- 歷史紀錄 -->
+  <section id="tab-history" class="hidden">
+    <div class="card">
+      <div class="row" style="margin-bottom:10px">
+        <h2 style="margin:0">月庫存管理表</h2>
+        <span class="grow"></span>
+        <input type="month" id="monthPick">
+      </div>
+      <div class="scroll"><table class="hist" id="histTable"></table></div>
+      <div class="muted" style="margin-top:8px">點日期即可回到該日檢視／修改。綠底代表當天已有紀錄。</div>
+    </div>
+    <div class="card">
+      <h2>資料備份</h2>
+      <div class="row">
+        <button class="btn" id="btnBackup">備份成 JSON</button>
+        <label class="btn">還原備份<input type="file" id="fileRestore" accept=".json,application/json" class="hidden"></label>
+        <span class="muted" id="recCount"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 品項設定 -->
+  <section id="tab-items" class="hidden">
+    <div class="card">
+      <h2>品項清單</h2>
+      <div id="itemList"></div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn" id="btnAddItem">＋ 新增品項</button>
+      </div>
+      <div class="muted" style="margin-top:10px">刪除品項後，該品項的歷史數字仍保留在資料內，但不會出現在畫面與匯出中。</div>
+    </div>
+  </section>
+</div>
+
+<div class="savebar">
+  <div class="inner">
+    <span class="muted grow" id="saveInfo"></span>
+    <button class="btn primary" id="btnSave">💾 儲存今日盤點</button>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+(function(){
+const KEY='inv_daily_v2', DKEY='inv_daily_draft_v2';
+const WD=['日','一','二','三','四','五','六'];
+const DEFAULT_ITEMS=["熟飲杯蓋", "冷飲杯蓋", "熟飲杯套", "號印珍珠", "養樂珍珠", "奶精粉", "粉粿粉", "豆黃粉", "果凍粉", "杏仁凍粉", "仙草粉", "冬瓜醬罐", "蔗茶", "荔枝原汁", "發票紙捲", "品項貼", "餐巾紙", "餅乾", "自訂欄1", "自訂欄2", "自訂欄3", "New 大杯 / New 中杯"].map((n,i)=>({id:'i'+(i+1),name:n,unit:''}));
+const pad=n=>String(n).padStart(2,'0');
+const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const parse=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const $=id=>document.getElementById(id);
+const clone=o=>JSON.parse(JSON.stringify(o));
+
+let storageOK=true;
+function load(){
+  try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&Array.isArray(s.items))return s}catch(e){}
+  return {items:clone(DEFAULT_ITEMS),records:{},nextId:30};
+}
+function persist(){
+  try{localStorage.setItem(KEY,JSON.stringify(S));return true}
+  catch(e){storageOK=false;$('storageWarn').classList.remove('hidden');return false}
+}
+function saveDraft(){
+  try{ if(dirty) localStorage.setItem(DKEY,JSON.stringify({date:curDate,form})); else localStorage.removeItem(DKEY);}catch(e){}
+}
+function readDraft(){try{return JSON.parse(localStorage.getItem(DKEY))}catch(e){return null}}
+
+let S=load();
+let todayStr=ymd(new Date());
+let curDate=todayStr, followToday=true, dirty=false;
+let form={staff:'',note:'',values:{}};
+let histMonth=todayStr.slice(0,7);
+
+function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),2400)}
+
+function prevRecord(date){
+  const ds=Object.keys(S.records).filter(d=>d<date).sort();
+  return ds.length?{date:ds[ds.length-1],rec:S.records[ds[ds.length-1]]}:null;
+}
+function lastStaff(){
+  const ds=Object.keys(S.records).sort();
+  for(let i=ds.length-1;i>=0;i--){if(S.records[ds[i]].staff)return S.records[ds[i]].staff}
+  return '';
+}
+
+/* ---------- 日期／時鐘 ---------- */
+function tick(){
+  const n=new Date();
+  $('clock').textContent='目前時間 '+ymd(n)+'（週'+WD[n.getDay()]+'） '+pad(n.getHours())+':'+pad(n.getMinutes());
+  const t=ymd(n);
+  if(t!==todayStr){
+    todayStr=t;
+    if(followToday&&!dirty){loadDate(t);toast('日期已自動更新為 '+t)}
+    else{toast('已跨日，今天是 '+t+'，可按「回到今天」');updateHead()}
+  }
+}
+setInterval(tick,15000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick()});
+
+/* ---------- 載入日期 ---------- */
+function loadDate(d){
+  curDate=d; followToday=(d===todayStr);
+  const dr=readDraft();
+  if(dr&&dr.date===d&&dr.form){form=dr.form;dirty=true}
+  else if(S.records[d]){const r=S.records[d];form={staff:r.staff||'',note:r.note||'',values:clone(r.values||{})};dirty=false}
+  else{form={staff:lastStaff(),note:'',values:{}};dirty=false}
+  $('datePick').value=d;
+  $('staff').value=form.staff;$('note').value=form.note;
+  renderDaily();updateHead();
+}
+function updateHead(){
+  const d=parse(curDate);
+  $('dateLabel').textContent=(d.getMonth()+1)+'月'+d.getDate()+'日 週'+WD[d.getDay()]+'　'+d.getFullYear();
+  const pill=$('statusPill');
+  const saved=!!S.records[curDate];
+  if(dirty){pill.textContent='尚未儲存';pill.className='pill warn'}
+  else if(saved){pill.textContent='已儲存';pill.className='pill'}
+  else{pill.textContent='尚無紀錄';pill.className='pill warn'}
+  $('btnDelete').classList.toggle('hidden',!saved);
+  $('btnToday').classList.toggle('hidden',curDate===todayStr);
+  const r=S.records[curDate];
+  $('saveInfo').textContent=r&&r.savedAt?'上次儲存：'+r.savedAt:(curDate===todayStr?'今天':'');
+  $('btnSave').disabled=!dirty&&saved;
+}
+
+/* ---------- 每日盤點表 ---------- */
+function diffCell(id){
+  const p=prevRecord(curDate); const cur=form.values[id];
+  const pv=p&&p.rec.values?p.rec.values[id]:undefined;
+  if(cur===''||cur===undefined||pv===''||pv===undefined) return {t:'—',c:''};
+  const d=Math.round((Number(cur)-Number(pv))*100)/100;
+  return {t:(d>0?'+':'')+d,c:d>0?'up':d<0?'down':''};
+}
+function renderDaily(){
+  const p=prevRecord(curDate);
+  $('prevHead').textContent=p?'前次（'+p.date.slice(5).replace('-','/')+'）':'前次';
+  const tb=$('dailyBody');tb.innerHTML='';
+  S.items.forEach((it,idx)=>{
+    const tr=document.createElement('tr');
+    const pv=p&&p.rec.values?p.rec.values[it.id]:undefined;
+    const d=diffCell(it.id);
+    tr.innerHTML='<td class="name"></td><td class="num muted"></td><td class="num"><input class="qty" type="number" inputmode="decimal" step="any"></td><td class="num diff"></td>';
+    tr.children[0].textContent=it.name+(it.unit?' ('+it.unit+')':'');
+    tr.children[1].textContent=(pv===undefined||pv==='')?'—':pv;
+    const inp=tr.querySelector('input');
+    inp.value=form.values[it.id]??'';
+    inp.dataset.id=it.id;
+    tr.children[3].textContent=d.t;tr.children[3].className='num diff '+d.c;
+    inp.addEventListener('input',()=>{
+      form.values[it.id]=inp.value===''?'':Number(inp.value);
+      markDirty();
+      const dd=diffCell(it.id);tr.children[3].textContent=dd.t;tr.children[3].className='num diff '+dd.c;
+    });
+    inp.addEventListener('keydown',e=>{
+      if(e.key==='Enter'){e.preventDefault();const all=[...tb.querySelectorAll('input')];const nx=all[all.indexOf(inp)+1];if(nx){nx.focus();nx.select()}else{inp.blur()}}
+    });
+    inp.addEventListener('focus',()=>inp.select());
+    tb.appendChild(tr);
+  });
+  if(!S.items.length){tb.innerHTML='<tr><td colspan="4" class="muted">尚無品項，請到「品項設定」新增。</td></tr>'}
+}
+function markDirty(){dirty=true;saveDraft();updateHead()}
+$('staff').addEventListener('input',e=>{form.staff=e.target.value;markDirty()});
+$('note').addEventListener('input',e=>{form.note=e.target.value;markDirty()});
+
+function stamp(){const n=new Date();return ymd(n)+' '+pad(n.getHours())+':'+pad(n.getMinutes())}
+function saveToday(){
+  S.records[curDate]={staff:form.staff,note:form.note,values:clone(form.values),savedAt:stamp()};
+  const ok=persist();
+  dirty=false;saveDraft();updateHead();
+  toast(ok?'已儲存 '+curDate+' 的盤點':'儲存失敗：瀏覽器不允許寫入，請改用匯出備份');
+  if(!$('tab-history').classList.contains('hidden'))renderHistory();
+}
+$('btnSave').onclick=saveToday;
+$('btnToday').onclick=()=>loadDate(todayStr);
+$('datePick').onchange=e=>{
+  if(!e.target.value)return;
+  if(dirty){saveToday()}
+  loadDate(e.target.value);
+};
+function saveDraftInto(){ /* 切換日期前，未儲存內容保留為草稿即可（僅保留最近一筆） */ }
+$('btnCopyPrev').onclick=()=>{
+  const p=prevRecord(curDate);
+  if(!p){toast('沒有更早的紀錄可帶入');return}
+  S.items.forEach(it=>{const v=p.rec.values[it.id];if(v!==undefined&&v!=='')form.values[it.id]=v});
+  markDirty();renderDaily();toast('已帶入 '+p.date+' 的數量，請確認後修改');
+};
+$('btnClear').onclick=()=>{form.values={};markDirty();renderDaily()};
+let delArm=0;
+$('btnDelete').onclick=()=>{
+  const b=$('btnDelete');
+  if(!delArm){delArm=1;b.textContent='再按一次確認刪除';setTimeout(()=>{delArm=0;b.textContent='刪除此日紀錄'},3000);return}
+  delete S.records[curDate];persist();delArm=0;b.textContent='刪除此日紀錄';
+  dirty=false;saveDraft();loadDate(curDate);toast('已刪除');
+};
+
+/* ---------- 歷史紀錄 ---------- */
+function renderHistory(){
+  $('monthPick').value=histMonth;
+  const [y,m]=histMonth.split('-').map(Number);
+  const days=new Date(y,m,0).getDate();
+  const t=$('histTable');
+  let h='<thead><tr><th>日期</th><th>星期</th><th>人員</th>'+S.items.map(i=>'<th class="num">'+esc(i.name)+'</th>').join('')+'</tr></thead><tbody>';
+  for(let d=1;d<=days;d++){
+    const ds=y+'-'+pad(m)+'-'+pad(d);
+    const r=S.records[ds];
+    const wd=WD[new Date(y,m-1,d).getDay()];
+    h+='<tr class="'+(r?'has':'')+(ds===curDate?' cur':'')+'"><td class="day" data-d="'+ds+'">'+d+'</td><td>'+wd+'</td><td>'+esc(r?r.staff||'':'')+'</td>'+
+      S.items.map(i=>'<td class="num">'+(r&&r.values[i.id]!==undefined&&r.values[i.id]!==''?r.values[i.id]:'')+'</td>').join('')+'</tr>';
+  }
+  t.innerHTML=h+'</tbody>';
+  t.querySelectorAll('td.day').forEach(td=>td.onclick=()=>{if(dirty)saveToday();switchTab('daily');loadDate(td.dataset.d)});
+  $('recCount').textContent='共 '+Object.keys(S.records).length+' 天紀錄';
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+$('monthPick').onchange=e=>{if(e.target.value){histMonth=e.target.value;renderHistory()}};
+
+/* ---------- 品項設定 ---------- */
+function renderItems(){
+  const box=$('itemList');box.innerHTML='';
+  S.items.forEach((it,idx)=>{
+    const r=document.createElement('div');r.className='itemrow';
+    r.innerHTML='<input class="n" placeholder="品項名稱"><input class="u" placeholder="單位"><button class="btn icon" title="上移">↑</button><button class="btn icon" title="下移">↓</button><button class="btn icon danger" title="刪除">✕</button>';
+    const [n,u,up,dn,del]=r.children;
+    n.value=it.name;u.value=it.unit||'';
+    n.oninput=()=>{it.name=n.value;persist();renderDaily()};
+    u.oninput=()=>{it.unit=u.value;persist();renderDaily()};
+    up.onclick=()=>{if(idx>0){[S.items[idx-1],S.items[idx]]=[S.items[idx],S.items[idx-1]];persist();renderItems();renderDaily()}};
+    dn.onclick=()=>{if(idx<S.items.length-1){[S.items[idx+1],S.items[idx]]=[S.items[idx],S.items[idx+1]];persist();renderItems();renderDaily()}};
+    let arm=0;
+    del.onclick=()=>{
+      if(!arm){arm=1;del.textContent='確認?';setTimeout(()=>{arm=0;del.textContent='✕'},2500);return}
+      S.items.splice(idx,1);persist();renderItems();renderDaily();
+    };
+    box.appendChild(r);
+  });
+}
+$('btnAddItem').onclick=()=>{
+  S.nextId=(S.nextId||100)+1;
+  S.items.push({id:'i'+S.nextId+'_'+Date.now().toString(36),name:'',unit:'包'});
+  persist();renderItems();renderDaily();
+  const ins=$('itemList').querySelectorAll('input.n');ins[ins.length-1].focus();
+};
+
+/* ---------- 分頁 ---------- */
+function switchTab(t){
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
+  ['daily','history','items'].forEach(x=>$('tab-'+x).classList.toggle('hidden',x!==t));
+  document.querySelector('.savebar').classList.toggle('hidden',t!=='daily');
+  if(t==='history')renderHistory();
+  if(t==='items')renderItems();
+}
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>switchTab(b.dataset.t));
+
+/* ---------- 匯出 ---------- */
+function allRecords(){
+  const r=clone(S.records);
+  if(dirty){r[curDate]={staff:form.staff,note:form.note,values:clone(form.values)}}
+  return r;
+}
+function num(v){return (v===undefined||v==='')?'':v}
+function buildWorkbook(){
+  const recs=allRecords(); const items=S.items.filter(i=>i.name);
+  const wb=XLSX.utils.book_new();
+
+  // Sheet 1: 當日盤點
+  const p=(function(){const ds=Object.keys(recs).filter(d=>d<curDate).sort();return ds.length?{date:ds[ds.length-1],rec:recs[ds[ds.length-1]]}:null})();
+  const cur=recs[curDate]||{values:{},staff:'',note:''};
+  const a1=[
+    ['每日盤點表'],
+    ['日期',curDate,'星期','週'+WD[parse(curDate).getDay()]],
+    ['盤點人員',cur.staff||'','備註',cur.note||''],
+    [],
+    ['品項','單位','前次'+(p?'（'+p.date+'）':''),'今日盤點','增減']
+  ];
+  items.forEach(i=>{
+    const c=cur.values[i.id],pv=p?p.rec.values[i.id]:undefined;
+    const d=(c===undefined||c===''||pv===undefined||pv==='')?'':Math.round((c-pv)*100)/100;
+    a1.push([i.name,i.unit||'',num(pv),num(c),d]);
+  });
+  const ws1=XLSX.utils.aoa_to_sheet(a1);
+  ws1['!cols']=[{wch:12},{wch:8},{wch:18},{wch:12},{wch:10}];
+  XLSX.utils.book_append_sheet(wb,ws1,'當日盤點');
+
+  // Sheet 2: 當月月庫存管理表
+  const [y,m]=curDate.split('-').map(Number);
+  const days=new Date(y,m,0).getDate();
+  const a2=[['日期','星期','盤點人員',...items.map(i=>i.name+(i.unit?'('+i.unit+')':'')),'備註']];
+  for(let d=1;d<=days;d++){
+    const ds=y+'-'+pad(m)+'-'+pad(d);const r=recs[ds];
+    a2.push([d,'週'+WD[new Date(y,m-1,d).getDay()],r?r.staff||'':'',...items.map(i=>r?num(r.values[i.id]):''),r?r.note||'':'']);
+  }
+  const ws2=XLSX.utils.aoa_to_sheet(a2);
+  ws2['!cols']=[{wch:6},{wch:6},{wch:10},...items.map(()=>({wch:8})),{wch:20}];
+  ws2['!freeze']={xSplit:3,ySplit:1};
+  XLSX.utils.book_append_sheet(wb,ws2,y+'年'+m+'月');
+
+  // Sheet 3: 全部歷史
+  const ds=Object.keys(recs).sort();
+  const a3=[['日期','星期','盤點人員',...items.map(i=>i.name+(i.unit?'('+i.unit+')':'')),'備註']];
+  ds.forEach(d=>{const r=recs[d];a3.push([d,'週'+WD[parse(d).getDay()],r.staff||'',...items.map(i=>num(r.values[i.id])),r.note||''])});
+  const ws3=XLSX.utils.aoa_to_sheet(a3);
+  ws3['!cols']=[{wch:12},{wch:6},{wch:10},...items.map(()=>({wch:8})),{wch:20}];
+  XLSX.utils.book_append_sheet(wb,ws3,'全部歷史');
+  return wb;
+}
+async function getDownloads(){
+  try{return (window.claude&&await window.claude.use('downloads'))||null}catch(e){return null}
+}
+async function saveFile(filename,data){
+  const dl=await getDownloads();
+  if(dl){
+    try{await dl.save({filename,data});toast('已匯出 '+filename);return}
+    catch(e){if(e&&e.code==='declined'){return}toast('匯出失敗：'+(e&&e.message||'未知錯誤'));return}
+  }
+  // 備援：一般瀏覽器環境（在 claude.ai 內的發佈頁可能無效）
+  try{
+    const blob=new Blob([data]);const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);a.download=filename;document.body.appendChild(a);a.click();a.remove();
+    toast('已嘗試下載 '+filename);
+  }catch(e){toast('此環境不支援下載')}
+}
+$('btnExport').onclick=async()=>{
+  if(typeof XLSX==='undefined'){toast('Excel 元件載入失敗，請檢查網路後重新整理');return}
+  try{
+    const wb=buildWorkbook();
+    const buf=XLSX.write(wb,{bookType:'xlsx',type:'array'});
+    await saveFile('盤點表_'+curDate+'.xlsx',buf);
+  }catch(e){toast('匯出失敗：'+e.message)}
+};
+
+/* ---------- 備份／還原 ---------- */
+$('btnBackup').onclick=()=>saveFile('盤點備份_'+todayStr+'.json',JSON.stringify(S,null,1));
+$('fileRestore').onchange=e=>{
+  const f=e.target.files[0];if(!f)return;
+  const rd=new FileReader();
+  rd.onload=()=>{
+    try{
+      const s=JSON.parse(rd.result);
+      if(!s||!Array.isArray(s.items)||typeof s.records!=='object')throw new Error('格式不符');
+      S=s;persist();dirty=false;saveDraft();loadDate(curDate);renderHistory();renderItems();
+      toast('已還原 '+Object.keys(S.records).length+' 天紀錄');
+    }catch(err){toast('還原失敗：'+err.message)}
+  };
+  rd.readAsText(f);e.target.value='';
+};
+window.addEventListener('beforeunload',()=>{if(dirty)saveDraft()});
+
+/* ---------- 啟動 ---------- */
+persist();
+tick();
+loadDate(todayStr);
+})();
+</script>
+</body>
+</html>
