@@ -150,10 +150,10 @@ tr.cur td{outline:2px solid var(--accent);outline-offset:-2px}
     </details>
     <div id="items"></div>
     <div class="row" style="margin-top:10px">
-      <button class="btn" id="btnCopyPrev">帶入前次數量</button>
-      <button class="btn danger" id="btnClear">清空本日</button>
+      <button class="btn" id="btnCopyPrev">前次紀錄</button>
+      <button class="btn danger" id="btnClear">清空</button>
     </div>
-    <div class="muted" style="margin-top:10px">輸入後自動儲存，所有人的畫面即時同步。有修改的欄位（自己改或別人改）都會閃一下藍色。</div>
+    <div class="muted" style="margin-top:10px">輸入後自動儲存，畫面即時同步。</div>
   </div>
 </section>
 
@@ -184,6 +184,7 @@ tr.cur td{outline:2px solid var(--accent);outline-offset:-2px}
     <h2>📦 品項清單</h2>
     <div id="itemList"></div>
     <div class="row"><button class="btn" id="btnAddItem">＋ 新增品項</button></div>
+    <div class="muted" style="margin-top:8px">修改後會同步給所有人。刪除品項後，歷史數字仍保留在資料庫，但不會顯示與匯出。分類可自由輸入，按上方分類鈕時會自動出現。</div>
   </div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v9</div>
   <details class="card sync" id="syncBox">
