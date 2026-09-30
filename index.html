@@ -100,9 +100,11 @@ table{border-collapse:collapse;width:100%;font-size:14px}
 th,td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
 th{color:var(--muted);font-size:12px;position:sticky;top:0;background:var(--card)}
 th:nth-child(-n+3),td:nth-child(-n+3){text-align:left}
-td.day{font-weight:800;color:var(--accent);cursor:pointer}
-tr.has td{background:var(--accent-soft)}
-tr.cur td{outline:2px solid var(--accent);outline-offset:-2px}
+td.day{font-weight:800;color:#8a5a00;cursor:pointer}
+tr.has td{background:#fbeaa0}
+tr.cur td{outline:0;box-shadow:inset 0 2px 0 #e0a800,inset 0 -2px 0 #e0a800}
+tr.cur td:first-child{box-shadow:inset 0 2px 0 #e0a800,inset 0 -2px 0 #e0a800,inset 2px 0 0 #e0a800}
+tr.cur td:last-child{box-shadow:inset 0 2px 0 #e0a800,inset 0 -2px 0 #e0a800,inset -2px 0 0 #e0a800}
 .irow{display:grid;grid-template-columns:1fr 70px;gap:6px;margin-bottom:6px}
 .irow2{display:grid;gap:6px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px dashed var(--line)}
 .brow{display:flex;gap:6px;justify-content:flex-end}
@@ -118,12 +120,12 @@ tr.cur td{outline:2px solid var(--accent);outline-offset:-2px}
 .banner{background:var(--warn-soft);color:var(--warn);padding:10px 12px;font-size:14px;margin:10px 12px 0;border-radius:12px}
 .nic{width:26px;height:26px;display:block;margin-bottom:2px}
 .nav button .nic.a{display:none}.nav button.on .nic.a{display:block}.nav button.on .nic.g{display:none}
-.ib.arm{background:var(--down);border-color:var(--down);color:#fff;font-size:13px;font-weight:800;white-space:nowrap;padding:0;letter-spacing:0}
-tr.has td{background:#fbeaa0!important;color:#3d3208}
+.ib.arm{background:var(--down)!important;border-color:var(--down)!important;color:#fff!important;font-size:13px;font-weight:800;white-space:nowrap;padding:0;letter-spacing:0}
+tr.has td,tr.has td.day{background:#fbeaa0!important;color:#3d3208}
 td.day{text-align:center!important}
 #histTable th:nth-child(n+4),#histTable td:nth-child(n+4){text-align:center}
 #histTable th:nth-child(-n+3),#histTable td:nth-child(-n+3){text-align:center}
-@media (prefers-color-scheme:dark){tr.has td{background:#5a4c12!important;color:#fff3c2}}
+@media (prefers-color-scheme:dark){tr.has td{background:#5a4c12!important;color:#fff3c2;border-bottom-color:#8a7420}td.day{color:#f5d76e}}
 .avatar{width:26px;height:26px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:8px;border:1px solid var(--line)}
 .mi{display:flex;align-items:center;color:var(--ink)}
 :root{--flash:#2f7fd6;--flash-soft:#dbeafe}
@@ -149,15 +151,15 @@ td.day{text-align:center!important}
   </div>
   <div class="banner hidden" id="banner"></div>
   <div class="list">
-    <details class="meta"><summary><span class="mi"><img class="avatar" src="data:image/jpeg;base64,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" alt="">盤點人員／備註</span><span id="metaSum"></span></summary>
-      <div class="in"><input id="staff" placeholder="盤點人員"><input id="note" placeholder="備註（進貨、報廢、缺貨…）"></div>
+    <details class="meta"><summary><span class="mi"><img class="avatar" src="data:image/jpeg;base64,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" alt="">盤點人員</span><span id="metaSum"></span></summary>
+      <div class="in"><input id="staff" placeholder="盤點人員"><input id="note" placeholder="備註"></div>
     </details>
     <div id="items"></div>
     <div class="row" style="margin-top:10px">
-      <button class="btn" id="btnCopyPrev">帶入前次數量</button>
-      <button class="btn danger" id="btnClear">清空本日</button>
+      <button class="btn" id="btnCopyPrev">前次紀錄</button>
+      <button class="btn danger" id="btnClear">清空</button>
     </div>
-    <div class="muted" style="margin-top:10px">輸入後自動儲存，所有人的畫面即時同步。有修改的欄位（自己改或別人改）都會閃一下藍色。</div>
+    <div class="muted" style="margin-top:10px">輸入後自動儲存，畫面即時同步。</div>
   </div>
 </section>
 
@@ -188,11 +190,11 @@ td.day{text-align:center!important}
     <h2>📦 品項清單</h2>
     <div id="itemList"></div>
     <div class="row"><button class="btn" id="btnAddItem">＋ 新增品項</button></div>
-    <div class="muted" style="margin-top:8px">修改後會同步給所有人。刪除品項後，歷史數字仍保留在資料庫，但不會顯示與匯出。分類可自由輸入，按上方分類鈕時會自動出現。</div>
+    
   </div>
-  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v10</div>
+  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v12</div>
   <details class="card sync" id="syncBox">
-    <summary>☁ 同步設定（點開）</summary>
+    <summary>☁ 同步設定</summary>
     <div class="body">
     <label class="field"><span>Firebase 資料庫網址</span><input id="cfgUrl" placeholder="https://xxxx-default-rtdb.firebaseio.com" inputmode="url" autocapitalize="off"></label>
     <label class="field"><span>店家代碼（自訂一組密碼，同店的人輸入同一組）</span><input id="cfgCode" placeholder="例如 peaktea-bigcity-2026" autocapitalize="off"></label>
