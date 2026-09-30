@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#3f6b5a">
-<meta name="app-version" content="21">
+<meta name="app-version" content="22">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -195,7 +195,7 @@ td.day{text-align:center!important}
     <div class="row"><button class="btn" id="btnAddItem">＋ 新增品項</button></div>
     
   </div>
-  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v21 <button class="btn sm" id="btnUpdate" style="margin-left:8px">檢查更新</button></div>
+  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v22 <button class="btn sm" id="btnUpdate" style="margin-left:8px">檢查更新</button></div>
   <details class="card sync" id="syncBox">
     <summary>☁ 同步設定</summary>
     <div class="body">
@@ -550,20 +550,20 @@ function buildWorkbook(){
   const its=S.items.filter(i=>i.name),wb=XLSX.utils.book_new();
   const label=i=>i.name+(i.unit?'('+i.unit+')':'');
   const p=prevRecord(curDate),cur=S.days[curDate]||{};const cv=cur.values||{};
-  const a1=[['PeakTea 每日盤點表'],['日期',curDate,'星期','週'+WD[parse(curDate).getDay()]],['盤點人員',cur.staff||'','備註',cur.note||''],[],['分類','品項','單位','前次'+(p?'（'+p.date+'）':''),'今日盤點','增減']];
+  const a1=[['青山巨城店 每日盤點表'],['日期',curDate,'星期','週'+WD[parse(curDate).getDay()]],['盤點人員',cur.staff||''],[],['分類','品項','單位','前次'+(p?'（'+p.date+'）':''),'今日盤點','增減']];
   its.forEach(i=>{const c=cv[i.id],pv=p&&p.rec.values?p.rec.values[i.id]:undefined;
     a1.push([i.cat||'',i.name,i.unit||'',num(pv),num(c),(hasVal(c)&&hasVal(pv))?Math.round((c-pv)*100)/100:''])});
   const ws1=XLSX.utils.aoa_to_sheet(a1);ws1['!cols']=[{wch:8},{wch:20},{wch:8},{wch:18},{wch:12},{wch:10}];
   XLSX.utils.book_append_sheet(wb,ws1,'當日盤點');
   const [y,m]=curDate.split('-').map(Number),days=new Date(y,m,0).getDate();
-  const a2=[['日期','星期','盤點人員',...its.map(label),'備註']];
+  const a2=[['日期','星期','盤點人員',...its.map(label)]];
   for(let d=1;d<=days;d++){const ds=y+'-'+pad(m)+'-'+pad(d),r=S.days[ds]||{};
-    a2.push([d,'週'+WD[new Date(y,m-1,d).getDay()],r.staff||'',...its.map(i=>num(r.values&&r.values[i.id])),r.note||''])}
-  const ws2=XLSX.utils.aoa_to_sheet(a2);ws2['!cols']=[{wch:6},{wch:6},{wch:10},...its.map(()=>({wch:10})),{wch:20}];
+    a2.push([d,'週'+WD[new Date(y,m-1,d).getDay()],r.staff||'',...its.map(i=>num(r.values&&r.values[i.id]))])}
+  const ws2=XLSX.utils.aoa_to_sheet(a2);ws2['!cols']=[{wch:6},{wch:6},{wch:10},...its.map(()=>({wch:10}))];
   XLSX.utils.book_append_sheet(wb,ws2,y+'年'+m+'月');
-  const a3=[['日期','星期','盤點人員',...its.map(label),'備註']];
-  Object.keys(S.days).filter(d=>hasData(S.days[d])).sort().forEach(d=>{const r=S.days[d];a3.push([d,'週'+WD[parse(d).getDay()],r.staff||'',...its.map(i=>num(r.values&&r.values[i.id])),r.note||''])});
-  const ws3=XLSX.utils.aoa_to_sheet(a3);ws3['!cols']=[{wch:12},{wch:6},{wch:10},...its.map(()=>({wch:10})),{wch:20}];
+  const a3=[['日期','星期','盤點人員',...its.map(label)]];
+  Object.keys(S.days).filter(d=>hasData(S.days[d])).sort().forEach(d=>{const r=S.days[d];a3.push([d,'週'+WD[parse(d).getDay()],r.staff||'',...its.map(i=>num(r.values&&r.values[i.id]))])});
+  const ws3=XLSX.utils.aoa_to_sheet(a3);ws3['!cols']=[{wch:12},{wch:6},{wch:10},...its.map(()=>({wch:10}))];
   XLSX.utils.book_append_sheet(wb,ws3,'全部歷史');
   return wb;
 }
