@@ -49,10 +49,12 @@ details.sync .body{margin-top:12px}
 .dwrap{flex:1;position:relative;height:44px;border:1px solid var(--line);border-radius:12px;background:var(--card);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:17px}
 .dwrap input{position:absolute;inset:0;opacity:0;width:100%;height:100%;padding:0;border:0}
 .todaybtn{height:44px;padding:0 12px;border-radius:12px;border:1px solid var(--accent);background:var(--accent);color:var(--accent-ink);font-weight:700;flex:none}
-.search{position:relative;margin-bottom:8px}
-.search input{padding-left:38px;padding-right:38px;border-radius:12px;background:var(--card)}
-.search .ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
-.search .x{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:36px;height:36px;border:0;background:none;color:var(--muted);font-size:18px}
+.toolrow{display:flex;gap:6px;align-items:center;margin-bottom:8px}
+.search{position:relative;flex:1;min-width:0;max-width:150px}
+.btn.sm{min-height:34px;padding:0 10px;font-size:14px;border-radius:10px;flex:none;white-space:nowrap}
+.search input{height:34px;font-size:15px;padding:0 26px 0 30px;border-radius:10px;background:var(--card)}
+.search .ic{font-size:13px;position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.search .x{position:absolute;right:4px;top:50%;transform:translateY(-50%);width:28px;height:34px;border:0;background:none;color:var(--muted);font-size:15px}
 .chips{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none}
 .chips::-webkit-scrollbar{display:none}
 .chip{flex:none;border:1px solid var(--line);background:var(--card);border-radius:99px;padding:8px 14px;font-weight:700;font-size:15px;white-space:nowrap}
@@ -146,7 +148,7 @@ td.day{text-align:center!important}
       <button class="nb" id="nextDay" aria-label="後一天">▶</button>
       <button class="todaybtn hidden" id="btnToday">今天</button>
     </div>
-    <div class="search"><span class="ic">🔍</span><input id="q" type="search" placeholder="搜尋品項…" autocomplete="off"><button class="x hidden" id="qx" aria-label="清除">✕</button></div>
+    <div class="toolrow"><div class="search"><span class="ic">🔍</span><input id="q" type="search" placeholder="搜尋品項" autocomplete="off"><button class="x hidden" id="qx" aria-label="清除">✕</button></div><button class="btn sm" id="btnCopyPrev">前次紀錄</button><button class="btn sm danger" id="btnClear">清空</button></div>
     <div class="chips" id="chips"></div>
     <div class="prog"><i id="progBar"></i></div>
   </div>
@@ -156,10 +158,6 @@ td.day{text-align:center!important}
       <div class="in"><input id="staff" placeholder="盤點人員"><input id="note" placeholder="備註"></div>
     </details>
     <div id="items"></div>
-    <div class="row" style="margin-top:10px">
-      <button class="btn" id="btnCopyPrev">前次紀錄</button>
-      <button class="btn danger" id="btnClear">清空</button>
-    </div>
     <div class="muted" style="margin-top:10px">輸入後自動儲存，畫面即時同步。</div>
   </div>
 </section>
@@ -193,7 +191,7 @@ td.day{text-align:center!important}
     <div class="row"><button class="btn" id="btnAddItem">＋ 新增品項</button></div>
     
   </div>
-  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v14</div>
+  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v16</div>
   <details class="card sync" id="syncBox">
     <summary>☁ 同步設定</summary>
     <div class="body">
@@ -363,11 +361,12 @@ $('datePick').onchange=e=>{if(e.target.value)loadDate(e.target.value)};
 function cats(){
   const set=[...DEFAULT_CATS];
   S.items.forEach(i=>{if(i.cat&&!set.includes(i.cat))set.push(i.cat)});
-  return set.filter(c=>S.items.some(i=>(i.cat||'其他')===c));
+  return set.filter(c=>S.items.some(i=>i.name&&i.cat===c));
 }
 function renderChips(){
   const box=$('chips');
-  const list=[['全部',S.items],...cats().map(c=>[c,S.items.filter(i=>(i.cat||'其他')===c)]),['未填',S.items.filter(i=>!hasVal(valOf(curDate,i.id)))]];
+  const NI=S.items.filter(i=>i.name);
+  const list=[['全部',NI],['未填',NI.filter(i=>!hasVal(valOf(curDate,i.id)))],...cats().map(c=>[c,NI.filter(i=>i.cat===c)])];
   if(catSel!=='全部'&&catSel!=='未填'&&!cats().includes(catSel))catSel='全部';
   box.innerHTML='';
   list.forEach(([c,its])=>{
@@ -382,7 +381,7 @@ $('q').oninput=e=>{query=e.target.value.trim().toLowerCase();$('qx').classList.t
 $('qx').onclick=()=>{$('q').value='';query='';$('qx').classList.add('hidden');renderItems()};
 function visible(it){
   if(catSel==='未填'){if(hasVal(valOf(curDate,it.id)))return false}
-  else if(catSel!=='全部'&&(it.cat||'其他')!==catSel)return false;
+  else if(catSel!=='全部'&&(it.cat||'')!==catSel)return false;
   if(query&&!(it.name.toLowerCase().includes(query)||(it.cat||'').toLowerCase().includes(query)))return false;
   return true;
 }
@@ -403,7 +402,7 @@ function renderItems(){
   list.forEach(it=>{
     const el=document.createElement('div');el.className='item';
     el.innerHTML='<div class="info"><div class="nm"></div><div class="sub"></div></div><div class="stp"><button class="sb" aria-label="減一">−</button><input class="qty" type="number" inputmode="decimal" step="any" min="0" placeholder="—"><button class="sb" aria-label="加一">＋</button></div>';
-    el.querySelector('.nm').innerHTML=esc(it.name)+(it.unit?' <span class="muted">('+esc(it.unit)+')</span>':'')+'<span class="cat">'+esc(it.cat||'其他')+'</span>';
+    el.querySelector('.nm').innerHTML=esc(it.name)+(it.unit?' <span class="muted">('+esc(it.unit)+')</span>':'')+(it.cat?'<span class="cat">'+esc(it.cat)+'</span>':'');
     const inp=el.querySelector('input'),[m,p]=el.querySelectorAll('.sb');
     const commit=raw=>{
       const v=raw===''?'':Number(raw);if(v!==''&&isNaN(v))return;
@@ -460,8 +459,8 @@ $('btnCopyPrev').onclick=()=>{
 let clrArm=0;
 $('btnClear').onclick=async()=>{
   const b=$('btnClear');
-  if(!clrArm){clrArm=1;b.textContent='再按一次確認清空';setTimeout(()=>{clrArm=0;b.textContent='清空本日'},3000);return}
-  clrArm=0;b.textContent='清空本日';
+  if(!clrArm){clrArm=1;b.textContent='再按確認';setTimeout(()=>{clrArm=0;b.textContent='清空'},3000);return}
+  clrArm=0;b.textContent='清空';
   Object.keys(pendVals).filter(k=>k.startsWith(curDate+'|')).forEach(k=>{clearTimeout(timers[k]);delete pendVals[k]});
   const keep={staff:dayOf(curDate).staff||null,note:dayOf(curDate).note||null};
   try{await store.setDay(curDate,keep.staff||keep.note?{staff:keep.staff||'',note:keep.note||'',updatedAt:Date.now()}:null)}catch(e){toast('清空失敗')}
@@ -498,7 +497,7 @@ function renderItemEditor(){
   $('catList').innerHTML=[...new Set([...DEFAULT_CATS,...S.items.map(i=>i.cat).filter(Boolean)])].map(c=>'<option value="'+esc(c)+'">').join('');
   S.items.forEach((it,idx)=>{
     const r=document.createElement('div');r.className='irow2';
-    r.innerHTML='<div class="irow"><input class="n" placeholder="品項名稱"><input class="u" placeholder="單位"></div><input class="c" list="catList" placeholder="分類（粉／包裝／發票…）"><div class="brow"><button class="ib">↑</button><button class="ib">↓</button><button class="ib" style="color:var(--down)">✕</button></div>';
+    r.innerHTML='<div class="irow"><input class="n" placeholder="品項名稱"><input class="u" placeholder="單位"></div><input class="c" list="catList" placeholder="分類"><div class="brow"><button class="ib">↑</button><button class="ib">↓</button><button class="ib" style="color:var(--down)">✕</button></div>';
     const n=r.querySelector('.n'),u=r.querySelector('.u'),c=r.querySelector('.c');
     const [up,dn,del]=r.querySelectorAll('.ib');
     n.value=it.name;u.value=it.unit||'';c.value=it.cat||'';
@@ -513,7 +512,7 @@ function renderItemEditor(){
 }
 $('btnAddItem').onclick=()=>{
   S.nextId=(S.nextId||100)+1;
-  S.items.push({id:'n'+S.nextId+Date.now().toString(36),name:'',unit:'',cat:catSel&&!['全部','未填'].includes(catSel)?catSel:'其他'});
+  S.items.push({id:'n'+S.nextId+Date.now().toString(36),name:'',unit:'',cat:catSel&&!['全部','未填'].includes(catSel)?catSel:''});
   saveItems();renderItemEditor();renderChips();
   const ins=$('itemList').querySelectorAll('input.n');ins[ins.length-1].focus();
 };
