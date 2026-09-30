@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#3f6b5a">
-<meta name="app-version" content="23">
+<meta name="app-version" content="24">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -121,6 +121,7 @@ tr.cur td:last-child{box-shadow:inset 0 2px 0 #e0a800,inset 0 -2px 0 #e0a800,ins
 .ib{width:42px;height:42px;border-radius:10px;border:1px solid var(--line);background:var(--input)}
 
 /* 底部導覽 */
+#tab-settings{padding-bottom:72px}
 .addbar{position:fixed;left:0;right:0;bottom:calc(var(--navh,64px) + env(safe-area-inset-bottom,0px));z-index:19;padding:8px 12px;display:flex;justify-content:center;background:linear-gradient(to top,var(--bg,#f3ebdc) 70%,transparent)}
 .addbar .btn{width:100%;max-width:696px;min-height:44px;box-shadow:0 2px 8px rgba(0,0,0,.15)}
 .nav{position:fixed;left:0;right:0;bottom:0;z-index:20;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -194,10 +195,9 @@ td.day{text-align:center!important}
   <div class="card" style="margin-top:calc(10px + env(safe-area-inset-top,0px))">
     <h2>📦 品項清單</h2>
     <div id="itemList"></div>
-    <div style="height:64px"></div>
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem">＋ 新增品項</button></div>
-  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v23 <button class="btn sm" id="btnUpdate" style="margin-left:8px">檢查更新</button></div>
+  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v24 <button class="btn sm" id="btnUpdate" style="margin-left:8px">檢查更新</button></div>
   <details class="card sync" id="syncBox">
     <summary>☁ 同步設定</summary>
     <div class="body">
