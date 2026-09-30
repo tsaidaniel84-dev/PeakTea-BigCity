@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#3f6b5a">
-<meta name="app-version" content="25">
+<meta name="app-version" content="26">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -199,7 +199,7 @@ td.day{text-align:center!important}
     <div id="itemList"></div>
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem">＋ 新增品項</button></div>
-  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v25 <button class="btn sm" id="btnUpdate" style="margin-left:8px">檢查更新</button></div>
+  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v26 <button class="btn sm" id="btnUpdate" style="margin-left:8px">檢查更新</button></div>
   <details class="card sync" id="syncBox">
     <summary>☁ 同步設定</summary>
     <div class="body">
@@ -421,7 +421,9 @@ function renderItems(){
     inp.addEventListener('input',()=>commit(inp.value));
     inp.addEventListener('focus',()=>inp.select());
     inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const all=[...box.querySelectorAll('input.qty')];const nx=all[all.indexOf(inp)+1];if(nx)nx.focus();else inp.blur()}});
-    const bump=d=>{const cur=inp.value===''?0:Number(inp.value);const n=Math.max(0,Math.round((cur+d)*100)/100);inp.value=n;commit(String(n))};
+    const bump=d=>{
+      if(d<0&&(inp.value===''||Number(inp.value)<=0)){inp.value='';commit('');return}
+      const cur=inp.value===''?0:Number(inp.value);const n=Math.max(0,Math.round((cur+d)*100)/100);inp.value=n;commit(String(n))};
     m.onclick=()=>bump(-1);p.onclick=()=>bump(1);
     box.appendChild(el);cards[it.id]={el,inp};refreshCard(it.id,true);
   });
@@ -524,7 +526,11 @@ $('btnAddItem').onclick=()=>{
 };
 
 /* ---------- 分頁 ---------- */
+const VP=document.querySelector('meta[name=viewport]');
+function setZoom(on){VP.setAttribute('content',on?'width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover':'width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover')}
+let zoomOK=false;
 function switchTab(t){
+  zoomOK=(t==='history');setZoom(zoomOK);
   document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
   ['daily','history','settings'].forEach(x=>$('tab-'+x).classList.toggle('hidden',x!==t));
   window.scrollTo(0,0);
@@ -627,7 +633,7 @@ async function boot(){
 }
 boot();
 (function(){const n=$('nav'),f=()=>document.documentElement.style.setProperty('--navh',(n.offsetHeight-parseFloat(getComputedStyle(n).paddingBottom||0))+'px');f();addEventListener('resize',f);setTimeout(f,300)})();
-['gesturestart','gesturechange','gestureend'].forEach(g=>document.addEventListener(g,e=>e.preventDefault()));
+['gesturestart','gesturechange','gestureend'].forEach(g=>document.addEventListener(g,e=>{if(!zoomOK)e.preventDefault()}));
 /* ---------- 自動檢查更新（加入主畫面也會更新） ---------- */
 const APP_VER=document.querySelector('meta[name=app-version]').content;
 let updChecking=false;
