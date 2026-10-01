@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#3f6b5a">
-<meta name="app-version" content="28">
+<meta name="app-version" content="29">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -199,7 +199,7 @@ td.day{text-align:center!important}
     <div id="itemList"></div>
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem">＋ 新增品項</button></div>
-  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v28 <button class="btn sm" id="btnUpdate" style="margin-left:8px">檢查更新</button></div>
+  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v29</div>
   <details class="card sync" id="syncBox">
     <summary>☁ 同步設定</summary>
     <div class="body">
@@ -659,7 +659,6 @@ async function checkUpdate(manual){
   }catch(e){}
   finally{updChecking=false}
 }
-$('btnUpdate').onclick=()=>checkUpdate(true);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdate(false)});
 window.addEventListener('pageshow',e=>{if(e.persisted)checkUpdate(false)});
 setTimeout(()=>checkUpdate(false),1500);
