@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#3f6b5a">
-<meta name="app-version" content="30">
+<meta name="app-version" content="31">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -146,20 +146,18 @@ td.day{text-align:center!important}
 :root{--flash:#2f7fd6;--flash-soft:#dbeafe}
 @media (prefers-color-scheme:dark){:root{--flash:#5aa2ff;--flash-soft:#1f3a5c}}
 
-/* 月庫存管理表：表頭與日期欄固定 */
-.hscroll{overflow:auto;-webkit-overflow-scrolling:touch;max-height:calc(100vh - 250px);max-height:calc(100dvh - 250px);border:1px solid var(--line);border-radius:10px;overscroll-behavior:contain}
-#histTable{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%}
-#histTable th,#histTable td{border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
-#histTable th{position:sticky;top:0;z-index:3;background:var(--card);color:var(--ink);white-space:normal;line-height:1.2;min-width:58px;max-width:78px;vertical-align:bottom;font-size:12px;font-weight:800;border-bottom:2px solid var(--accent)}
-#histTable th:nth-child(1),#histTable td:nth-child(1){position:sticky;left:0;z-index:2;min-width:38px;width:38px;max-width:38px;padding-left:4px;padding-right:4px}
-#histTable th:nth-child(2),#histTable td:nth-child(2){position:sticky;left:38px;z-index:2;min-width:34px;width:34px;max-width:34px;padding-left:4px;padding-right:4px;border-right:2px solid var(--accent)}
-#histTable th:nth-child(1),#histTable th:nth-child(2){z-index:5}
-#histTable td:nth-child(1),#histTable td:nth-child(2){background:var(--card)}
-#histTable tr.has td:nth-child(1),#histTable tr.has td:nth-child(2){background:#fbeaa0}
-#histTable td{min-width:58px}
+/* 月庫存管理表：表頭固定在畫面上方（跟著上下滑），日期欄固定在左邊（跟著左右滑） */
+.hhead{position:sticky;top:env(safe-area-inset-top,0px);z-index:8;overflow:hidden;background:var(--card);border:1px solid var(--line);border-bottom:2px solid var(--accent);border-radius:10px 10px 0 0}
+.hbody{overflow-x:auto;-webkit-overflow-scrolling:touch;border:1px solid var(--line);border-top:0;border-radius:0 0 10px 10px}
+.htab{border-collapse:separate;border-spacing:0;table-layout:fixed}
+.htab th,.htab td{padding:6px 3px;border-bottom:1px solid var(--line);border-right:1px solid var(--line);text-align:center;font-size:14px}
+.htab th{position:static;top:auto;background:var(--card);color:var(--ink);font-size:12px;font-weight:800;line-height:1.2;vertical-align:bottom;border-bottom:0;white-space:normal;overflow-wrap:anywhere}
+.htab td{white-space:nowrap;overflow:hidden}
+.htab th:nth-child(1),.htab td:nth-child(1){position:sticky;left:0;z-index:2}
+.htab th:nth-child(2),.htab td:nth-child(2){position:sticky;left:38px;z-index:2;border-right:2px solid var(--accent)}
+.htab td:nth-child(1),.htab td:nth-child(2){background:var(--card)}
 #histTable tr.selr td{box-shadow:inset 0 2px 0 var(--flash),inset 0 -2px 0 var(--flash)}
-#histTable th.selc{background:var(--flash);color:#fff}
-@media (prefers-color-scheme:dark){#histTable tr.has td:nth-child(1),#histTable tr.has td:nth-child(2){background:#5a4c12}}
+#histHeadTable th.selc{background:var(--flash);color:#fff}
 </style>
 </head>
 <body>
@@ -193,8 +191,8 @@ td.day{text-align:center!important}
       <h2 style="margin:0">月庫存管理表</h2>
       <input type="month" id="monthPick" style="width:auto">
     </div>
-    <div class="hscroll"><table id="histTable"></table></div>
-    <div class="muted" style="margin-top:8px">上下左右滑動時，品項名稱和日期會固定不動。點日期可回到該日修改，點其他格子會標出該列與該品項，黃底代表有紀錄。</div>
+    <div class="hhead" id="histHead"><table class="htab" id="histHeadTable"></table></div>
+    <div class="hbody" id="histBody"><table class="htab" id="histTable"></table></div>
   </div>
   <div class="card">
     <h2>匯出與備份</h2>
@@ -214,7 +212,7 @@ td.day{text-align:center!important}
     <div id="itemList"></div>
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem">＋ 新增品項</button></div>
-  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v30（月表固定表頭）</div>
+  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v31（月表表頭跟著滑動）</div>
   <details class="card sync" id="syncBox">
     <summary>☁ 同步設定</summary>
     <div class="body">
@@ -494,25 +492,38 @@ $('btnClear').onclick=async()=>{
 function renderHistory(){
   $('monthPick').value=histMonth;
   const [y,m]=histMonth.split('-').map(Number),days=new Date(y,m,0).getDate(),its=S.items.filter(i=>i.name);
-  let h='<thead><tr><th>日</th><th>週</th><th>人員</th>'+its.map(i=>'<th>'+esc(i.name)+'</th>').join('')+'</tr></thead><tbody>';
+  const W=[38,34,64,...its.map(()=>68)],total=W.reduce((p,c)=>p+c,0);
+  const cg='<colgroup>'+W.map(w=>'<col style="width:'+w+'px">').join('')+'</colgroup>';
+  const hh=$('histHeadTable'),t=$('histTable');
+  hh.style.width=t.style.width=total+'px';
+  hh.innerHTML=cg+'<thead><tr><th>日</th><th>週</th><th>人員</th>'+its.map(i=>'<th>'+esc(i.name)+'</th>').join('')+'</tr></thead>';
+  let h=cg+'<tbody>';
   for(let d=1;d<=days;d++){
     const ds=y+'-'+pad(m)+'-'+pad(d),r=S.days[ds];
     h+='<tr class="'+(hasData(r)?'has':'')+(ds===curDate?' cur':'')+'"><td class="day" data-d="'+ds+'">'+d+'</td><td>'+WD[new Date(y,m-1,d).getDay()]+'</td><td>'+esc(r&&r.staff||'')+'</td>'+
       its.map(i=>{const v=r&&r.values?r.values[i.id]:'';return'<td>'+(hasVal(v)?v:'')+'</td>'}).join('')+'</tr>';
   }
-  const t=$('histTable');t.innerHTML=h+'</tbody>';
+  t.innerHTML=h+'</tbody>';
   t.querySelectorAll('td.day').forEach(td=>td.onclick=()=>{switchTab('daily');loadDate(td.dataset.d)});
   t.querySelectorAll('tbody td:not(.day)').forEach(td=>td.onclick=()=>{
     t.querySelectorAll('.selr').forEach(x=>x.classList.remove('selr'));
-    t.querySelectorAll('th.selc').forEach(x=>x.classList.remove('selc'));
+    hh.querySelectorAll('th.selc').forEach(x=>x.classList.remove('selc'));
     const was=td.parentElement.dataset.sel==='1';
     t.querySelectorAll('tr[data-sel]').forEach(x=>x.removeAttribute('data-sel'));
     if(was)return;
     td.parentElement.classList.add('selr');td.parentElement.dataset.sel='1';
-    const th=t.querySelectorAll('thead th')[td.cellIndex];if(th)th.classList.add('selc');
+    const th=hh.querySelectorAll('th')[td.cellIndex];if(th)th.classList.add('selc');
   });
+  $('histHead').scrollLeft=$('histBody').scrollLeft;
   $('recCount').textContent='共 '+Object.keys(S.days).filter(d=>hasData(S.days[d])).length+' 天紀錄';
 }
+(function(){
+  const hd=$('histHead'),bd=$('histBody');
+  bd.addEventListener('scroll',()=>{hd.scrollLeft=bd.scrollLeft},{passive:true});
+  let sx=0,sl=0;
+  hd.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sl=bd.scrollLeft},{passive:true});
+  hd.addEventListener('touchmove',e=>{bd.scrollLeft=sl+(sx-e.touches[0].clientX)},{passive:true});
+})();
 $('monthPick').onchange=e=>{if(e.target.value){histMonth=e.target.value;renderHistory()}};
 
 /* ---------- 品項設定 ---------- */
