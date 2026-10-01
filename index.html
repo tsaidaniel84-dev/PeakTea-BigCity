@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#3f6b5a">
-<meta name="app-version" content="29">
+<meta name="app-version" content="30">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -145,6 +145,21 @@ td.day{text-align:center!important}
 .mi{display:flex;align-items:center;color:var(--ink)}
 :root{--flash:#2f7fd6;--flash-soft:#dbeafe}
 @media (prefers-color-scheme:dark){:root{--flash:#5aa2ff;--flash-soft:#1f3a5c}}
+
+/* 月庫存管理表：表頭與日期欄固定 */
+.hscroll{overflow:auto;-webkit-overflow-scrolling:touch;max-height:calc(100vh - 250px);max-height:calc(100dvh - 250px);border:1px solid var(--line);border-radius:10px;overscroll-behavior:contain}
+#histTable{border-collapse:separate;border-spacing:0;width:max-content;min-width:100%}
+#histTable th,#histTable td{border-bottom:1px solid var(--line);border-right:1px solid var(--line)}
+#histTable th{position:sticky;top:0;z-index:3;background:var(--card);color:var(--ink);white-space:normal;line-height:1.2;min-width:58px;max-width:78px;vertical-align:bottom;font-size:12px;font-weight:800;border-bottom:2px solid var(--accent)}
+#histTable th:nth-child(1),#histTable td:nth-child(1){position:sticky;left:0;z-index:2;min-width:38px;width:38px;max-width:38px;padding-left:4px;padding-right:4px}
+#histTable th:nth-child(2),#histTable td:nth-child(2){position:sticky;left:38px;z-index:2;min-width:34px;width:34px;max-width:34px;padding-left:4px;padding-right:4px;border-right:2px solid var(--accent)}
+#histTable th:nth-child(1),#histTable th:nth-child(2){z-index:5}
+#histTable td:nth-child(1),#histTable td:nth-child(2){background:var(--card)}
+#histTable tr.has td:nth-child(1),#histTable tr.has td:nth-child(2){background:#fbeaa0}
+#histTable td{min-width:58px}
+#histTable tr.selr td{box-shadow:inset 0 2px 0 var(--flash),inset 0 -2px 0 var(--flash)}
+#histTable th.selc{background:var(--flash);color:#fff}
+@media (prefers-color-scheme:dark){#histTable tr.has td:nth-child(1),#histTable tr.has td:nth-child(2){background:#5a4c12}}
 </style>
 </head>
 <body>
@@ -178,8 +193,8 @@ td.day{text-align:center!important}
       <h2 style="margin:0">月庫存管理表</h2>
       <input type="month" id="monthPick" style="width:auto">
     </div>
-    <div class="scroll"><table id="histTable"></table></div>
-    <div class="muted" style="margin-top:8px">點左邊日期可回到該日檢視／修改，黃底代表有紀錄。</div>
+    <div class="hscroll"><table id="histTable"></table></div>
+    <div class="muted" style="margin-top:8px">上下左右滑動時，品項名稱和日期會固定不動。點日期可回到該日修改，點其他格子會標出該列與該品項，黃底代表有紀錄。</div>
   </div>
   <div class="card">
     <h2>匯出與備份</h2>
@@ -199,7 +214,7 @@ td.day{text-align:center!important}
     <div id="itemList"></div>
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem">＋ 新增品項</button></div>
-  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v29</div>
+  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v30（月表固定表頭）</div>
   <details class="card sync" id="syncBox">
     <summary>☁ 同步設定</summary>
     <div class="body">
@@ -487,6 +502,15 @@ function renderHistory(){
   }
   const t=$('histTable');t.innerHTML=h+'</tbody>';
   t.querySelectorAll('td.day').forEach(td=>td.onclick=()=>{switchTab('daily');loadDate(td.dataset.d)});
+  t.querySelectorAll('tbody td:not(.day)').forEach(td=>td.onclick=()=>{
+    t.querySelectorAll('.selr').forEach(x=>x.classList.remove('selr'));
+    t.querySelectorAll('th.selc').forEach(x=>x.classList.remove('selc'));
+    const was=td.parentElement.dataset.sel==='1';
+    t.querySelectorAll('tr[data-sel]').forEach(x=>x.removeAttribute('data-sel'));
+    if(was)return;
+    td.parentElement.classList.add('selr');td.parentElement.dataset.sel='1';
+    const th=t.querySelectorAll('thead th')[td.cellIndex];if(th)th.classList.add('selc');
+  });
   $('recCount').textContent='共 '+Object.keys(S.days).filter(d=>hasData(S.days[d])).length+' 天紀錄';
 }
 $('monthPick').onchange=e=>{if(e.target.value){histMonth=e.target.value;renderHistory()}};
