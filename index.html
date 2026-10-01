@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#3f6b5a">
-<meta name="app-version" content="31">
+<meta name="app-version" content="32">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -158,6 +158,27 @@ td.day{text-align:center!important}
 .htab td:nth-child(1),.htab td:nth-child(2){background:var(--card)}
 #histTable tr.selr td{box-shadow:inset 0 2px 0 var(--flash),inset 0 -2px 0 var(--flash)}
 #histHeadTable th.selc{background:var(--flash);color:#fff}
+
+/* 月表：篩選、單一品項 */
+.seg{display:flex;background:var(--line);padding:3px;border-radius:12px;margin-bottom:10px}
+.seg button{flex:1;border:0;background:none;padding:9px 6px;border-radius:9px;font-weight:700;font-size:14px;color:var(--muted)}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.15)}
+.hsearch{position:relative;margin-bottom:8px}
+.hsearch input{padding:0 36px 0 36px;height:42px;border-radius:12px;background:var(--card)}
+.hsearch .ic{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.hsearch .x{position:absolute;right:2px;top:50%;transform:translateY(-50%);width:38px;height:38px;border:0;background:none;color:var(--muted);font-size:16px}
+#hChips{margin-bottom:10px}
+.pills{display:flex;flex-wrap:wrap;gap:6px;max-height:120px;overflow:auto;margin-bottom:12px}
+.pl{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:7px 13px;font-weight:700;font-size:14px}
+.pl.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:10px}
+.stat{background:var(--input);border:1px solid var(--line);border-radius:10px;padding:6px 4px;text-align:center}
+.stat b{display:block;font-size:17px}.stat span{font-size:11px;color:var(--muted)}
+.lrow{display:flex;align-items:center;gap:8px;padding:10px 4px;border-bottom:1px solid var(--line);cursor:pointer}
+.lrow .d{flex:1;font-weight:700}.lrow .v{font-size:18px;font-weight:800;min-width:44px;text-align:right}
+.lrow .df{min-width:48px;text-align:right}
+.htab th[data-id]{cursor:pointer}
+.htab td.day.tdy{background:var(--sun)!important;color:#fff!important}
 </style>
 </head>
 <body>
@@ -191,8 +212,17 @@ td.day{text-align:center!important}
       <h2 style="margin:0">月庫存管理表</h2>
       <input type="month" id="monthPick" style="width:auto">
     </div>
-    <div class="hhead" id="histHead"><table class="htab" id="histHeadTable"></table></div>
-    <div class="hbody" id="histBody"><table class="htab" id="histTable"></table></div>
+    <div class="seg" id="hSeg"><button data-m="table" class="on">全部品項表</button><button data-m="item">單一品項</button></div>
+    <div class="hsearch"><span class="ic">🔍</span><input id="hq" type="search" placeholder="搜尋品項…" autocomplete="off"><button class="x hidden" id="hqx" aria-label="清除">✕</button></div>
+    <div class="chips" id="hChips"></div>
+    <div id="hTableWrap">
+      <div class="hhead" id="histHead"><table class="htab" id="histHeadTable"></table></div>
+      <div class="hbody" id="histBody"><table class="htab" id="histTable"></table></div>
+    </div>
+    <div id="hItemWrap" class="hidden">
+      <div class="pills" id="hPills"></div>
+      <div id="hItemBody"></div>
+    </div>
   </div>
   <div class="card">
     <h2>匯出與備份</h2>
@@ -212,7 +242,7 @@ td.day{text-align:center!important}
     <div id="itemList"></div>
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem">＋ 新增品項</button></div>
-  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v31（月表表頭跟著滑動）</div>
+  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v32（月表篩選＋單品項走勢）</div>
   <details class="card sync" id="syncBox">
     <summary>☁ 同步設定</summary>
     <div class="body">
@@ -267,6 +297,7 @@ const BOOT_AT=Date.now();
 /* ---------- 狀態 ---------- */
 let S={items:clone(DEFAULT_ITEMS),nextId:100,days:{}};
 let todayStr=ymd(new Date()),curDate=todayStr,histMonth=todayStr.slice(0,7);
+let hCat='全部',hQ='',hMode='table',hItem=null;
 let catSel='全部',query='';
 let store=null,online=true,connected=false;
 const pendVals={};      // key -> 尚未被雲端確認的值
@@ -489,22 +520,47 @@ $('btnClear').onclick=async()=>{
 };
 
 /* ---------- 歷史 ---------- */
-function renderHistory(){
+function hFiltered(){
+  return S.items.filter(i=>i.name).filter(it=>{
+    if(hCat!=='全部'&&(it.cat||'')!==hCat)return false;
+    if(hQ&&!(it.name.toLowerCase().includes(hQ)||(it.cat||'').toLowerCase().includes(hQ)))return false;
+    return true;
+  });
+}
+function renderHChips(){
+  const box=$('hChips');box.innerHTML='';
+  if(hCat!=='全部'&&!cats().includes(hCat))hCat='全部';
+  const all=S.items.filter(i=>i.name);
+  [['全部',all],...cats().map(c=>[c,all.filter(i=>i.cat===c)])].forEach(([c,its])=>{
+    const b=document.createElement('button');b.className='chip'+(hCat===c?' on':'');
+    b.innerHTML=esc(c)+'<small>'+its.length+'</small>';
+    b.onclick=()=>{hCat=c;renderHistory(false)};box.appendChild(b);
+  });
+}
+function renderHistory(scrollToday){
   $('monthPick').value=histMonth;
-  const [y,m]=histMonth.split('-').map(Number),days=new Date(y,m,0).getDate(),its=S.items.filter(i=>i.name);
+  renderHChips();
+  document.querySelectorAll('#hSeg button').forEach(b=>b.classList.toggle('on',b.dataset.m===hMode));
+  $('hTableWrap').classList.toggle('hidden',hMode!=='table');
+  $('hItemWrap').classList.toggle('hidden',hMode!=='item');
+  $('recCount').textContent='共 '+Object.keys(S.days).filter(d=>hasData(S.days[d])).length+' 天紀錄';
+  const its=hFiltered();
+  if(hMode==='item'){renderHItem(its);return}
+  const [y,m]=histMonth.split('-').map(Number),days=new Date(y,m,0).getDate();
   const W=[38,34,64,...its.map(()=>68)],total=W.reduce((p,c)=>p+c,0);
   const cg='<colgroup>'+W.map(w=>'<col style="width:'+w+'px">').join('')+'</colgroup>';
   const hh=$('histHeadTable'),t=$('histTable');
   hh.style.width=t.style.width=total+'px';
-  hh.innerHTML=cg+'<thead><tr><th>日</th><th>週</th><th>人員</th>'+its.map(i=>'<th>'+esc(i.name)+'</th>').join('')+'</tr></thead>';
+  hh.innerHTML=cg+'<thead><tr><th>日</th><th>週</th><th>人員</th>'+its.map(i=>'<th data-id="'+i.id+'">'+esc(i.name)+'</th>').join('')+'</tr></thead>';
   let h=cg+'<tbody>';
   for(let d=1;d<=days;d++){
     const ds=y+'-'+pad(m)+'-'+pad(d),r=S.days[ds];
-    h+='<tr class="'+(hasData(r)?'has':'')+(ds===curDate?' cur':'')+'"><td class="day" data-d="'+ds+'">'+d+'</td><td>'+WD[new Date(y,m-1,d).getDay()]+'</td><td>'+esc(r&&r.staff||'')+'</td>'+
+    h+='<tr class="'+(hasData(r)?'has':'')+(ds===curDate?' cur':'')+'"><td class="day'+(ds===todayStr?' tdy':'')+'" data-d="'+ds+'">'+d+'</td><td>'+WD[new Date(y,m-1,d).getDay()]+'</td><td>'+esc(r&&r.staff||'')+'</td>'+
       its.map(i=>{const v=r&&r.values?r.values[i.id]:'';return'<td>'+(hasVal(v)?v:'')+'</td>'}).join('')+'</tr>';
   }
   t.innerHTML=h+'</tbody>';
   t.querySelectorAll('td.day').forEach(td=>td.onclick=()=>{switchTab('daily');loadDate(td.dataset.d)});
+  hh.querySelectorAll('th[data-id]').forEach(th=>th.onclick=()=>{hMode='item';hItem=th.dataset.id;renderHistory(false);window.scrollTo(0,0)});
   t.querySelectorAll('tbody td:not(.day)').forEach(td=>td.onclick=()=>{
     t.querySelectorAll('.selr').forEach(x=>x.classList.remove('selr'));
     hh.querySelectorAll('th.selc').forEach(x=>x.classList.remove('selc'));
@@ -515,8 +571,58 @@ function renderHistory(){
     const th=hh.querySelectorAll('th')[td.cellIndex];if(th)th.classList.add('selc');
   });
   $('histHead').scrollLeft=$('histBody').scrollLeft;
-  $('recCount').textContent='共 '+Object.keys(S.days).filter(d=>hasData(S.days[d])).length+' 天紀錄';
+  if(scrollToday===true)scrollToTodayRow(t);
 }
+function scrollToTodayRow(t){
+  requestAnimationFrame(()=>{
+    const tdy=t.querySelector('td.day.tdy');if(!tdy){window.scrollTo(0,0);return}
+    const tr=tdy.parentElement,headH=$('histHead').offsetHeight;
+    const top=tr.getBoundingClientRect().top+window.pageYOffset-headH-70;
+    window.scrollTo(0,Math.max(0,top));
+  });
+}
+function renderHItem(list){
+  const pills=$('hPills'),body=$('hItemBody');pills.innerHTML='';
+  if(!list.length){body.innerHTML='<div class="empty">沒有符合的品項</div>';return}
+  if(!list.some(i=>i.id===hItem))hItem=list[0].id;
+  list.forEach(it=>{const b=document.createElement('button');b.className='pl'+(it.id===hItem?' on':'');b.textContent=it.name;
+    b.onclick=()=>{hItem=it.id;renderHistory(false)};pills.appendChild(b)});
+  const it=list.find(i=>i.id===hItem);
+  const [y,m]=histMonth.split('-').map(Number),days=new Date(y,m,0).getDate();
+  const pts=[];
+  for(let d=1;d<=days;d++){const ds=y+'-'+pad(m)+'-'+pad(d),v=valOf(ds,it.id);if(hasVal(v))pts.push({d,ds,v:Number(v)})}
+  const unit=it.unit?esc(it.unit):'';
+  if(!pts.length){body.innerHTML='<div class="empty">'+(m)+'月還沒有「'+esc(it.name)+'」的紀錄</div>';return}
+  const vs=pts.map(p=>p.v),mn=Math.min(...vs),mx=Math.max(...vs),avg=Math.round(vs.reduce((a,b)=>a+b,0)/vs.length*10)/10,last=pts[pts.length-1];
+  const W=340,H=170,L=34,R=12,T=14,B=24;
+  const pad2=(mx-mn)*0.15||1;let lo=mn-pad2,hi=mx+pad2;if(mn>=0&&lo<0)lo=0;
+  const X=d=>L+(days===1?0:(d-1)/(days-1))*(W-L-R),Y=v=>T+(1-(v-lo)/(hi-lo))*(H-T-B);
+  const r1=v=>Math.round(v*10)/10;
+  let svg='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block">';
+  [lo,(lo+hi)/2,hi].forEach(v=>{const y=Y(v);
+    svg+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'" style="stroke:var(--line);stroke-width:1"/><text x="'+(L-4)+'" y="'+(y+3)+'" text-anchor="end" style="fill:var(--muted);font-size:10px">'+r1(v)+'</text>'});
+  [...new Set([1,5,10,15,20,25,days])].filter(d=>d<=days).forEach(d=>{
+    svg+='<text x="'+X(d)+'" y="'+(H-8)+'" text-anchor="middle" style="fill:var(--muted);font-size:10px">'+d+'</text>'});
+  const td=todayStr.startsWith(y+'-'+pad(m))?parseInt(todayStr.slice(8)):0;
+  if(td)svg+='<line x1="'+X(td)+'" x2="'+X(td)+'" y1="'+T+'" y2="'+(H-B)+'" style="stroke:var(--sun);stroke-width:1;stroke-dasharray:3 3"/>';
+  svg+='<polyline fill="none" points="'+pts.map(p=>X(p.d)+','+Y(p.v)).join(' ')+'" style="stroke:var(--accent);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round"/>';
+  pts.forEach(p=>{svg+='<circle cx="'+X(p.d)+'" cy="'+Y(p.v)+'" r="3.5" style="fill:var(--card);stroke:var(--accent);stroke-width:2"/>'});
+  svg+='</svg>';
+  const stat=(n,l)=>'<div class="stat"><b>'+n+'</b><span>'+l+'</span></div>';
+  let rows='';
+  for(let i=pts.length-1;i>=0;i--){
+    const p=pts[i],pv=i>0?pts[i-1].v:null,df=pv===null?'':r1(p.v-pv);
+    const dd=new Date(y,m-1,p.d);
+    rows+='<div class="lrow" data-d="'+p.ds+'"><span class="d">'+m+'/'+p.d+'（週'+WD[dd.getDay()]+'）'+(p.ds===todayStr?' <span class="pill">今天</span>':'')+'</span><span class="df diff '+(df>0?'up':df<0?'down':'')+'">'+(df===''?'':(df>0?'+':'')+df)+'</span><span class="v">'+p.v+'</span></div>';
+  }
+  body.innerHTML='<div class="muted" style="margin-bottom:6px"><b style="color:var(--ink);font-size:17px">'+esc(it.name)+'</b> '+m+'月每日數量'+(unit?'（'+unit+'）':'')+'</div>'+
+    '<div class="stats">'+stat(last.v,'最新 '+m+'/'+last.d)+stat(mn,'最低')+stat(mx,'最高')+stat(avg,'平均')+'</div>'+svg+
+    '<div class="muted" style="margin:10px 0 2px">每日紀錄（最新在上，點一下可回到該日）</div>'+rows;
+  body.querySelectorAll('.lrow').forEach(r=>r.onclick=()=>{switchTab('daily');loadDate(r.dataset.d)});
+}
+$('hq').oninput=e=>{hQ=e.target.value.trim().toLowerCase();$('hqx').classList.toggle('hidden',!hQ);renderHistory(false)};
+$('hqx').onclick=()=>{$('hq').value='';hQ='';$('hqx').classList.add('hidden');renderHistory(false)};
+document.querySelectorAll('#hSeg button').forEach(b=>b.onclick=()=>{hMode=b.dataset.m;renderHistory(hMode==='table')});
 (function(){
   const hd=$('histHead'),bd=$('histBody');
   bd.addEventListener('scroll',()=>{hd.scrollLeft=bd.scrollLeft},{passive:true});
@@ -524,7 +630,7 @@ function renderHistory(){
   hd.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sl=bd.scrollLeft},{passive:true});
   hd.addEventListener('touchmove',e=>{bd.scrollLeft=sl+(sx-e.touches[0].clientX)},{passive:true});
 })();
-$('monthPick').onchange=e=>{if(e.target.value){histMonth=e.target.value;renderHistory()}};
+$('monthPick').onchange=e=>{if(e.target.value){histMonth=e.target.value;renderHistory(true)}};
 
 /* ---------- 品項設定 ---------- */
 let itemTimer=null,lastItemsJson='';
@@ -569,7 +675,7 @@ function switchTab(t){
   document.querySelectorAll('#nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===t));
   ['daily','history','settings'].forEach(x=>$('tab-'+x).classList.toggle('hidden',x!==t));
   window.scrollTo(0,0);
-  if(t==='history')renderHistory();
+  if(t==='history')renderHistory(true);
   if(t==='settings'){renderItemEditor();renderCfg()}
 }
 document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>switchTab(b.dataset.t));
