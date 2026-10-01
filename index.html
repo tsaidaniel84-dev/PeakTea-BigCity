@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#3f6b5a">
-<meta name="app-version" content="34">
+<meta name="app-version" content="36">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -188,6 +188,14 @@ td.day{text-align:center!important}
 .htab td.day.tdy{background:var(--sun)!important;color:#fff!important}
 .expbar{flex-wrap:nowrap!important;gap:6px!important}
 .expbar .btn{flex:1 1 0;min-width:0;min-height:38px;padding:7px 4px;font-size:13px;white-space:nowrap;display:flex;align-items:center;justify-content:center;border-radius:10px;text-align:center}
+
+.syncbox{display:flex;align-items:center;gap:6px;flex:none;cursor:pointer;opacity:.85}
+.syncbox .dot{width:8px;height:8px;border-radius:50%;background:#2fa36b;flex:none;transition:background .2s}
+.syncbox .dot.busy{background:#e0a030}
+.syncbox .dot.off{background:#d6453d}
+.syncbox .le{line-height:1.15;text-align:right}
+.syncbox small{display:block;font-size:10px;color:var(--muted)}
+.syncbox b{display:block;font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap}
 </style>
 </head>
 <body>
@@ -196,7 +204,7 @@ td.day{text-align:center!important}
 <!-- ================= 盤點頁 ================= -->
 <section id="tab-daily">
   <div class="top">
-    <div class="bar"><img class="logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEkAAAA8CAYAAAAqnJeuAAAFWklEQVR42u2cTWjbZhjHH4vNl4zKJiDBhjEoWQJByU5NmrKU1s1wC9lxTptlO4wcAknpfWSO87HeyxLIIeywZhn2jg1koZ1bkpKkGQwaq4EW2+A4LVgQLI3kkh20Q61MVmVb0vu+8gd+jo6sj5+f5//+n+cVceWP/oZmlA+qiaByfNDoD5hbX1VOkwKc5UVwexkAAGhp58Hbe73T3cq+NnMOVyOW20kyMZffi0/lnz8ue5y7lQU2eOttS3v3tXLAGgpS/vnjN/m9+McnyYTl7/pG7r719g1+0rCQzo5zHUer91/ZgaMN9sZtYG+OuBpOk06Sibn0T99PYdGvP34DAFD0oKgmoPdB5dZXlYaBdLR6f4rEefN/xeHsONdR95By66vK2XGOlMZBfu/PV/UP6Z1+EIvTpFDf5aYtBWLXyIv1DUlbCgR/iPqGpC0FUuFuZZsNbkVIhT6vJsykKMkcAADjodOiJHNCJvuI8dC/AADwft9MCX9E/L5a2vnqQxIlmXuy/zIV3dqBAiQQJVn9c6TwWeRadxcMX7nscvr+Wj7tnq9quYmSzC2sbZwDKnxmdBxEt3Ygurld5IC9fYPE7/Gj9u4fqgoptrWbEjJZ08frQbHBW51aYSUp2lWBJEoyF9+3vjo9SRyc65e7lX3tvRgAUqC8FwPVhbSwtpGyCbfou+zNERcpUN7e651VgyRkstNWyszg+yBkstN6ULhLTT+lpJzVop0IhkyMqGWngmJv3CZWao5CQs0ibdmFf/09FX8hFJUejrIrNZmkHNSiCK5ziZIMsWe7nLb0uIkfkVY87s69eSNAjkEKr8QUIx+ECkpbeuqKZ8MPAXfn3rzWF+mD+EaAkMlOh1diEVLn5/0+mB0NuTQty1x+Lz51mkxAuaGct28QvL2BsnAcgSRKMje+uJwinamTQ8F04DO+zWDc0XGWF7/59zj3HQDAh63sz24v88DspqQjkMIrMQWHWFcKxkPD0sQYsf6OmCZFN7cdAXSuTw83lLqCJGSy09rm1UpG2L7mYbHRrGlIoiRzdoR6djQUmRwKRlCyCYdZJQ5JyGSn7Qg17/cB7/fNMPSFB4jXB63JrDlI0c1txe5Sf7W7K10ot/TkUDCN1Po82+W0bUvNQIpubit2NEgN7fLN+31f8H4fcttSU5DiL4QUEqAeXi/e6dBAP5K24F7tKFRAC2sbSKkdGrjUZqBRMyjZBAAQ3xdgfHFZqRqkwgqmoAIK9PDAeOh0CRfdhmIJ1IwaX1xWUK2BZUjqCobDKBplkbbsUCyBvhFGAWWpLUEVaG0MD/Sb2ipaeLih2JmJ42xdTGdSeCWGDRAAmN5LK5dtVjPKroeizGYQzj5seKDfSgYgeydUD0WZ0SCcGcR4aMs7sqjeSe+h9JudSJBIDMzsiDEO76QFZbQrbAsSCUCBHr7kSxAmsmkGRzadS8jWjml7QDkFiPf7YPLLoAsxC9tw3pPZyQHlBCDGQxfNoRHOk8aZTerkoFI2UU4AwmEKcTrx91a9CtlE6VoN7CW2NDHmsqtDpbJp9uuvsIKqlE3U/zR3sY4XAj08lhJzCpQoyd9WhCQc4jWLqCLtNKiniQOO2DxJH7OjoYhTr+/hBCXK/1TWJIa+UFUfhAoKddUTJRlKtSwUxpslXmIV+rs2Kz2h0Q9carZ1DkkdxjvZbuAGNXzlsmtpYswyLMZDw9WeroipeZLdbWmzsyEnQ33Dt9zzMB4aQp9fMnyPoCQk9WXzp4kDzgwsxkNDQTjTUKOhvi/+8vAI1GcyC8cQkv7kQib76ODwDSfKctEFAMDSReo9XM3/MIE4T2rGu/gPznHuUyAmPmIAAAAASUVORK5CYII=" alt="PeakTea"><div class="ttl">青山巨城店 盤點表<small>青山茶飲 · 庫存管理</small></div><span class="pill warn" id="livePill">連線中…</span></div>
+    <div class="bar"><img class="logo" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEkAAAA8CAYAAAAqnJeuAAAFWklEQVR42u2cTWjbZhjHH4vNl4zKJiDBhjEoWQJByU5NmrKU1s1wC9lxTptlO4wcAknpfWSO87HeyxLIIeywZhn2jg1koZ1bkpKkGQwaq4EW2+A4LVgQLI3kkh20Q61MVmVb0vu+8gd+jo6sj5+f5//+n+cVceWP/oZmlA+qiaByfNDoD5hbX1VOkwKc5UVwexkAAGhp58Hbe73T3cq+NnMOVyOW20kyMZffi0/lnz8ue5y7lQU2eOttS3v3tXLAGgpS/vnjN/m9+McnyYTl7/pG7r719g1+0rCQzo5zHUer91/ZgaMN9sZtYG+OuBpOk06Sibn0T99PYdGvP34DAFD0oKgmoPdB5dZXlYaBdLR6f4rEefN/xeHsONdR95By66vK2XGOlMZBfu/PV/UP6Z1+EIvTpFDf5aYtBWLXyIv1DUlbCgR/iPqGpC0FUuFuZZsNbkVIhT6vJsykKMkcAADjodOiJHNCJvuI8dC/AADwft9MCX9E/L5a2vnqQxIlmXuy/zIV3dqBAiQQJVn9c6TwWeRadxcMX7nscvr+Wj7tnq9quYmSzC2sbZwDKnxmdBxEt3Ygurld5IC9fYPE7/Gj9u4fqgoptrWbEjJZ08frQbHBW51aYSUp2lWBJEoyF9+3vjo9SRyc65e7lX3tvRgAUqC8FwPVhbSwtpGyCbfou+zNERcpUN7e651VgyRkstNWyszg+yBkstN6ULhLTT+lpJzVop0IhkyMqGWngmJv3CZWao5CQs0ibdmFf/09FX8hFJUejrIrNZmkHNSiCK5ziZIMsWe7nLb0uIkfkVY87s69eSNAjkEKr8QUIx+ECkpbeuqKZ8MPAXfn3rzWF+mD+EaAkMlOh1diEVLn5/0+mB0NuTQty1x+Lz51mkxAuaGct28QvL2BsnAcgSRKMje+uJwinamTQ8F04DO+zWDc0XGWF7/59zj3HQDAh63sz24v88DspqQjkMIrMQWHWFcKxkPD0sQYsf6OmCZFN7cdAXSuTw83lLqCJGSy09rm1UpG2L7mYbHRrGlIoiRzdoR6djQUmRwKRlCyCYdZJQ5JyGSn7Qg17/cB7/fNMPSFB4jXB63JrDlI0c1txe5Sf7W7K10ot/TkUDCN1Po82+W0bUvNQIpubit2NEgN7fLN+31f8H4fcttSU5DiL4QUEqAeXi/e6dBAP5K24F7tKFRAC2sbSKkdGrjUZqBRMyjZBAAQ3xdgfHFZqRqkwgqmoAIK9PDAeOh0CRfdhmIJ1IwaX1xWUK2BZUjqCobDKBplkbbsUCyBvhFGAWWpLUEVaG0MD/Sb2ipaeLih2JmJ42xdTGdSeCWGDRAAmN5LK5dtVjPKroeizGYQzj5seKDfSgYgeydUD0WZ0SCcGcR4aMs7sqjeSe+h9JudSJBIDMzsiDEO76QFZbQrbAsSCUCBHr7kSxAmsmkGRzadS8jWjml7QDkFiPf7YPLLoAsxC9tw3pPZyQHlBCDGQxfNoRHOk8aZTerkoFI2UU4AwmEKcTrx91a9CtlE6VoN7CW2NDHmsqtDpbJp9uuvsIKqlE3U/zR3sY4XAj08lhJzCpQoyd9WhCQc4jWLqCLtNKiniQOO2DxJH7OjoYhTr+/hBCXK/1TWJIa+UFUfhAoKddUTJRlKtSwUxpslXmIV+rs2Kz2h0Q9carZ1DkkdxjvZbuAGNXzlsmtpYswyLMZDw9WeroipeZLdbWmzsyEnQ33Dt9zzMB4aQp9fMnyPoCQk9WXzp4kDzgwsxkNDQTjTUKOhvi/+8vAI1GcyC8cQkv7kQib76ODwDSfKctEFAMDSReo9XM3/MIE4T2rGu/gPznHuUyAmPmIAAAAASUVORK5CYII=" alt="PeakTea"><div class="ttl">青山巨城店 盤點表<small>青山茶飲 · 庫存管理</small></div><div class="syncbox" id="syncBox2" role="button" aria-label="同步狀態"><i class="dot" id="syncDot"></i><div class="le"><small>最後編輯</small><b id="lastEdit">—</b></div></div></div>
     <div class="datenav">
       <button class="nb" id="prevDay" aria-label="前一天">◀</button>
       <label class="dwrap"><span id="dateLabel"></span><input type="date" id="datePick"></label>
@@ -252,7 +260,7 @@ td.day{text-align:center!important}
     <div id="itemList"></div>
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem">＋ 新增品項</button></div>
-  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v34</div>
+  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v36</div>
   <details class="card sync" id="syncBox">
     <summary>☁ 同步設定</summary>
     <div class="body">
@@ -311,15 +319,7 @@ let hCat='全部',hQ='',hMode='table',hItem=null;
 let catSel='全部',query='';
 let store=null,online=true,connected=false;
 const pendVals={};      // key -> 尚未被雲端確認的值
-let busy=0,lastSyncTs=0;
-try{lastSyncTs=Number(localStorage.getItem('pt_lastsync'))||0}catch(e){}
-function markSync(){lastSyncTs=Date.now();try{localStorage.setItem('pt_lastsync',String(lastSyncTs))}catch(e){}}
-function fmtSync(){
-  if(!lastSyncTs)return '';
-  const d=new Date(lastSyncTs),n=new Date();
-  const t=pad(d.getHours())+':'+pad(d.getMinutes());
-  return ymd(d)===ymd(n)?t:(d.getMonth()+1)+'/'+d.getDate()+' '+t;
-}
+let busy=0;
 
 /* ---------- 設定 ---------- */
 function getCfg(){
@@ -353,7 +353,7 @@ async function makeCloudStore(url,code){
   const app=firebase.initializeApp({databaseURL:url});
   const db=firebase.database(app);
   const base=db.ref('stores/'+cleanCode(code));
-  db.ref('.info/connected').on('value',s=>{connected=!!s.val();if(connected)markSync();setStatus()});
+  db.ref('.info/connected').on('value',s=>{connected=!!s.val();setStatus()});
   return {kind:'cloud',
     subscribe(d,i,err){
       base.child('days').on('value',s=>d(s.val()||{}),err);
@@ -388,26 +388,43 @@ const timers={};
 function writeField(date,kind,id,v){ // kind: 'v' 數量 / 'm' staff,note
   const path=kind==='v'?'values/'+id:id;
   const key=date+'|'+(kind==='v'?'v:'+id:id);
-  pendVals[key]=v;
+  pendVals[key]=v;localEditTs=Date.now();
   clearTimeout(timers[key]);setStatus();
   timers[key]=setTimeout(async()=>{
     const sent=pendVals[key];busy++;setStatus();
     try{
       await store.setField(date,path,sent);
-      markSync();
       if(pendVals[key]===sent)delete pendVals[key];
     }catch(e){toast('儲存失敗，稍後自動重試');timers[key]=setTimeout(()=>writeField(date,kind,id,pendVals[key]),3000)}
     finally{busy--;setStatus()}
   },400);
 }
-function setStatus(){
-  const p=$('livePill');const pending=busy>0||Object.keys(pendVals).length>0;
-  if(!store){p.textContent='連線中…';p.className='pill warn';return}
-  if(store.kind==='local'){p.textContent='本機模式';p.className='pill warn';return}
-  const ls=fmtSync();
-  if(!connected){p.textContent='🔴 離線'+(ls?' · 上次同步 '+ls:'');p.className='pill warn';return}
-  p.textContent=pending?'⏳ 儲存中…':'🟢 已同步'+(ls?' · 上次 '+ls:'');p.className='pill'+(pending?' warn':'');
+let localEditTs=0;
+function lastEditTs(){
+  let t=localEditTs;
+  for(const d in S.days){const u=S.days[d]&&S.days[d].updatedAt;if(typeof u==='number'&&u>t)t=u}
+  return t;
 }
+function fmtEdit(t){
+  if(!t)return '—';
+  const d=new Date(t),n=new Date(),hm=pad(d.getHours())+':'+pad(d.getMinutes());
+  return ymd(d)===ymd(n)?'今天 '+hm:(d.getMonth()+1)+'/'+d.getDate()+' '+hm;
+}
+let statusText='';
+function setStatus(){
+  const dot=$('syncDot'),le=$('lastEdit');
+  const pending=busy>0||Object.keys(pendVals).length>0;
+  let cls='',txt='';
+  if(!store){cls='busy';txt='連線中…'}
+  else if(store.kind==='local'){cls='busy';txt='本機模式（資料只存在這支手機）'}
+  else if(!connected){cls='off';txt='離線（恢復後自動同步）'}
+  else if(pending){cls='busy';txt='儲存中…'}
+  else{cls='';txt='已同步'}
+  dot.className='dot'+(cls?' '+cls:'');
+  statusText=txt;
+  if(le)le.textContent=fmtEdit(lastEditTs());
+}
+$('syncBox2').onclick=()=>toast(statusText);
 
 /* ---------- 日期／自動更新 ---------- */
 function tick(){
@@ -806,7 +823,7 @@ $('fileRestore').onchange=e=>{
 
 /* ---------- 資料更新回呼 ---------- */
 function onDays(d){
-  S.days=d||{};applyPending();if(store&&store.kind==='cloud'&&connected)markSync();
+  S.days=d||{};applyPending();
   if(!$('tab-daily').classList.contains('hidden'))syncFromRemote();
   if(!$('tab-history').classList.contains('hidden'))renderHistory();
   setStatus();
