@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#3f6b5a">
-<meta name="app-version" content="32">
+<meta name="app-version" content="33">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -116,8 +116,15 @@ tr.cur td{outline:0;box-shadow:inset 0 2px 0 #e0a800,inset 0 -2px 0 #e0a800}
 tr.cur td:first-child{box-shadow:inset 0 2px 0 #e0a800,inset 0 -2px 0 #e0a800,inset 2px 0 0 #e0a800}
 tr.cur td:last-child{box-shadow:inset 0 2px 0 #e0a800,inset 0 -2px 0 #e0a800,inset -2px 0 0 #e0a800}
 .irow{display:grid;grid-template-columns:1fr 70px;gap:6px;margin-bottom:6px}
-.irow2{display:grid;gap:6px;margin-bottom:12px;padding-bottom:12px;border-bottom:1px dashed var(--line)}
-.brow{display:flex;gap:6px;justify-content:flex-end}
+.irow2{display:flex;align-items:stretch;gap:8px;margin-bottom:10px;padding:8px;background:var(--card);border:1px solid var(--line);border-radius:12px;position:relative}
+.irow2 .fields{flex:1;min-width:0;display:grid;gap:6px}
+.irow2 .irow{margin-bottom:0}
+.irow2 .ib{align-self:center;flex:none}
+.grip{flex:none;width:40px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;border-radius:10px;background:var(--input);border:1px solid var(--line);cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.grip i{display:block;width:18px;height:2.5px;border-radius:2px;background:var(--muted)}
+.irow2.dragging{z-index:20;box-shadow:0 8px 22px rgba(0,0,0,.28);border-color:var(--flash);opacity:.97;transition:none;cursor:grabbing}
+.irow2.dragging .grip{background:var(--flash-soft);cursor:grabbing}
+.dragtip{font-size:12px;color:var(--muted);margin:-4px 0 10px}
 .ib{width:42px;height:42px;border-radius:10px;border:1px solid var(--line);background:var(--input)}
 
 /* 底部導覽 */
@@ -239,10 +246,11 @@ td.day{text-align:center!important}
 <section id="tab-settings" class="hidden">
   <div class="card" style="margin-top:calc(10px + env(safe-area-inset-top,0px))">
     <h2>📦 品項清單</h2>
+    <div class="dragtip"></div>
     <div id="itemList"></div>
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem">＋ 新增品項</button></div>
-  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v32（月表篩選＋單品項走勢）</div>
+  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v33</div>
   <details class="card sync" id="syncBox">
     <summary>☁ 同步設定</summary>
     <div class="body">
@@ -645,19 +653,65 @@ function renderItemEditor(){
   const box=$('itemList');box.innerHTML='';
   $('catList').innerHTML=[...new Set([...DEFAULT_CATS,...S.items.map(i=>i.cat).filter(Boolean)])].map(c=>'<option value="'+esc(c)+'">').join('');
   S.items.forEach((it,idx)=>{
-    const r=document.createElement('div');r.className='irow2';
-    r.innerHTML='<div class="irow"><input class="n" placeholder="品項名稱"><input class="u" placeholder="單位"></div><input class="c" list="catList" placeholder="分類（粉／包裝／發票…）"><div class="brow"><button class="ib">↑</button><button class="ib">↓</button><button class="ib" style="color:var(--down)">✕</button></div>';
-    const n=r.querySelector('.n'),u=r.querySelector('.u'),c=r.querySelector('.c');
-    const [up,dn,del]=r.querySelectorAll('.ib');
+    const r=document.createElement('div');r.className='irow2';r.dataset.id=it.id;
+    r.innerHTML='<div class="grip" aria-label="拖曳排序"><i></i><i></i><i></i></div><div class="fields"><div class="irow"><input class="n" placeholder="品項名稱"><input class="u" placeholder="單位"></div><input class="c" list="catList" placeholder="分類（粉／包裝／發票…）"></div><button class="ib del" aria-label="刪除">✕</button>';
+    const n=r.querySelector('.n'),u=r.querySelector('.u'),c=r.querySelector('.c'),del=r.querySelector('.del'),grip=r.querySelector('.grip');
     n.value=it.name;u.value=it.unit||'';c.value=it.cat||'';
     const upd=()=>{saveItems();renderChips();renderItems()};
     n.oninput=()=>{it.name=n.value;upd()};u.oninput=()=>{it.unit=u.value;upd()};c.oninput=()=>{it.cat=c.value.trim();upd()};
-    up.onclick=()=>{if(idx>0){[S.items[idx-1],S.items[idx]]=[S.items[idx],S.items[idx-1]];saveItems();renderItemEditor();renderItems()}};
-    dn.onclick=()=>{if(idx<S.items.length-1){[S.items[idx+1],S.items[idx]]=[S.items[idx],S.items[idx+1]];saveItems();renderItemEditor();renderItems()}};
     let arm=0;del.onclick=()=>{if(!arm){arm=1;del.textContent='確認';del.classList.add('arm');setTimeout(()=>{arm=0;del.textContent='✕';del.classList.remove('arm')},2500);return}
-      S.items.splice(idx,1);saveItems();renderItemEditor();renderChips();renderItems()};
+      const k=S.items.findIndex(x=>x.id===it.id);if(k>=0)S.items.splice(k,1);saveItems();renderItemEditor();renderChips();renderItems()};
+    grip.addEventListener('pointerdown',e=>startDrag(e,r,box));
     box.appendChild(r);
   });
+}
+/* 拖曳排序：按住左邊把手上下移動，放開就儲存 */
+function startDrag(e,row,box){
+  if(e.button!==undefined&&e.button>0)return;
+  e.preventDefault();
+  const grip=e.currentTarget;
+  try{grip.setPointerCapture(e.pointerId)}catch(_){}
+  const startRect=row.getBoundingClientRect();
+  const grab=e.clientY-startRect.top;
+  let ty=0,pointerY=e.clientY,raf=0,active=true;
+  row.classList.add('dragging');
+  function update(){
+    const natural=row.getBoundingClientRect().top-ty;
+    ty=(pointerY-grab)-natural;
+    row.style.transform='translateY('+ty+'px)';
+    for(let guard=0;guard<60;guard++){
+      const rc=row.getBoundingClientRect(),center=rc.top+rc.height/2;
+      const prev=row.previousElementSibling,next=row.nextElementSibling;
+      let moved=false;
+      if(prev){const pr=prev.getBoundingClientRect();if(center<pr.top+pr.height/2){box.insertBefore(row,prev);moved=true}}
+      if(!moved&&next){const nr=next.getBoundingClientRect();if(center>nr.top+nr.height/2){box.insertBefore(next,row);moved=true}}
+      if(!moved)break;
+      const nat=row.getBoundingClientRect().top-ty;ty=(pointerY-grab)-nat;row.style.transform='translateY('+ty+'px)';
+    }
+  }
+  function loop(){
+    if(!active)return;
+    const vh=window.innerHeight;let dy=0;
+    if(pointerY<100)dy=-Math.ceil((100-pointerY)/6);else if(pointerY>vh-120)dy=Math.ceil((pointerY-(vh-120))/6);
+    if(dy){window.scrollBy(0,dy);update()}
+    raf=requestAnimationFrame(loop);
+  }
+  const mv=ev=>{pointerY=ev.clientY;update()};
+  const end=()=>{
+    if(!active)return;active=false;cancelAnimationFrame(raf);
+    grip.removeEventListener('pointermove',mv);grip.removeEventListener('pointerup',end);grip.removeEventListener('pointercancel',end);
+    try{grip.releasePointerCapture(e.pointerId)}catch(_){}
+    row.classList.remove('dragging');row.style.transform='';
+    const order=[...box.children].map(x=>x.dataset.id);
+    const map=new Map(S.items.map(i=>[i.id,i]));
+    const next=order.map(id=>map.get(id)).filter(Boolean);
+    S.items.forEach(i=>{if(!next.includes(i))next.push(i)});
+    const changed=next.some((i,k)=>i!==S.items[k]);
+    if(changed){S.items=next;saveItems();renderChips();renderItems();if(!$('tab-history').classList.contains('hidden'))renderHistory()}
+    renderItemEditor();
+  };
+  grip.addEventListener('pointermove',mv);grip.addEventListener('pointerup',end);grip.addEventListener('pointercancel',end);
+  raf=requestAnimationFrame(loop);
 }
 $('btnAddItem').onclick=()=>{
   S.nextId=(S.nextId||100)+1;
