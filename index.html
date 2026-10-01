@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#3f6b5a">
-<meta name="app-version" content="33">
+<meta name="app-version" content="34">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -186,6 +186,8 @@ td.day{text-align:center!important}
 .lrow .df{min-width:48px;text-align:right}
 .htab th[data-id]{cursor:pointer}
 .htab td.day.tdy{background:var(--sun)!important;color:#fff!important}
+.expbar{flex-wrap:nowrap!important;gap:6px!important}
+.expbar .btn{flex:1 1 0;min-width:0;min-height:38px;padding:7px 4px;font-size:13px;white-space:nowrap;display:flex;align-items:center;justify-content:center;border-radius:10px;text-align:center}
 </style>
 </head>
 <body>
@@ -233,7 +235,7 @@ td.day{text-align:center!important}
   </div>
   <div class="card">
     <h2>匯出與備份</h2>
-    <div class="row">
+    <div class="row expbar">
       <button class="btn primary" id="btnExport">⬇ 匯出 Excel</button>
       <button class="btn" id="btnBackup">備份 JSON</button>
       <label class="btn">還原備份<input type="file" id="fileRestore" accept=".json,application/json" class="hidden"></label>
@@ -250,12 +252,12 @@ td.day{text-align:center!important}
     <div id="itemList"></div>
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem">＋ 新增品項</button></div>
-  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v33</div>
+  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v34</div>
   <details class="card sync" id="syncBox">
     <summary>☁ 同步設定</summary>
     <div class="body">
-    <label class="field"><span>Firebase 資料庫網址</span><input id="cfgUrl" placeholder="https://xxxx-default-rtdb.firebaseio.com" inputmode="url" autocapitalize="off"></label>
-    <label class="field"><span>店家代碼（自訂一組密碼，同店的人輸入同一組）</span><input id="cfgCode" placeholder="例如 peaktea-bigcity-2026" autocapitalize="off"></label>
+    <label class="field"><span>Firebase</span><input id="cfgUrl" placeholder="https://xxxx-default-rtdb.firebaseio.com" inputmode="url" autocapitalize="off"></label>
+    <label class="field"><span>店家代碼</span><input id="cfgCode" placeholder="例如 peaktea-bigcity-2026" autocapitalize="off"></label>
     <div class="row"><button class="btn primary" id="cfgSave">儲存並重新連線</button></div>
     <div class="muted" style="margin-top:8px" id="cfgState"></div>
     </div>
@@ -309,7 +311,15 @@ let hCat='全部',hQ='',hMode='table',hItem=null;
 let catSel='全部',query='';
 let store=null,online=true,connected=false;
 const pendVals={};      // key -> 尚未被雲端確認的值
-let busy=0,lastSync='';
+let busy=0,lastSyncTs=0;
+try{lastSyncTs=Number(localStorage.getItem('pt_lastsync'))||0}catch(e){}
+function markSync(){lastSyncTs=Date.now();try{localStorage.setItem('pt_lastsync',String(lastSyncTs))}catch(e){}}
+function fmtSync(){
+  if(!lastSyncTs)return '';
+  const d=new Date(lastSyncTs),n=new Date();
+  const t=pad(d.getHours())+':'+pad(d.getMinutes());
+  return ymd(d)===ymd(n)?t:(d.getMonth()+1)+'/'+d.getDate()+' '+t;
+}
 
 /* ---------- 設定 ---------- */
 function getCfg(){
@@ -343,7 +353,7 @@ async function makeCloudStore(url,code){
   const app=firebase.initializeApp({databaseURL:url});
   const db=firebase.database(app);
   const base=db.ref('stores/'+cleanCode(code));
-  db.ref('.info/connected').on('value',s=>{connected=!!s.val();setStatus()});
+  db.ref('.info/connected').on('value',s=>{connected=!!s.val();if(connected)markSync();setStatus()});
   return {kind:'cloud',
     subscribe(d,i,err){
       base.child('days').on('value',s=>d(s.val()||{}),err);
@@ -384,7 +394,7 @@ function writeField(date,kind,id,v){ // kind: 'v' 數量 / 'm' staff,note
     const sent=pendVals[key];busy++;setStatus();
     try{
       await store.setField(date,path,sent);
-      lastSync=new Date().toLocaleTimeString('zh-TW',{hour:'2-digit',minute:'2-digit'});
+      markSync();
       if(pendVals[key]===sent)delete pendVals[key];
     }catch(e){toast('儲存失敗，稍後自動重試');timers[key]=setTimeout(()=>writeField(date,kind,id,pendVals[key]),3000)}
     finally{busy--;setStatus()}
@@ -394,8 +404,9 @@ function setStatus(){
   const p=$('livePill');const pending=busy>0||Object.keys(pendVals).length>0;
   if(!store){p.textContent='連線中…';p.className='pill warn';return}
   if(store.kind==='local'){p.textContent='本機模式';p.className='pill warn';return}
-  if(!connected){p.textContent='🔴 離線（恢復後自動同步）';p.className='pill warn';return}
-  p.textContent=pending?'⏳ 儲存中…':'🟢 已同步'+(lastSync?' '+lastSync:'');p.className='pill'+(pending?' warn':'');
+  const ls=fmtSync();
+  if(!connected){p.textContent='🔴 離線'+(ls?' · 上次同步 '+ls:'');p.className='pill warn';return}
+  p.textContent=pending?'⏳ 儲存中…':'🟢 已同步'+(ls?' · 上次 '+ls:'');p.className='pill'+(pending?' warn':'');
 }
 
 /* ---------- 日期／自動更新 ---------- */
@@ -795,7 +806,7 @@ $('fileRestore').onchange=e=>{
 
 /* ---------- 資料更新回呼 ---------- */
 function onDays(d){
-  S.days=d||{};applyPending();
+  S.days=d||{};applyPending();if(store&&store.kind==='cloud'&&connected)markSync();
   if(!$('tab-daily').classList.contains('hidden'))syncFromRemote();
   if(!$('tab-history').classList.contains('hidden'))renderHistory();
   setStatus();
