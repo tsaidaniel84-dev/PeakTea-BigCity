@@ -4,7 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#3f6b5a">
-<meta name="app-version" content="45">
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="app-version" content="47">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -151,8 +153,8 @@ td.day{text-align:center!important}
 @media (prefers-color-scheme:dark){tr.has td{background:#5a4c12!important;color:#fff3c2;border-bottom-color:#8a7420}td.day{color:#f5d76e}}
 .avatar{width:26px;height:26px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:8px;border:1px solid var(--line)}
 .mi{display:flex;align-items:center;color:var(--ink)}
-:root{--flash:#2f7fd6;--flash-soft:#dbeafe}
-@media (prefers-color-scheme:dark){:root{--flash:#5aa2ff;--flash-soft:#1f3a5c}}
+:root{--flash:#2c8fa0;--flash-soft:#dff0f2}
+@media (prefers-color-scheme:dark){:root{--flash:#4db6c6;--flash-soft:#1f3a40}}
 
 /* 月庫存管理表：表頭固定在畫面上方（跟著上下滑），日期欄固定在左邊（跟著左右滑） */
 .hhead{position:sticky;top:env(safe-area-inset-top,0px);z-index:8;overflow:hidden;background:var(--card);border:1px solid var(--line);border-bottom:2px solid var(--accent);border-radius:10px 10px 0 0}
@@ -198,7 +200,7 @@ td.day{text-align:center!important}
 .syncbox small{display:block;font-size:10px;color:var(--muted)}
 .syncbox b{display:block;font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap}
 
-@keyframes loc{0%,100%{box-shadow:0 0 0 0 rgba(47,127,214,0);background:var(--card)}50%{box-shadow:0 0 0 6px var(--flash);background:var(--flash-soft)}}
+@keyframes loc{0%,100%{box-shadow:0 0 0 0 rgba(44,143,160,0);background:var(--card)}50%{box-shadow:0 0 0 6px var(--flash);background:var(--flash-soft)}}
 .item.locate{animation:loc .9s ease-in-out 3;border-color:var(--flash)}
 .htab tbody td:not(.day){cursor:pointer}
 
@@ -218,9 +220,24 @@ td.day{text-align:center!important}
 .chip small{color:var(--muted)}
 .chip.on{background:var(--teal);border-color:var(--teal);color:var(--teal-ink)}
 .chip.on small{color:var(--teal-ink);opacity:.85}
+
+/* v46：低庫存、搜尋、鎖定畫面 */
+.item.low{border:2px solid var(--down);background:rgba(192,57,43,.08);padding:9px 9px 9px 13px}
+.item.filled.low{border-color:var(--down)}
+.lowtag{color:var(--down);font-weight:800}
+.chip.alert{border-color:var(--down);color:var(--down);background:rgba(192,57,43,.1)}
+.chip.alert small{color:inherit}
+.chip.alert.on{background:var(--down);border-color:var(--down);color:#fff}
+.chip.alert.on small{color:#fff}
+.chips.searching .chip.on{background:var(--teal-soft);border-color:var(--teal-line);color:var(--ink)}
+.chips.searching .chip.on small{color:var(--muted)}
+.chips.searching .chip.alert.on{background:rgba(192,57,43,.1);color:var(--down);border-color:var(--down)}
+.htab td.lowc{color:var(--down);font-weight:800}
+.irow.r2{grid-template-columns:1fr 92px}
 </style>
 </head>
 <body>
+</div>
 <div class="wrap">
 
 <!-- ================= 盤點頁 ================= -->
@@ -282,7 +299,8 @@ td.day{text-align:center!important}
     <div id="itemList"></div>
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem">＋ 新增品項</button></div>
-  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v45</div>
+  <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v47</div>
   <details class="card sync" id="syncBox">
     <summary>☁ 同步設定</summary>
     <div class="body">
@@ -407,16 +425,24 @@ function applyPending(){
 
 /* ---------- 自動儲存（每個欄位 0.4 秒合併一次） ---------- */
 const timers={};
+function persistPend(){try{localStorage.setItem('pt_pend_v1',JSON.stringify(pendVals))}catch(e){}}
+let cacheT=null;
+function saveCache(){clearTimeout(cacheT);cacheT=setTimeout(()=>{try{
+  if(!store||store.kind!=='cloud')return;
+  const ds=Object.keys(S.days).sort().slice(-400),days={};ds.forEach(d=>days[d]=S.days[d]);
+  localStorage.setItem('pt_cache_v1',JSON.stringify({code:getCfg().code,days,items:S.items,nextId:S.nextId}))}catch(e){}},1500)}
+function loadCache(){try{const c=JSON.parse(localStorage.getItem('pt_cache_v1'));
+  if(c&&c.code===getCfg().code){S.days=c.days||{};if(Array.isArray(c.items)&&c.items.length){S.items=c.items;S.nextId=c.nextId||S.nextId}return true}}catch(e){}return false}
 function writeField(date,kind,id,v){ // kind: 'v' 數量 / 'm' staff,note
   const path=kind==='v'?'values/'+id:id;
   const key=date+'|'+(kind==='v'?'v:'+id:id);
-  pendVals[key]=v;localEditTs=Date.now();
+  pendVals[key]=v;persistPend();localEditTs=Date.now();
   clearTimeout(timers[key]);setStatus();
   timers[key]=setTimeout(async()=>{
     const sent=pendVals[key];busy++;setStatus();
     try{
       await store.setField(date,path,sent);
-      if(pendVals[key]===sent)delete pendVals[key];
+      if(pendVals[key]===sent){delete pendVals[key];persistPend()}
     }catch(e){toast('儲存失敗，稍後自動重試');timers[key]=setTimeout(()=>writeField(date,kind,id,pendVals[key]),3000)}
     finally{busy--;setStatus()}
   },400);
@@ -492,24 +518,33 @@ function renderChips(){
   const box=$('chips');
   const NI=S.items.filter(i=>i.name);
   const list=[['全部',NI],['未填',NI.filter(i=>!hasVal(valOf(curDate,i.id)))],...cats().map(c=>[c,NI.filter(i=>i.cat===c)])];
-  if(catSel!=='全部'&&catSel!=='未填'&&!cats().includes(catSel))catSel='全部';
-  box.innerHTML='';
+  const hasAnyMin=NI.some(hasMin);
+  if(hasAnyMin)list.splice(2,0,['需叫貨',NI.filter(isLow)]);
+  if(catSel==='需叫貨'&&!hasAnyMin)catSel='全部';
+  if(catSel!=='全部'&&catSel!=='未填'&&catSel!=='需叫貨'&&!cats().includes(catSel))catSel='全部';
+  box.innerHTML='';box.classList.toggle('searching',!!query);
   list.forEach(([c,its])=>{
-    const b=document.createElement('button');b.className='chip'+(catSel===c?' on':'');
+    const b=document.createElement('button');b.className='chip'+(catSel===c?' on':'')+(c==='需叫貨'&&its.length?' alert':'');
     const filled=its.filter(i=>hasVal(valOf(curDate,i.id))).length;
-    b.innerHTML=esc(c)+'<small>'+(c==='未填'?its.length:filled+'/'+its.length)+'</small>';
+    b.innerHTML=esc(c)+'<small>'+((c==='未填'||c==='需叫貨')?its.length:filled+'/'+its.length)+'</small>';
     b.onclick=()=>{catSel=c;renderChips();renderItems()};
     box.appendChild(b);
   });
 }
-$('q').oninput=e=>{query=e.target.value.trim().toLowerCase();$('qx').classList.toggle('hidden',!query);renderItems()};
-$('qx').onclick=()=>{$('q').value='';query='';$('qx').classList.add('hidden');renderItems()};
+$('q').oninput=e=>{query=e.target.value.trim().toLowerCase();$('qx').classList.toggle('hidden',!query);renderChips();renderItems()};
+$('qx').onclick=()=>{$('q').value='';query='';$('qx').classList.add('hidden');renderChips();renderItems()};
 function visible(it){
+  if(query)return it.name.toLowerCase().includes(query)||(it.cat||'').toLowerCase().includes(query);   // 搜尋時一律搜全部分類
   if(catSel==='未填'){if(hasVal(valOf(curDate,it.id)))return false}
+  else if(catSel==='需叫貨'){if(!isLow(it))return false}
   else if(catSel!=='全部'&&(it.cat||'')!==catSel)return false;
-  if(query&&!(it.name.toLowerCase().includes(query)||(it.cat||'').toLowerCase().includes(query)))return false;
   return true;
 }
+
+/* ---------- 低庫存判斷 ---------- */
+const hasMin=it=>it&&it.min!==undefined&&it.min!==null&&it.min!==''&&!isNaN(Number(it.min));
+const lowVal=(it,v)=>hasMin(it)&&hasVal(v)&&Number(v)<Number(it.min);
+const isLow=it=>lowVal(it,valOf(curDate,it.id));
 
 /* ---------- 品項卡片 ---------- */
 function flashEl(el){el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')}
@@ -551,8 +586,9 @@ function refreshCard(id,force){
   const v=valOf(curDate,id),sv=hasVal(v)?String(v):'';
   if(force&&document.activeElement!==c.inp)c.inp.value=sv;
   c.el.classList.toggle('filled',hasVal(v));
+  const itm=S.items.find(x=>x.id===id);const low=lowVal(itm,v);c.el.classList.toggle('low',low);
   const p=prevRecord(curDate),pv=p&&p.rec.values?p.rec.values[id]:undefined,d=diffOf(id);
-  c.el.querySelector('.sub').innerHTML=(hasVal(pv)?'前次 '+pv+'（'+p.date.slice(5).replace('-','/')+'）':'無前次紀錄')+(d.t?' · <span class="diff '+d.c+'">'+d.t+'</span>':'');
+  c.el.querySelector('.sub').innerHTML=(hasVal(pv)?'前次 '+pv+'（'+p.date.slice(5).replace('-','/')+'）':'無前次紀錄')+(d.t?' · <span class="diff '+d.c+'">'+d.t+'</span>':'')+(hasMin(itm)?' · 最低 '+itm.min:'')+(low?' · <span class="lowtag">⚠ 低於最低量</span>':'');
 }
 function syncFromRemote(){
   S.items.forEach(it=>{
@@ -597,13 +633,13 @@ $('btnClear').onclick=async()=>{
 /* ---------- 歷史 ---------- */
 function hFiltered(){
   return S.items.filter(i=>i.name).filter(it=>{
-    if(hCat!=='全部'&&(it.cat||'')!==hCat)return false;
+    if(!hQ&&hCat!=='全部'&&(it.cat||'')!==hCat)return false;
     if(hQ&&!(it.name.toLowerCase().includes(hQ)||(it.cat||'').toLowerCase().includes(hQ)))return false;
     return true;
   });
 }
 function renderHChips(){
-  const box=$('hChips');box.innerHTML='';
+  const box=$('hChips');box.innerHTML='';box.classList.toggle('searching',!!hQ);
   if(hCat!=='全部'&&!cats().includes(hCat))hCat='全部';
   const all=S.items.filter(i=>i.name);
   [['全部',all],...cats().map(c=>[c,all.filter(i=>i.cat===c)])].forEach(([c,its])=>{
@@ -631,7 +667,7 @@ function renderHistory(scrollToday){
   for(let d=1;d<=days;d++){
     const ds=y+'-'+pad(m)+'-'+pad(d),r=S.days[ds];
     h+='<tr class="'+(hasData(r)?'has':'')+(ds===curDate?' cur':'')+'"><td class="day'+(ds===todayStr?' tdy':'')+'" data-d="'+ds+'">'+d+'</td><td>'+WD[new Date(y,m-1,d).getDay()]+'</td><td>'+esc(r&&r.staff||'')+'</td>'+
-      its.map(i=>{const v=r&&r.values?r.values[i.id]:'';return'<td>'+(hasVal(v)?v:'')+'</td>'}).join('')+'</tr>';
+      its.map(i=>{const v=r&&r.values?r.values[i.id]:'';return'<td'+(lowVal(i,v)?' class="lowc"':'')+'>'+(hasVal(v)?v:'')+'</td>'}).join('')+'</tr>';
   }
   t.innerHTML=h+'</tbody>';
   t.querySelectorAll('td.day').forEach(td=>td.onclick=()=>{switchTab('daily');loadDate(td.dataset.d)});
@@ -666,7 +702,7 @@ function renderHItem(list){
   if(!pts.length){body.innerHTML='<div class="empty">'+(m)+'月還沒有「'+esc(it.name)+'」的紀錄</div>';return}
   const vs=pts.map(p=>p.v),mn=Math.min(...vs),mx=Math.max(...vs),avg=Math.round(vs.reduce((a,b)=>a+b,0)/vs.length*10)/10,last=pts[pts.length-1];
   const W=340,H=170,L=34,R=12,T=14,B=24;
-  const pad2=(mx-mn)*0.15||1;let lo=mn-pad2,hi=mx+pad2;if(mn>=0&&lo<0)lo=0;
+  const mv=hasMin(it)?Number(it.min):null;const rmn=mv===null?mn:Math.min(mn,mv),rmx=mv===null?mx:Math.max(mx,mv);const pad2=(rmx-rmn)*0.15||1;let lo=rmn-pad2,hi=rmx+pad2;if(mn>=0&&lo<0)lo=0;
   const X=d=>L+(days===1?0:(d-1)/(days-1))*(W-L-R),Y=v=>T+(1-(v-lo)/(hi-lo))*(H-T-B);
   const r1=v=>Math.round(v*10)/10;
   let svg='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block">';
@@ -676,6 +712,7 @@ function renderHItem(list){
     svg+='<text x="'+X(d)+'" y="'+(H-8)+'" text-anchor="middle" style="fill:var(--muted);font-size:10px">'+d+'</text>'});
   const td=todayStr.startsWith(y+'-'+pad(m))?parseInt(todayStr.slice(8)):0;
   if(td)svg+='<line x1="'+X(td)+'" x2="'+X(td)+'" y1="'+T+'" y2="'+(H-B)+'" style="stroke:var(--sun);stroke-width:1;stroke-dasharray:3 3"/>';
+  if(mv!==null)svg+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(mv)+'" y2="'+Y(mv)+'" style="stroke:var(--down);stroke-width:1.5;stroke-dasharray:5 3"/><text x="'+(W-R)+'" y="'+(Y(mv)-3)+'" text-anchor="end" style="fill:var(--down);font-size:10px">最低 '+mv+'</text>';
   svg+='<polyline fill="none" points="'+pts.map(p=>X(p.d)+','+Y(p.v)).join(' ')+'" style="stroke:var(--accent);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round"/>';
   pts.forEach(p=>{svg+='<circle cx="'+X(p.d)+'" cy="'+Y(p.v)+'" r="3.5" style="fill:var(--card);stroke:var(--accent);stroke-width:2"/>'});
   svg+='</svg>';
@@ -724,11 +761,12 @@ function renderItemEditor(){
   $('catList').innerHTML=[...new Set([...DEFAULT_CATS,...S.items.map(i=>i.cat).filter(Boolean)])].map(c=>'<option value="'+esc(c)+'">').join('');
   S.items.forEach((it,idx)=>{
     const r=document.createElement('div');r.className='irow2';r.dataset.id=it.id;
-    r.innerHTML='<div class="grip" aria-label="拖曳排序"><i></i><i></i><i></i></div><div class="fields"><div class="irow"><input class="n" placeholder="品項名稱"><input class="u" placeholder="單位"></div><input class="c" list="catList" placeholder="分類（粉／包裝／發票…）"></div><button class="ib del" aria-label="刪除">✕</button>';
+    r.innerHTML='<div class="grip" aria-label="拖曳排序"><i></i><i></i><i></i></div><div class="fields"><div class="irow"><input class="n" placeholder="品項名稱"><input class="u" placeholder="單位"></div><div class="irow r2"><input class="c" list="catList" placeholder="分類（粉／包裝／發票…）"><input class="mn" type="number" inputmode="decimal" min="0" placeholder="最低量"></div></div><button class="ib del" aria-label="刪除">✕</button>';
     const n=r.querySelector('.n'),u=r.querySelector('.u'),c=r.querySelector('.c'),del=r.querySelector('.del'),grip=r.querySelector('.grip');
     n.value=it.name;u.value=it.unit||'';c.value=it.cat||'';
+    const mn=r.querySelector('.mn');mn.value=hasMin(it)?it.min:'';
     const upd=()=>{saveItems();renderChips();renderItems()};
-    n.oninput=()=>{it.name=n.value;upd()};u.oninput=()=>{it.unit=u.value;upd()};c.oninput=()=>{it.cat=c.value.trim();upd()};
+    n.oninput=()=>{it.name=n.value;upd()};u.oninput=()=>{it.unit=u.value;upd()};c.oninput=()=>{it.cat=c.value.trim();upd()};mn.oninput=()=>{it.min=mn.value===''?'':Number(mn.value);upd()};
     let arm=0;del.onclick=()=>{if(!arm){arm=1;del.textContent='確認';del.classList.add('arm');setTimeout(()=>{arm=0;del.textContent='✕';del.classList.remove('arm')},2500);return}
       const k=S.items.findIndex(x=>x.id===it.id);if(k>=0)S.items.splice(k,1);saveItems();renderItemEditor();renderChips();renderItems()};
     grip.addEventListener('pointerdown',e=>startDrag(e,r,box));
@@ -825,10 +863,10 @@ function buildWorkbook(){
   const its=S.items.filter(i=>i.name),wb=XLSX.utils.book_new();
   const label=i=>i.name+(i.unit?'('+i.unit+')':'');
   const p=prevRecord(curDate),cur=S.days[curDate]||{};const cv=cur.values||{};
-  const a1=[['青山巨城店 每日盤點表'],['日期',curDate,'星期','週'+WD[parse(curDate).getDay()]],['盤點人員',cur.staff||''],[],['分類','品項','單位','前次'+(p?'（'+p.date+'）':''),'今日盤點','增減']];
+  const a1=[['青山巨城店 每日盤點表'],['日期',curDate,'星期','週'+WD[parse(curDate).getDay()]],['盤點人員',cur.staff||''],[],['分類','品項','單位','前次'+(p?'（'+p.date+'）':''),'今日盤點','增減','最低量','狀態']];
   its.forEach(i=>{const c=cv[i.id],pv=p&&p.rec.values?p.rec.values[i.id]:undefined;
-    a1.push([i.cat||'',i.name,i.unit||'',num(pv),num(c),(hasVal(c)&&hasVal(pv))?Math.round((c-pv)*100)/100:''])});
-  const ws1=XLSX.utils.aoa_to_sheet(a1);ws1['!cols']=[{wch:8},{wch:20},{wch:8},{wch:18},{wch:12},{wch:10}];
+    a1.push([i.cat||'',i.name,i.unit||'',num(pv),num(c),(hasVal(c)&&hasVal(pv))?Math.round((c-pv)*100)/100:'',hasMin(i)?Number(i.min):'',lowVal(i,c)?'需叫貨':''])});
+  const ws1=XLSX.utils.aoa_to_sheet(a1);ws1['!cols']=[{wch:8},{wch:20},{wch:8},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8}];
   XLSX.utils.book_append_sheet(wb,ws1,'當日盤點');
   const [y,m]=curDate.split('-').map(Number),days=new Date(y,m,0).getDate();
   const a2=[['日期','星期','盤點人員',...its.map(label)]];
@@ -865,7 +903,7 @@ $('fileRestore').onchange=e=>{
 
 /* ---------- 資料更新回呼 ---------- */
 function onDays(d){
-  S.days=d||{};applyPending();
+  S.days=d||{};applyPending();saveCache();
   if(!$('tab-daily').classList.contains('hidden'))syncFromRemote();
   if(!$('tab-history').classList.contains('hidden'))renderHistory();
   setStatus();
@@ -875,7 +913,7 @@ function onItems(json){
   let list=clone(DEFAULT_ITEMS),nid=S.nextId;
   if(json){try{const o=JSON.parse(json);if(Array.isArray(o.list)){list=o.list;nid=Math.max(nid,o.nextId||0)}}catch(e){}}
   if(JSON.stringify(list)!==JSON.stringify(S.items)){
-    S.items=list;S.nextId=nid;
+    S.items=list;S.nextId=nid;saveCache();
     renderChips();renderItems();
     if(!$('tab-settings').classList.contains('hidden')&&!(document.activeElement&&$('itemList').contains(document.activeElement)))renderItemEditor();
   }
@@ -885,6 +923,7 @@ function onItems(json){
 async function boot(){
   tick();updateDateUI();renderChips();renderItems();setStatus();
   const c=getCfg();
+  if(c.dbUrl&&c.code)loadCache();
   if(c.dbUrl&&c.code){
     try{store=await makeCloudStore(c.dbUrl,c.code)}
     catch(e){store=null;const b=$('banner');b.textContent='無法連上雲端同步（'+e.message+'），已改用本機模式。';b.classList.remove('hidden')}
@@ -895,8 +934,11 @@ async function boot(){
   }
   store.subscribe(onDays,onItems,e=>{toast('同步錯誤：'+(e&&e.message||'請檢查資料庫規則'));const b=$('banner');b.textContent='雲端讀寫被拒絕，請檢查 Firebase 規則是否已設定（見設定說明）。';b.classList.remove('hidden')});
   setStatus();loadDate(curDate);
+  try{const pv=JSON.parse(localStorage.getItem('pt_pend_v1')||'{}');   // 上次離線時還沒送出的修改，重新送出
+    for(const k in pv){const [d,p]=k.split('|');if(p.startsWith('v:'))writeField(d,'v',p.slice(2),pv[k]);else writeField(d,'m',p,pv[k])}}catch(e){}
 }
 boot();
+if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 (function(){const n=$('nav'),f=()=>document.documentElement.style.setProperty('--navh',(n.offsetHeight-parseFloat(getComputedStyle(n).paddingBottom||0))+'px');f();addEventListener('resize',f);setTimeout(f,300)})();
 ['gesturestart','gesturechange','gestureend'].forEach(g=>document.addEventListener(g,e=>{if(!zoomOK)e.preventDefault()}));
 /* ---------- 自動檢查更新（加入主畫面也會更新） ---------- */
