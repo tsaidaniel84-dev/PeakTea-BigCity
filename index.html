@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#3f6b5a">
-<meta name="app-version" content="40">
+<meta name="app-version" content="42">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -200,6 +200,17 @@ td.day{text-align:center!important}
 @keyframes loc{0%,100%{box-shadow:0 0 0 0 rgba(47,127,214,0);background:var(--card)}50%{box-shadow:0 0 0 6px var(--flash);background:var(--flash-soft)}}
 .item.locate{animation:loc .9s ease-in-out 3;border-color:var(--flash)}
 .htab tbody td:not(.day){cursor:pointer}
+
+/* 進度條：橘色膠囊＋光澤，字樣 PeakTea */
+:root{--prog:#c1531b;--sun:#c1531b}
+@media (prefers-color-scheme:dark){:root{--prog:#e58a55;--sun:#e58a55}}
+.prog{position:relative;height:16px;border:1.5px solid var(--prog);border-radius:99px;background:var(--card);overflow:hidden;margin-top:8px;box-shadow:0 1.5px 0 var(--line)}
+.prog .pt{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:800;letter-spacing:.26em;padding-left:.26em;color:var(--prog);user-select:none;-webkit-user-select:none}
+.prog .pf{position:absolute;left:0;top:0;bottom:0;width:0;overflow:hidden;border-radius:99px;background:var(--prog)}
+.prog .pf::before{content:"";position:absolute;left:0;right:0;top:0;height:50%;background:rgba(255,255,255,.14)}
+.prog .pf::after{content:"";position:absolute;left:8px;right:8px;top:2px;height:1.5px;border-radius:2px;background:rgba(255,255,255,.6)}
+.prog .pf .pt2{inset:auto;left:0;top:0;height:100%;width:calc(100% * 100 / var(--p,100));color:#fff;z-index:1}
+@media (prefers-color-scheme:dark){.prog .pf .pt2{color:#2a1608}}
 </style>
 </head>
 <body>
@@ -217,7 +228,7 @@ td.day{text-align:center!important}
     </div>
     <div class="toolrow"><div class="search"><span class="ic">🔍</span><input id="q" type="search" placeholder="搜尋品項" autocomplete="off"><button class="x hidden" id="qx" aria-label="清除">✕</button></div><button class="btn sm" id="btnCopyPrev">前次紀錄</button><button class="btn sm danger" id="btnClear">清空</button></div>
     <div class="chips" id="chips"></div>
-    <div class="prog"><i id="progBar"></i></div>
+    <div class="prog" id="prog"><span class="pt">PeakTea</span><div class="pf" id="progBar"><span class="pt pt2">PeakTea</span></div></div>
   </div>
   <div class="banner hidden" id="banner"></div>
   <div class="list">
@@ -264,7 +275,7 @@ td.day{text-align:center!important}
     <div id="itemList"></div>
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem">＋ 新增品項</button></div>
-  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v40</div>
+  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v42</div>
   <details class="card sync" id="syncBox">
     <summary>☁ 同步設定</summary>
     <div class="body">
@@ -554,7 +565,8 @@ function syncMeta(flash){
 }
 function updateProg(){
   const its=S.items.filter(i=>i.name);const n=its.filter(i=>hasVal(valOf(curDate,i.id))).length;
-  $('progBar').style.width=(its.length?n/its.length*100:0)+'%';
+  const pc=its.length?n/its.length*100:0,bar=$('progBar');
+  bar.style.width=pc+'%';bar.style.setProperty('--p',Math.max(pc,1));
 }
 $('staff').addEventListener('input',e=>{dayOf(curDate).staff=e.target.value;writeField(curDate,'m','staff',e.target.value)});
 $('staff').addEventListener('change',e=>flashEl(e.target));
