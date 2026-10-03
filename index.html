@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#3f6b5a">
-<meta name="app-version" content="37">
+<meta name="app-version" content="38">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -196,6 +196,10 @@ td.day{text-align:center!important}
 .syncbox .le{line-height:1.15;text-align:right}
 .syncbox small{display:block;font-size:10px;color:var(--muted)}
 .syncbox b{display:block;font-size:11px;font-weight:600;color:var(--muted);white-space:nowrap}
+
+@keyframes loc{0%,100%{box-shadow:0 0 0 0 rgba(47,127,214,0);background:var(--card)}50%{box-shadow:0 0 0 6px var(--flash);background:var(--flash-soft)}}
+.item.locate{animation:loc .9s ease-in-out 3;border-color:var(--flash)}
+.htab tbody td:not(.day){cursor:pointer}
 </style>
 </head>
 <body>
@@ -260,7 +264,7 @@ td.day{text-align:center!important}
     <div id="itemList"></div>
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem">＋ 新增品項</button></div>
-  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v37</div>
+  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v38</div>
   <details class="card sync" id="syncBox">
     <summary>☁ 同步設定</summary>
     <div class="body">
@@ -441,6 +445,21 @@ function updateDateUI(){
   $('btnToday').classList.toggle('hidden',curDate===todayStr);
 }
 function loadDate(d){curDate=d;updateDateUI();renderItems();syncMeta(false);renderChips();updateProg()}
+/* 從歷史頁跳到某天的某個品項：捲到位置並閃爍提示 */
+function goToItem(date,itemId){
+  catSel='全部';query='';$('q').value='';$('qx').classList.add('hidden');
+  switchTab('daily');loadDate(date);
+  if(!itemId)return;
+  const go=()=>{
+    const c=cards[itemId];if(!c){return}
+    const topH=document.querySelector('#tab-daily .top').offsetHeight;
+    const y=c.el.getBoundingClientRect().top+window.pageYOffset-topH-16;
+    window.scrollTo(0,Math.max(0,y));
+    c.el.classList.remove('locate');void c.el.offsetWidth;c.el.classList.add('locate');
+    setTimeout(()=>c.el.classList.remove('locate'),3000);
+  };
+  requestAnimationFrame(()=>requestAnimationFrame(go));
+}
 $('prevDay').onclick=()=>shift(-1);$('nextDay').onclick=()=>shift(1);
 $('btnToday').onclick=()=>loadDate(todayStr);
 $('datePick').onchange=e=>{if(e.target.value)loadDate(e.target.value)};
@@ -598,13 +617,9 @@ function renderHistory(scrollToday){
   t.querySelectorAll('td.day').forEach(td=>td.onclick=()=>{switchTab('daily');loadDate(td.dataset.d)});
   hh.querySelectorAll('th[data-id]').forEach(th=>th.onclick=()=>{hMode='item';hItem=th.dataset.id;renderHistory(false);window.scrollTo(0,0)});
   t.querySelectorAll('tbody td:not(.day)').forEach(td=>td.onclick=()=>{
-    t.querySelectorAll('.selr').forEach(x=>x.classList.remove('selr'));
-    hh.querySelectorAll('th.selc').forEach(x=>x.classList.remove('selc'));
-    const was=td.parentElement.dataset.sel==='1';
-    t.querySelectorAll('tr[data-sel]').forEach(x=>x.removeAttribute('data-sel'));
-    if(was)return;
-    td.parentElement.classList.add('selr');td.parentElement.dataset.sel='1';
-    const th=hh.querySelectorAll('th')[td.cellIndex];if(th)th.classList.add('selc');
+    const th=hh.querySelectorAll('th')[td.cellIndex];
+    const date=td.parentElement.querySelector('td.day').dataset.d;
+    goToItem(date,th&&th.dataset.id);
   });
   $('histHead').scrollLeft=$('histBody').scrollLeft;
   if(scrollToday===true)scrollToTodayRow(t);
@@ -653,8 +668,8 @@ function renderHItem(list){
   }
   body.innerHTML='<div class="muted" style="margin-bottom:6px"><b style="color:var(--ink);font-size:17px">'+esc(it.name)+'</b> '+m+'月每日數量'+(unit?'（'+unit+'）':'')+'</div>'+
     '<div class="stats">'+stat(last.v,'最新 '+m+'/'+last.d)+stat(mn,'最低')+stat(mx,'最高')+stat(avg,'平均')+'</div>'+svg+
-    '<div class="muted" style="margin:10px 0 2px">每日紀錄（最新在上，點一下可回到該日）</div>'+rows;
-  body.querySelectorAll('.lrow').forEach(r=>r.onclick=()=>{switchTab('daily');loadDate(r.dataset.d)});
+    '<div class="muted" style="margin:10px 0 2px">每日紀錄（最新在上）</div>'+rows;
+  body.querySelectorAll('.lrow').forEach(r=>r.onclick=()=>goToItem(r.dataset.d,it.id));
 }
 $('hq').oninput=e=>{hQ=e.target.value.trim().toLowerCase();$('hqx').classList.toggle('hidden',!hQ);renderHistory(false)};
 $('hqx').onclick=()=>{$('hq').value='';hQ='';$('hqx').classList.add('hidden');renderHistory(false)};
