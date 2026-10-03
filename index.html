@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <meta name="theme-color" content="#3f6b5a">
-<meta name="app-version" content="38">
+<meta name="app-version" content="40">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -40,7 +40,7 @@ input:focus{outline:2px solid var(--accent);outline-offset:-1px}
 .logo{height:38px;width:auto;flex:none}
 .ttl{font-weight:800;font-size:17px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--accent);line-height:1.15}
 .ttl small{display:block;font-size:11px;font-weight:600;color:var(--sun);letter-spacing:.08em}
-.top{border-bottom:3px solid var(--accent)}
+.top{border-bottom:0}
 details.sync summary{font-weight:800;font-size:16px;cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center}
 details.sync summary::-webkit-details-marker{display:none}
 details.sync summary::after{content:"▾";color:var(--muted)}
@@ -264,7 +264,7 @@ td.day{text-align:center!important}
     <div id="itemList"></div>
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem">＋ 新增品項</button></div>
-  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v38</div>
+  <div class="muted" style="text-align:center;margin:14px 12px 0">網頁版本：v40</div>
   <details class="card sync" id="syncBox">
     <summary>☁ 同步設定</summary>
     <div class="body">
@@ -503,6 +503,7 @@ function diffOf(id){
   return{t:(d>0?'+':'')+d,c:d>0?'up':d<0?'down':''};
 }
 function renderItems(){
+  updateProg();
   const box=$('items');box.innerHTML='';cards={};
   const list=S.items.filter(i=>i.name).filter(visible);
   if(!list.length){box.innerHTML='<div class="empty">'+(S.items.length?'沒有符合的品項':'尚無品項，請到「設定」新增')+'</div>';return}
