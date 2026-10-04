@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="53">
+<meta name="app-version" content="56">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -322,7 +322,7 @@ input.sw:focus{outline:none}
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem">＋ 新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v53</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v56</div>
   <details class="card sync" id="syncBox">
     <summary>☁ 同步設定</summary>
     <div class="body">
@@ -810,13 +810,17 @@ document.querySelectorAll('#hSeg button').forEach(b=>b.onclick=()=>{hMode=b.data
   hd.addEventListener('touchmove',e=>{bd.scrollLeft=sl+(sx-e.touches[0].clientX)},{passive:true});
 })();
 function onMonthPick(e){
-  const v=e.target.value;
-  histMonth=v||todayStr.slice(0,7);          // 按「重設／清除」→ 回到當前月份
-  if(!v)e.target.value=histMonth;
-  renderHistory(true);
+  const el=e.target,v=el.value;
+  histMonth=v||todayStr.slice(0,7);          // 按「重設／清除」→ 回到當前月份（畫面停在原處，不跳到今天那一列）
+  renderHistory(false);
+  if(!v){                                    // 有些手機在清除當下會把欄位保持空白，稍後再補上一次並收起選擇器
+    const fix=()=>{el.value=histMonth};
+    fix();setTimeout(()=>{fix();try{el.blur()}catch(_){}},0);setTimeout(fix,250);
+  }
 }
 $('monthPick').onchange=onMonthPick;
 $('monthPick').oninput=e=>{if(!e.target.value)onMonthPick(e)};
+$('monthPick').onblur=e=>{if(!e.target.value)e.target.value=histMonth};
 
 /* ---------- 品項設定 ---------- */
 let itemTimer=null,lastItemsJson='';
