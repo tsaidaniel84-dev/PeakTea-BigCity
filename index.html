@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="56">
+<meta name="app-version" content="57">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -256,6 +256,16 @@ input.sw::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:
 input.sw:checked{background:var(--accent)}
 input.sw:checked::after{transform:translateX(22px)}
 input.sw:focus{outline:none}
+
+/* v57：停用品項 */
+.acts{display:flex;flex-direction:column;gap:6px;align-self:center;flex:none}
+.ib.offb{font-size:12px;font-weight:700;color:var(--muted)}
+details.offbox{margin-top:14px;padding-top:10px;border-top:1px dashed var(--line)}
+details.offbox summary{font-weight:800;cursor:pointer;color:var(--muted)}
+.offrow{display:flex;align-items:center;gap:8px;padding:8px 10px;margin-bottom:8px;background:var(--input);border:1px solid var(--line);border-radius:12px;opacity:.9}
+.offname{flex:1;min-width:0}.offname b{display:block;overflow-wrap:anywhere}.offname small{color:var(--muted)}
+.offrow .onb{min-height:40px;padding:6px 14px}
+.offtag{font-size:10px;font-weight:700;color:var(--muted)}
 </style>
 </head>
 <body>
@@ -319,10 +329,15 @@ input.sw:focus{outline:none}
     <h2>📦 品項清單</h2>
     <div class="dragtip"></div>
     <div id="itemList"></div>
+    <details class="offbox hidden" id="offBox">
+      <summary>已停用的品項（<span id="offCount">0</span>）</summary>
+      <div class="muted" style="margin:6px 0 10px">不會出現在盤點頁，歷史數字仍保留。需要時按「啟用」即可恢復。</div>
+      <div id="itemListOff"></div>
+    </details>
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem">＋ 新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v56</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v57</div>
   <details class="card sync" id="syncBox">
     <summary>☁ 同步設定</summary>
     <div class="body">
@@ -531,15 +546,21 @@ $('prevDay').onclick=()=>shift(-1);$('nextDay').onclick=()=>shift(1);
 $('btnToday').onclick=()=>loadDate(todayStr);
 $('datePick').onchange=e=>{if(e.target.value)loadDate(e.target.value)};
 
+/* ---------- 停用品項 ---------- */
+// 停用的品項：今天與之後不顯示；過去的日期若當天有數字，仍會顯示，歷史資料完整保留
+const dayItems=date=>S.items.filter(i=>i.name&&(!i.off||(date<todayStr&&hasVal(valOf(date,i.id)))));
+const monthDates=m=>{const [y,mm]=m.split('-').map(Number),n=new Date(y,mm,0).getDate(),r=[];for(let d=1;d<=n;d++)r.push(y+'-'+pad(mm)+'-'+pad(d));return r};
+const itemsForDates=dates=>S.items.filter(i=>i.name&&(!i.off||dates.some(d=>hasVal(valOf(d,i.id)))));
+
 /* ---------- 分類／搜尋 ---------- */
 function cats(){
   const set=[...DEFAULT_CATS];
   S.items.forEach(i=>{if(i.cat&&!set.includes(i.cat))set.push(i.cat)});
-  return set.filter(c=>S.items.some(i=>i.name&&i.cat===c));
+  return set.filter(c=>S.items.some(i=>i.name&&!i.off&&i.cat===c));
 }
 function renderChips(){
   const box=$('chips');
-  const NI=S.items.filter(i=>i.name);
+  const NI=dayItems(curDate);
   const list=[['全部',NI],['未填',NI.filter(i=>!hasVal(valOf(curDate,i.id)))],...cats().map(c=>[c,NI.filter(i=>i.cat===c)])];
   const hasAnyMin=NI.some(hasMin);
   if(hasAnyMin)list.splice(2,0,['需叫貨',NI.filter(isLow)]);
@@ -627,12 +648,12 @@ function diffOf(id){
 function renderItems(){
   updateProg();
   const box=$('items');box.innerHTML='';cards={};
-  const list=S.items.filter(i=>i.name).filter(visible);
+  const list=dayItems(curDate).filter(visible);
   if(!list.length){box.innerHTML='<div class="empty">'+(S.items.length?'沒有符合的品項':'尚無品項，請到「設定」新增')+'</div>';return}
   list.forEach(it=>{
     const el=document.createElement('div');el.className='item';
     el.innerHTML='<div class="info"><div class="nm"></div><div class="sub"></div><div class="warnline hidden"></div></div><div class="stp"><button class="sb" aria-label="減一">−</button><input class="qty" type="number" inputmode="decimal" step="any" min="0" placeholder="—"><button class="sb" aria-label="加一">＋</button></div>';
-    el.querySelector('.nm').innerHTML=esc(it.name)+(it.unit?' <span class="muted">('+esc(it.unit)+')</span>':'')+(it.cat?'<span class="cat">'+esc(it.cat)+'</span>':'');
+    el.querySelector('.nm').innerHTML=(it.off?'<span class="cat" style="margin:0 6px 0 0">已停用</span>':'')+esc(it.name)+(it.unit?' <span class="muted">('+esc(it.unit)+')</span>':'')+(it.cat?'<span class="cat">'+esc(it.cat)+'</span>':'');
     const inp=el.querySelector('input'),[m,p]=el.querySelectorAll('.sb');
     const commit=raw=>{
       const v=raw===''?'':Number(raw);if(v!==''&&isNaN(v))return;
@@ -678,7 +699,7 @@ function syncMeta(flash){
   });
 }
 function updateProg(){
-  const its=S.items.filter(i=>i.name);const n=its.filter(i=>hasVal(valOf(curDate,i.id))).length;
+  const its=dayItems(curDate);const n=its.filter(i=>hasVal(valOf(curDate,i.id))).length;
   const pc=its.length?n/its.length*100:0,bar=$('progBar');
   bar.style.width=pc+'%';bar.style.setProperty('--p',Math.max(pc,1));
 }
@@ -686,7 +707,7 @@ $('staff').addEventListener('input',e=>{dayOf(curDate).staff=e.target.value;writ
 $('staff').addEventListener('change',e=>flashEl(e.target));
 $('btnCopyPrev').onclick=()=>{
   const p=prevRecord(curDate);if(!p){toast('沒有更早的紀錄可帶入');return}
-  let n=0;const cs=[];S.items.forEach(it=>{const v=p.rec.values&&p.rec.values[it.id];if(hasVal(v)&&!hasVal(valOf(curDate,it.id))){
+  let n=0;const cs=[];dayItems(curDate).forEach(it=>{const v=p.rec.values&&p.rec.values[it.id];if(hasVal(v)&&!hasVal(valOf(curDate,it.id))){
     const day=dayOf(curDate);day.values=day.values||{};day.values[it.id]=v;writeField(curDate,'v',it.id,v);n++;const c=it.cat||'未分類';if(!cs.includes(c))cs.push(c)}});
   renderItems();renderChips();updateProg();toast(n?'已帶入：'+cs.join('、'):'沒有需要帶入的欄位');
 };
@@ -703,7 +724,7 @@ $('btnClear').onclick=async()=>{
 
 /* ---------- 歷史 ---------- */
 function hFiltered(){
-  return S.items.filter(i=>i.name).filter(it=>{
+  return itemsForDates(monthDates(histMonth)).filter(it=>{
     if(!hQ&&hCat!=='全部'&&(it.cat||'')!==hCat)return false;
     if(hQ&&!(it.name.toLowerCase().includes(hQ)||(it.cat||'').toLowerCase().includes(hQ)))return false;
     return true;
@@ -712,7 +733,7 @@ function hFiltered(){
 function renderHChips(){
   const box=$('hChips');box.innerHTML='';box.classList.toggle('searching',!!hQ);
   if(hCat!=='全部'&&!cats().includes(hCat))hCat='全部';
-  const all=S.items.filter(i=>i.name);
+  const all=itemsForDates(monthDates(histMonth));
   [['全部',all],...cats().map(c=>[c,all.filter(i=>i.cat===c)])].forEach(([c,its])=>{
     const b=document.createElement('button');b.className='chip'+(hCat===c?' on':'');
     b.innerHTML=esc(c)+'<small>'+its.length+'</small>';
@@ -733,7 +754,7 @@ function renderHistory(scrollToday){
   const cg='<colgroup>'+W.map(w=>'<col style="width:'+w+'px">').join('')+'</colgroup>';
   const hh=$('histHeadTable'),t=$('histTable');
   hh.style.width=t.style.width=total+'px';
-  hh.innerHTML=cg+'<thead><tr><th>日</th><th>週</th><th>人員</th>'+its.map(i=>'<th data-id="'+i.id+'">'+esc(i.name)+'</th>').join('')+'</tr></thead>';
+  hh.innerHTML=cg+'<thead><tr><th>日</th><th>週</th><th>人員</th>'+its.map(i=>'<th data-id="'+i.id+'">'+esc(i.name)+(i.off?'<br><small class="offtag">停用</small>':'')+'</th>').join('')+'</tr></thead>';
   let h=cg+'<tbody>';
   for(let d=1;d<=days;d++){
     const ds=y+'-'+pad(m)+'-'+pad(d),r=S.days[ds];
@@ -834,9 +855,9 @@ function saveItems(){
 function renderItemEditor(){
   const box=$('itemList');box.innerHTML='';
   $('catList').innerHTML=[...new Set([...DEFAULT_CATS,...S.items.map(i=>i.cat).filter(Boolean)])].map(c=>'<option value="'+esc(c)+'">').join('');
-  S.items.forEach((it,idx)=>{
+  S.items.filter(i=>!i.off).forEach((it)=>{
     const r=document.createElement('div');r.className='irow2';r.dataset.id=it.id;
-    r.innerHTML='<div class="grip" aria-label="拖曳排序"><i></i><i></i><i></i></div><div class="fields"><div class="irow"><input class="n" placeholder="品項名稱"><input class="u" placeholder="單位"></div><div class="irow r2"><input class="c" list="catList" placeholder="分類（粉／包裝／發票…）"><input class="mn" type="number" inputmode="decimal" min="0" placeholder="最低量"></div></div><button class="ib del" aria-label="刪除">✕</button>';
+    r.innerHTML='<div class="grip" aria-label="拖曳排序"><i></i><i></i><i></i></div><div class="fields"><div class="irow"><input class="n" placeholder="品項名稱"><input class="u" placeholder="單位"></div><div class="irow r2"><input class="c" list="catList" placeholder="分類（粉／包裝／發票…）"><input class="mn" type="number" inputmode="decimal" min="0" placeholder="最低量"></div></div><div class="acts"><button class="ib offb" aria-label="停用">停用</button><button class="ib del" aria-label="刪除">✕</button></div>';
     const n=r.querySelector('.n'),u=r.querySelector('.u'),c=r.querySelector('.c'),del=r.querySelector('.del'),grip=r.querySelector('.grip');
     n.value=it.name;u.value=it.unit||'';c.value=it.cat||'';
     const mn=r.querySelector('.mn');mn.value=hasMin(it)?it.min:'';
@@ -844,8 +865,22 @@ function renderItemEditor(){
     n.oninput=()=>{it.name=n.value;upd()};u.oninput=()=>{it.unit=u.value;upd()};c.oninput=()=>{it.cat=c.value.trim();upd()};mn.oninput=()=>{it.min=mn.value===''?'':Number(mn.value);upd()};
     let arm=0;del.onclick=()=>{if(!arm){arm=1;del.textContent='確認';del.classList.add('arm');setTimeout(()=>{arm=0;del.textContent='✕';del.classList.remove('arm')},2500);return}
       const k=S.items.findIndex(x=>x.id===it.id);if(k>=0)S.items.splice(k,1);saveItems();renderItemEditor();renderChips();renderItems()};
+    r.querySelector('.offb').onclick=()=>{it.off=true;saveItems();renderItemEditor();renderChips();renderItems();toast('已停用「'+(it.name||'未命名')+'」，可在下方重新啟用')};
     grip.addEventListener('pointerdown',e=>startDrag(e,r,box));
     box.appendChild(r);
+  });
+  /* 已停用的品項 */
+  const offs=S.items.filter(i=>i.off),ob=$('itemListOff');
+  $('offBox').classList.toggle('hidden',!offs.length);$('offCount').textContent=offs.length;ob.innerHTML='';
+  offs.forEach(it=>{
+    const r=document.createElement('div');r.className='offrow';
+    r.innerHTML='<div class="offname"><b></b><small></small></div><button class="btn onb" type="button">啟用</button><button class="ib del" aria-label="刪除">✕</button>';
+    r.querySelector('b').textContent=it.name||'（未命名）';r.querySelector('small').textContent=it.cat||'';
+    r.querySelector('.onb').onclick=()=>{it.off=false;saveItems();renderItemEditor();renderChips();renderItems();toast('已啟用「'+(it.name||'未命名')+'」')};
+    const del=r.querySelector('.del');let arm=0;
+    del.onclick=()=>{if(!arm){arm=1;del.textContent='確認';del.classList.add('arm');setTimeout(()=>{arm=0;del.textContent='✕';del.classList.remove('arm')},2500);return}
+      const k=S.items.findIndex(x=>x.id===it.id);if(k>=0)S.items.splice(k,1);saveItems();renderItemEditor();renderChips();renderItems()};
+    ob.appendChild(r);
   });
 }
 /* 拖曳排序：按住左邊把手上下移動，放開就儲存 */
@@ -887,8 +922,9 @@ function startDrag(e,row,box){
     row.classList.remove('dragging');row.style.transform='';
     const order=[...box.children].map(x=>x.dataset.id);
     const map=new Map(S.items.map(i=>[i.id,i]));
-    const next=order.map(id=>map.get(id)).filter(Boolean);
-    S.items.forEach(i=>{if(!next.includes(i))next.push(i)});
+    const activeOrder=order.map(id=>map.get(id)).filter(Boolean);
+    let ai=0;const next=S.items.map(i=>i.off?i:(activeOrder[ai++]||i));
+    activeOrder.forEach(i=>{if(!next.includes(i))next.push(i)});
     const changed=next.some((i,k)=>i!==S.items[k]);
     if(changed){S.items=next;saveItems();renderChips();renderItems();if(!$('tab-history').classList.contains('hidden'))renderHistory()}
     renderItemEditor();
@@ -935,7 +971,8 @@ $('cfgSave').onclick=()=>{
 /* ---------- 匯出 Excel ---------- */
 const num=v=>hasVal(v)?v:'';
 function buildWorkbook(){
-  const its=S.items.filter(i=>i.name),wb=XLSX.utils.book_new();
+  const its=dayItems(curDate),wb=XLSX.utils.book_new();
+  const itsM=itemsForDates(monthDates(curDate.slice(0,7))),itsA=itemsForDates(Object.keys(S.days));
   const label=i=>i.name+(i.unit?'('+i.unit+')':'');
   const p=prevRecord(curDate),cur=S.days[curDate]||{};const cv=cur.values||{};
   const a1=[['青山巨城店 每日盤點表'],['日期',curDate,'星期','週'+WD[parse(curDate).getDay()]],['盤點人員',cur.staff||''],[],['分類','品項','單位','前次'+(p?'（'+p.date+'）':''),'今日盤點','增減','最低量','狀態']];
@@ -944,14 +981,14 @@ function buildWorkbook(){
   const ws1=XLSX.utils.aoa_to_sheet(a1);ws1['!cols']=[{wch:8},{wch:20},{wch:8},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8}];
   XLSX.utils.book_append_sheet(wb,ws1,'當日盤點');
   const [y,m]=curDate.split('-').map(Number),days=new Date(y,m,0).getDate();
-  const a2=[['日期','星期','盤點人員',...its.map(label)]];
+  const a2=[['日期','星期','盤點人員',...itsM.map(label)]];
   for(let d=1;d<=days;d++){const ds=y+'-'+pad(m)+'-'+pad(d),r=S.days[ds]||{};
-    a2.push([d,'週'+WD[new Date(y,m-1,d).getDay()],r.staff||'',...its.map(i=>num(r.values&&r.values[i.id]))])}
-  const ws2=XLSX.utils.aoa_to_sheet(a2);ws2['!cols']=[{wch:6},{wch:6},{wch:10},...its.map(()=>({wch:10}))];
+    a2.push([d,'週'+WD[new Date(y,m-1,d).getDay()],r.staff||'',...itsM.map(i=>num(r.values&&r.values[i.id]))])}
+  const ws2=XLSX.utils.aoa_to_sheet(a2);ws2['!cols']=[{wch:6},{wch:6},{wch:10},...itsM.map(()=>({wch:10}))];
   XLSX.utils.book_append_sheet(wb,ws2,y+'年'+m+'月');
-  const a3=[['日期','星期','盤點人員',...its.map(label)]];
-  Object.keys(S.days).filter(d=>hasData(S.days[d])).sort().forEach(d=>{const r=S.days[d];a3.push([d,'週'+WD[parse(d).getDay()],r.staff||'',...its.map(i=>num(r.values&&r.values[i.id]))])});
-  const ws3=XLSX.utils.aoa_to_sheet(a3);ws3['!cols']=[{wch:12},{wch:6},{wch:10},...its.map(()=>({wch:10}))];
+  const a3=[['日期','星期','盤點人員',...itsA.map(label)]];
+  Object.keys(S.days).filter(d=>hasData(S.days[d])).sort().forEach(d=>{const r=S.days[d];a3.push([d,'週'+WD[parse(d).getDay()],r.staff||'',...itsA.map(i=>num(r.values&&r.values[i.id]))])});
+  const ws3=XLSX.utils.aoa_to_sheet(a3);ws3['!cols']=[{wch:12},{wch:6},{wch:10},...itsA.map(()=>({wch:10}))];
   XLSX.utils.book_append_sheet(wb,ws3,'全部歷史');
   return wb;
 }
