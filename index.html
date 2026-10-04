@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="57">
+<meta name="app-version" content="62">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -266,6 +266,62 @@ details.offbox summary{font-weight:800;cursor:pointer;color:var(--muted)}
 .offname{flex:1;min-width:0}.offname b{display:block;overflow-wrap:anywhere}.offname small{color:var(--muted)}
 .offrow .onb{min-height:40px;padding:6px 14px}
 .offtag{font-size:10px;font-weight:700;color:var(--muted)}
+
+/* v57：字體大小、分組、下一個未填、復原、品項備註 */
+.item .nm{font-size:calc(17px*var(--k,1))}
+.item .sub,.item .warnline,.item .itext{font-size:calc(13px*var(--k,1))}
+.item .cat{font-size:calc(11px*var(--k,1))}
+.item .qty{width:calc(74px*var(--k,1));height:calc(48px*var(--k,1));font-size:calc(22px*var(--k,1))}
+.item .sb{width:calc(44px*var(--k,1));height:calc(48px*var(--k,1));font-size:calc(22px*var(--k,1))}
+.chips .chip{font-size:calc(15px*var(--k,1))}
+.grp{margin-bottom:6px}
+.gh{width:100%;display:flex;align-items:center;gap:8px;background:var(--teal-soft);border:1px solid var(--teal-line);border-radius:12px;padding:10px 14px;margin:4px 0 8px;font-weight:800;font-size:calc(16px*var(--k,1));color:var(--ink);text-align:left}
+.gh .gc{margin-left:auto;color:var(--muted);font-weight:700;font-size:calc(14px*var(--k,1))}
+.gh .gcar{color:var(--muted);transition:transform .15s}
+.grp.closed .gcar{transform:rotate(-90deg)}
+.grp.closed .gb{display:none}
+.grp.done .gh{border-color:var(--flash)}
+.grp.done .gc{color:var(--flash)}
+.nbtn{border:0;background:none;font-size:14px;padding:0 4px;opacity:.35;vertical-align:1px}
+.nbtn.has{opacity:1}
+.itext{margin-top:3px;font-weight:700;color:var(--ink);overflow-wrap:anywhere}
+.ninp{height:36px;font-size:15px;margin-top:6px;border-radius:10px}
+.lnote{display:block;font-weight:500;font-size:12px;color:var(--muted)}
+.htab td.hasn{position:relative}
+.htab td.hasn::after{content:"";position:absolute;top:2px;right:2px;width:6px;height:6px;border-radius:50%;background:var(--sun)}
+.swrow2{display:flex;align-items:center;justify-content:space-between;gap:12px;font-weight:700;margin-bottom:12px}
+.swrow2 .seg{margin:0;min-width:190px}
+
+/* v59：人員姓名顏色 */
+:root{--pc-g:#3f6b5a;--pc-o:#c1531b;--pc-t:#2c8fa0;--pc-p:#7a5ab8;--pc-r:#c2456b;--pc-y:#a87800;--pc-b:#2f6fd6;--pc-k:#444}
+@media (prefers-color-scheme:dark){:root{--pc-g:#7fb59d;--pc-o:#e58a55;--pc-t:#4db6c6;--pc-p:#b69cf0;--pc-r:#f08aa8;--pc-y:#e6c04a;--pc-b:#7ab0ff;--pc-k:#cfd6d0}}
+.pc-g{color:var(--pc-g)!important}.pc-o{color:var(--pc-o)!important}.pc-t{color:var(--pc-t)!important}.pc-p{color:var(--pc-p)!important}
+.pc-r{color:var(--pc-r)!important}.pc-y{color:var(--pc-y)!important}.pc-b{color:var(--pc-b)!important}.pc-k{color:var(--pc-k)!important}
+.metarow{position:relative}
+.palbtn{flex:none;width:36px;height:36px;border-radius:10px;border:2px solid var(--line);background:var(--card);font-size:17px;padding:0;line-height:1}
+.pal{position:absolute;left:14px;top:calc(100% + 6px);z-index:40;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;box-shadow:0 8px 24px rgba(0,0,0,.2);display:flex;flex-wrap:wrap;gap:8px;max-width:268px}
+.pal .dot8{width:34px;height:34px;border-radius:50%;border:2px solid transparent;padding:0}
+.pal .dot8.cur{border-color:var(--ink)}
+.pal .rst{height:34px;border-radius:17px;border:1px solid var(--line);background:var(--input);padding:0 12px;font-weight:700;font-size:13px}
+.dot-g{background:var(--pc-g)}.dot-o{background:var(--pc-o)}.dot-t{background:var(--pc-t)}.dot-p{background:var(--pc-p)}
+.dot-r{background:var(--pc-r)}.dot-y{background:var(--pc-y)}.dot-b{background:var(--pc-b)}.dot-k{background:var(--pc-k)}
+
+/* v60：更多姓名顏色 */
+:root{--pc-rd:#d0342c}:root{--pc-am:#d98200}:root{--pc-lm:#6aa11f}:root{--pc-gr:#2e8b3d}:root{--pc-tl:#12957f}:root{--pc-sk:#1e90d6}:root{--pc-in:#3b4cc0}:root{--pc-mg:#a23ba8}:root{--pc-pk:#e0609a}:root{--pc-wn:#8c1f3a}:root{--pc-br:#8a5a3c}:root{--pc-ol:#7a7a1c}:root{--pc-bk:#111111}
+@media (prefers-color-scheme:dark){:root{--pc-rd:#ff8f84}:root{--pc-am:#ffb84d}:root{--pc-lm:#a6d65a}:root{--pc-gr:#6fcf7f}:root{--pc-tl:#52d1ba}:root{--pc-sk:#6fc3ff}:root{--pc-in:#8e9cff}:root{--pc-mg:#dc8be0}:root{--pc-pk:#ff9cc4}:root{--pc-wn:#e07a96}:root{--pc-br:#d2a07e}:root{--pc-ol:#c8c85a}:root{--pc-bk:#f2f2f2}}
+.pc-rd{color:var(--pc-rd)!important}.pc-am{color:var(--pc-am)!important}.pc-lm{color:var(--pc-lm)!important}.pc-gr{color:var(--pc-gr)!important}.pc-tl{color:var(--pc-tl)!important}.pc-sk{color:var(--pc-sk)!important}.pc-in{color:var(--pc-in)!important}.pc-mg{color:var(--pc-mg)!important}.pc-pk{color:var(--pc-pk)!important}.pc-wn{color:var(--pc-wn)!important}.pc-br{color:var(--pc-br)!important}.pc-ol{color:var(--pc-ol)!important}.pc-bk{color:var(--pc-bk)!important}
+.dot-rd{background:var(--pc-rd)}.dot-am{background:var(--pc-am)}.dot-lm{background:var(--pc-lm)}.dot-gr{background:var(--pc-gr)}.dot-tl{background:var(--pc-tl)}.dot-sk{background:var(--pc-sk)}.dot-in{background:var(--pc-in)}.dot-mg{background:var(--pc-mg)}.dot-pk{background:var(--pc-pk)}.dot-wn{background:var(--pc-wn)}.dot-br{background:var(--pc-br)}.dot-ol{background:var(--pc-ol)}.dot-bk{background:var(--pc-bk)}
+.pal{display:grid;grid-template-columns:repeat(7,34px);gap:8px;max-width:none;justify-content:center}
+.pal .rst{grid-column:1/-1;justify-self:stretch}
+
+/* v61：輸入過的人員名字建議清單 */
+.nlist{position:absolute;top:calc(100% + 4px);z-index:45;min-width:200px;max-width:calc(100% - 20px);max-height:260px;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.2);padding:4px}
+.nrow{display:flex;align-items:center;gap:10px;padding:9px 8px;border-radius:9px;font-weight:700;font-size:16px;cursor:pointer}
+.nrow:active{background:var(--accent-soft)}
+.nrow .ndot{flex:none;width:14px;height:14px;border-radius:50%;border:1.5px solid var(--line)}
+.nrow .nt{flex:1;min-width:0;overflow-wrap:anywhere}
+.nrow .nlast{flex:none;font-size:11px;font-weight:500;color:var(--muted)}
+.nrow .nx{flex:none;border:0;background:none;color:var(--muted);font-size:14px;padding:4px 6px}
 </style>
 </head>
 <body>
@@ -282,13 +338,13 @@ details.offbox summary{font-weight:800;cursor:pointer;color:var(--muted)}
       <button class="nb" id="nextDay" aria-label="後一天">▶</button>
       <button class="todaybtn hidden" id="btnToday">今天</button>
     </div>
-    <div class="toolrow"><div class="search"><span class="ic">🔍</span><input id="q" type="search" placeholder="搜尋品項" autocomplete="off"><button class="x hidden" id="qx" aria-label="清除">✕</button></div><button class="btn sm" id="btnCopyPrev">前次紀錄</button><button class="btn sm danger" id="btnClear">清空</button></div>
+    <div class="toolrow"><div class="search"><span class="ic">🔍</span><input id="q" type="search" placeholder="搜尋品項" autocomplete="off"><button class="x hidden" id="qx" aria-label="清除">✕</button></div><button class="btn sm hidden" id="btnUndo">↶ 復原</button><button class="btn sm" id="btnCopyPrev">前次紀錄</button><button class="btn sm danger" id="btnClear">清空</button></div>
     <div class="chips" id="chips"></div>
     <div class="prog" id="prog"><div class="pf" id="progBar"></div><span class="pt">PEAK TEA</span></div>
   </div>
   <div class="banner hidden" id="banner"></div>
   <div class="list">
-    <div class="meta metarow"><span class="mi"><img class="avatar" src="data:image/jpeg;base64,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" alt="">盤點人員</span><input id="staff" placeholder="輸入姓名" autocomplete="off"></div>
+    <div class="meta metarow"><span class="mi"><img class="avatar" src="data:image/jpeg;base64,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" alt="">盤點人員</span><input id="staff" placeholder="輸入姓名" autocomplete="off"><button class="palbtn" id="palBtn" type="button" aria-label="姓名顏色">🎨</button><div class="pal hidden" id="staffPal"></div><div class="nlist hidden" id="nameList"></div></div>
     <div id="items"></div>
   </div>
 </section>
@@ -337,7 +393,12 @@ details.offbox summary{font-weight:800;cursor:pointer;color:var(--muted)}
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem">＋ 新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v57</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v62</div>
+  <div class="card">
+    <h2>🖥 顯示</h2>
+    <div class="swrow2"><span>文字大小</span><div class="seg" id="fsSeg"><button data-k="1">標準</button><button data-k="1.15">大</button><button data-k="1.3">特大</button></div></div>
+    <label class="swrow"><span>盤點頁按分類分組</span><input type="checkbox" class="sw" id="swGroup"></label>
+  </div>
   <details class="card sync" id="syncBox">
     <summary>☁ 同步設定</summary>
     <div class="body">
@@ -409,10 +470,12 @@ const cleanCode=c=>c.replace(/[.$#\[\]\/\s]/g,'_');
 function makeLocalStore(){
   const K='pt_local_v1';let st;try{st=JSON.parse(localStorage.getItem(K))}catch(e){}
   st=st&&st.days?st:{days:{},itemsJson:null};
-  let cbD,cbI;const save=()=>{try{localStorage.setItem(K,JSON.stringify(st))}catch(e){}};
+  let cbD,cbI,cbN;const save=()=>{try{localStorage.setItem(K,JSON.stringify(st))}catch(e){}};
   const fire=()=>{cbD&&cbD(clone(st.days));cbI&&cbI(st.itemsJson)};
+  const fireN=()=>{cbN&&cbN(st.namesHide===undefined?null:st.namesHide)};
   return {kind:'local',
-    subscribe(d,i){cbD=d;cbI=i;fire()},
+    subscribe(d,i,err,n){cbD=d;cbI=i;cbN=n;fire();fireN()},
+    async setNames(json){st.namesHide=json;save();fireN()},
     async setField(date,path,v){
       const day=st.days[date]||(st.days[date]={});
       const parts=path.split('/');let o=day;
@@ -432,10 +495,12 @@ async function makeCloudStore(url,code){
   const base=db.ref('stores/'+cleanCode(code));
   db.ref('.info/connected').on('value',s=>{connected=!!s.val();setStatus()});
   return {kind:'cloud',
-    subscribe(d,i,err){
+    subscribe(d,i,err,n){
       base.child('days').on('value',s=>d(s.val()||{}),err);
       base.child('itemsJson').on('value',s=>i(s.val()),err);
+      if(n)base.child('namesHide').on('value',s=>n(s.val()),()=>{});
     },
+    setNames(json){return base.child('namesHide').set(json)},
     setField(date,path,v){
       const u={};u['days/'+date+'/'+path]=(v===''||v===undefined)?null:v;u['days/'+date+'/updatedAt']=firebase.database.ServerValue.TIMESTAMP;
       return base.update(u)},
@@ -457,6 +522,7 @@ function applyPending(){
     const v=pendVals[k];
     if(p.startsWith('v:')){const id=p.slice(2);day.values=day.values||{};if(hasVal(v))day.values[id]=v;else delete day.values[id]}
     else if(p.startsWith('o:')){const id=p.slice(2);day.ok=day.ok||{};if(v)day.ok[id]=true;else delete day.ok[id]}
+    else if(p.startsWith('n:')){const id=p.slice(2);day.inotes=day.inotes||{};if(v)day.inotes[id]=v;else delete day.inotes[id]}
     else{day[p]=v}
   }
 }
@@ -472,8 +538,8 @@ function saveCache(){clearTimeout(cacheT);cacheT=setTimeout(()=>{try{
 function loadCache(){try{const c=JSON.parse(localStorage.getItem('pt_cache_v1'));
   if(c&&c.code===getCfg().code){S.days=c.days||{};if(Array.isArray(c.items)&&c.items.length){S.items=c.items;S.nextId=c.nextId||S.nextId}return true}}catch(e){}return false}
 function writeField(date,kind,id,v){ // kind: 'v' 數量 / 'm' staff,note
-  const path=kind==='v'?'values/'+id:kind==='o'?'ok/'+id:id;
-  const key=date+'|'+(kind==='v'?'v:'+id:kind==='o'?'o:'+id:id);
+  const path=kind==='v'?'values/'+id:kind==='o'?'ok/'+id:kind==='n'?'inotes/'+id:id;
+  const key=date+'|'+(kind==='v'?'v:'+id:kind==='o'?'o:'+id:kind==='n'?'n:'+id:id);
   pendVals[key]=v;persistPend();localEditTs=Date.now();
   clearTimeout(timers[key]);setStatus();
   timers[key]=setTimeout(async()=>{
@@ -553,6 +619,33 @@ const monthDates=m=>{const [y,mm]=m.split('-').map(Number),n=new Date(y,mm,0).ge
 const itemsForDates=dates=>S.items.filter(i=>i.name&&(!i.off||dates.some(d=>hasVal(valOf(d,i.id)))));
 
 /* ---------- 分類／搜尋 ---------- */
+/* ---------- 顯示偏好（只存在這支手機） ---------- */
+const getPref=(k,d)=>{try{const v=localStorage.getItem(k);return v===null?d:v}catch(e){return d}};
+const setPref=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+let groupOn=getPref('pt_group','1')==='1';
+let collapsed={};try{collapsed=JSON.parse(getPref('pt_collapsed','{}'))||{}}catch(e){}
+const saveCollapsed=()=>setPref('pt_collapsed',JSON.stringify(collapsed));
+document.documentElement.style.setProperty('--k',getPref('pt_fs','1'));
+const noteOf=(date,id)=>{const d=S.days[date];return d&&d.inotes&&d.inotes[id]?String(d.inotes[id]):''};
+
+/* ---------- 復原（只存在這次開啟的網頁，每支手機各自） ---------- */
+const undoStack=[];
+const updateUndoBtn=()=>$('btnUndo').classList.toggle('hidden',!undoStack.length);
+function pushUndo(date,ops,label){
+  const top=undoStack[undoStack.length-1],now=Date.now();
+  if(top&&ops.length===1&&top.ops.length===1&&top.date===date&&top.ops[0].id===ops[0].id&&now-top.t<2500){top.ops[0].next=ops[0].next;top.t=now}   // 連續輸入合併成一筆
+  else{undoStack.push({date,ops,label,t:now});if(undoStack.length>40)undoStack.shift()}
+  updateUndoBtn();
+}
+function doUndo(){
+  const e=undoStack.pop();updateUndoBtn();if(!e)return;
+  if(e.date!==curDate)loadDate(e.date);
+  const day=dayOf(e.date);day.values=day.values||{};
+  e.ops.forEach(o=>{const v=hasVal(o.prev)?o.prev:'';if(hasVal(v))day.values[o.id]=v;else delete day.values[o.id];writeField(e.date,'v',o.id,v)});
+  renderItems();renderChips();updateProg();
+  const it=e.ops.length===1?S.items.find(x=>x.id===e.ops[0].id):null;
+  toast('已復原：'+(it?it.name:e.label));
+}
 function cats(){
   const set=[...DEFAULT_CATS];
   S.items.forEach(i=>{if(i.cat&&!set.includes(i.cat))set.push(i.cat)});
@@ -650,27 +743,65 @@ function renderItems(){
   const box=$('items');box.innerHTML='';cards={};
   const list=dayItems(curDate).filter(visible);
   if(!list.length){box.innerHTML='<div class="empty">'+(S.items.length?'沒有符合的品項':'尚無品項，請到「設定」新增')+'</div>';return}
-  list.forEach(it=>{
+  const buildCard=(it,parent)=>{
     const el=document.createElement('div');el.className='item';
-    el.innerHTML='<div class="info"><div class="nm"></div><div class="sub"></div><div class="warnline hidden"></div></div><div class="stp"><button class="sb" aria-label="減一">−</button><input class="qty" type="number" inputmode="decimal" step="any" min="0" placeholder="—"><button class="sb" aria-label="加一">＋</button></div>';
-    el.querySelector('.nm').innerHTML=(it.off?'<span class="cat" style="margin:0 6px 0 0">已停用</span>':'')+esc(it.name)+(it.unit?' <span class="muted">('+esc(it.unit)+')</span>':'')+(it.cat?'<span class="cat">'+esc(it.cat)+'</span>':'');
-    const inp=el.querySelector('input'),[m,p]=el.querySelectorAll('.sb');
+    el.innerHTML='<div class="info"><div class="nm"></div><div class="sub"></div><div class="itext hidden"></div><div class="warnline hidden"></div><div class="noteedit hidden"><input class="ninp" maxlength="60" placeholder="備註（例如：破損 2 包、已叫貨）"></div></div><div class="stp"><button class="sb" aria-label="減一">−</button><input class="qty" type="number" inputmode="decimal" step="any" min="0" placeholder="—"><button class="sb" aria-label="加一">＋</button></div>';
+    const nm=el.querySelector('.nm');
+    nm.innerHTML=(it.off?'<span class="cat" style="margin:0 6px 0 0">已停用</span>':'')+esc(it.name)+(it.unit?' <span class="muted">('+esc(it.unit)+')</span>':'')+(it.cat?'<span class="cat">'+esc(it.cat)+'</span>':'');
+    const nb=document.createElement('button');nb.type='button';nb.className='nbtn';nb.setAttribute('aria-label','備註');nb.textContent='📝';nm.appendChild(nb);
+    const inp=el.querySelector('input.qty'),[m,p]=el.querySelectorAll('.sb');
+    const ne=el.querySelector('.noteedit'),ni=el.querySelector('.ninp');
     const commit=raw=>{
       const v=raw===''?'':Number(raw);if(v!==''&&isNaN(v))return;
+      const prev=valOf(curDate,it.id);
+      if((hasVal(prev)?Number(prev):'')===v)return;           // 沒有改變
       const day=dayOf(curDate);day.values=day.values||{};if(hasVal(v))day.values[it.id]=v;else delete day.values[it.id];
       writeField(curDate,'v',it.id,v);flashEl(inp);
+      pushUndo(curDate,[{id:it.id,prev:hasVal(prev)?prev:'',next:v}]);
       refreshCard(it.id);renderChips();updateProg();
     };
     inp.addEventListener('input',()=>commit(inp.value));
     inp.addEventListener('focus',()=>inp.select());
-    inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const all=[...box.querySelectorAll('input.qty')];const nx=all[all.indexOf(inp)+1];if(nx)nx.focus();else inp.blur()}});
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const all=[...box.querySelectorAll('input.qty')].filter(i=>!i.closest('.grp.closed'));const nx=all[all.indexOf(inp)+1];if(nx)nx.focus();else inp.blur()}});
     const bump=d=>{
       if(d<0&&(inp.value===''||Number(inp.value)<=0)){inp.value='';commit('');return}
       const cur=inp.value===''?0:Number(inp.value);const n=Math.max(0,Math.round((cur+d)*100)/100);inp.value=n;commit(String(n))};
-    m.onclick=()=>{bump(-1);clearTimeout(bt);bt=setTimeout(()=>checkAnomaly(it),1000)};p.onclick=()=>{bump(1);clearTimeout(bt);bt=setTimeout(()=>checkAnomaly(it),1000)};
     let bt=null;
+    m.onclick=()=>{bump(-1);clearTimeout(bt);bt=setTimeout(()=>checkAnomaly(it),1000)};p.onclick=()=>{bump(1);clearTimeout(bt);bt=setTimeout(()=>checkAnomaly(it),1000)};
     inp.addEventListener('blur',()=>{clearTimeout(bt);refreshCard(it.id);renderChips();checkAnomaly(it)});
-    box.appendChild(el);cards[it.id]={el,inp};refreshCard(it.id,true);
+    // 品項備註
+    nb.addEventListener('mousedown',e=>e.preventDefault());
+    nb.onclick=()=>{const open=ne.classList.contains('hidden');ne.classList.toggle('hidden',!open);if(open){ni.value=noteOf(curDate,it.id);ni.focus()}refreshCard(it.id)};
+    ni.addEventListener('input',()=>{
+      const t=ni.value.trim(),day=dayOf(curDate);day.inotes=day.inotes||{};
+      if(t)day.inotes[it.id]=t;else delete day.inotes[it.id];
+      writeField(curDate,'n',it.id,t?t:null);refreshCard(it.id);
+    });
+    ni.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();ni.blur()}});
+    ni.addEventListener('blur',()=>{ne.classList.add('hidden');refreshCard(it.id)});
+    parent.appendChild(el);cards[it.id]={el,inp};refreshCard(it.id,true);
+  };
+  const grouped=groupOn&&!query&&catSel==='全部';
+  if(grouped){
+    const keys=[...cats()];list.forEach(it=>{const c=it.cat||'未分類';if(!keys.includes(c))keys.push(c)});
+    keys.forEach(c=>{
+      const g=list.filter(it=>(it.cat||'未分類')===c);if(!g.length)return;
+      const wrap=document.createElement('section');wrap.className='grp'+(collapsed[c]?' closed':'');wrap.dataset.cat=c;
+      const head=document.createElement('button');head.type='button';head.className='gh';
+      head.innerHTML='<span class="gt"></span><span class="gc"></span><span class="gcar">▾</span>';
+      const body=document.createElement('div');body.className='gb';
+      head.onclick=()=>{collapsed[c]=!collapsed[c];wrap.classList.toggle('closed',!!collapsed[c]);saveCollapsed()};
+      wrap.appendChild(head);wrap.appendChild(body);box.appendChild(wrap);
+      g.forEach(it=>buildCard(it,body));
+    });
+  }else list.forEach(it=>buildCard(it,box));
+  updateGroupHeads();
+}
+function updateGroupHeads(){
+  document.querySelectorAll('#items .grp').forEach(g=>{
+    const cs=[...g.querySelectorAll('.item')],n=cs.filter(x=>x.classList.contains('filled')).length;
+    g.querySelector('.gt').textContent=g.dataset.cat;g.querySelector('.gc').textContent=n+'/'+cs.length;
+    g.classList.toggle('done',cs.length>0&&n===cs.length);
   });
 }
 function refreshCard(id,force){
@@ -681,6 +812,11 @@ function refreshCard(id,force){
   const itm=S.items.find(x=>x.id===id);const low=lowVal(itm,v);c.el.classList.toggle('low',low);
   const p=prevRecord(curDate),pv=p&&p.rec.values?p.rec.values[id]:undefined,d=diffOf(id);
   c.el.querySelector('.sub').innerHTML=(hasVal(pv)?'前次 '+pv+'（'+p.date.slice(5).replace('-','/')+'）':'無前次紀錄')+(d.t?' · <span class="diff '+d.c+'">'+d.t+'</span>':'')+(hasMin(itm)?' · 最低 '+itm.min:'')+(low?' · <span class="lowtag">⚠ 低於最低量</span>':'');
+  const nt=noteOf(curDate,id),ne=c.el.querySelector('.noteedit'),ni=ne.querySelector('input'),tx=c.el.querySelector('.itext');
+  const editing=!ne.classList.contains('hidden');
+  tx.textContent=nt?'📝 '+nt:'';tx.classList.toggle('hidden',!nt||editing);
+  c.el.querySelector('.nbtn').classList.toggle('has',!!nt);
+  if(editing&&document.activeElement!==ni&&ni.value!==nt)ni.value=nt;
 }
 function syncFromRemote(){
   S.items.forEach(it=>{
@@ -691,24 +827,114 @@ function syncFromRemote(){
   });
   syncMeta(true);renderChips();updateProg();
 }
+/* ---------- 人員姓名顏色 ---------- */
+const PCOLORS=['g', 'tl', 't', 'gr', 'lm', 'y', 'am', 'o', 'rd', 'wn', 'r', 'pk', 'mg', 'p', 'in', 'b', 'sk', 'br', 'ol', 'k', 'bk'];
+const PNAMES={g:'青山綠',tl:'湖水綠',t:'青藍',gr:'草綠',lm:'萊姆綠',y:'金黃',am:'琥珀',o:'橘色',rd:'紅色',wn:'酒紅',r:'玫瑰',pk:'粉紅',mg:'紫紅',p:'紫色',in:'靛藍',b:'藍色',sk:'天藍',br:'棕色',ol:'橄欖',k:'深灰',bk:'黑色'};
+function staffColorOf(date){
+  const d=S.days[date];if(!d)return '';
+  if(d.scolor==='x')return '';                                       // 手動選了「預設」
+  if(PCOLORS.includes(d.scolor))return d.scolor;
+  if(d.staff){                                                       // 同名字的人，沿用他之前選過的顏色
+    const ks=Object.keys(S.days).sort().reverse();
+    for(const k of ks){const x=S.days[k];if(x&&x.staff===d.staff&&PCOLORS.includes(x.scolor))return x.scolor}
+  }
+  return '';
+}
+function paintStaff(){
+  const el=$('staff'),c=staffColorOf(curDate);
+  PCOLORS.forEach(k=>el.classList.remove('pc-'+k));
+  if(c)el.classList.add('pc-'+c);
+  $('palBtn').style.borderColor=c?'var(--pc-'+c+')':'';
+}
+(function(){
+  const box=$('staffPal');
+  PCOLORS.forEach(c=>{const b=document.createElement('button');b.type='button';b.className='dot8 dot-'+c;b.dataset.c=c;b.setAttribute('aria-label',PNAMES[c]);box.appendChild(b)});
+  const r=document.createElement('button');r.type='button';r.className='rst';r.textContent='預設';r.dataset.c='x';box.appendChild(r);
+  box.addEventListener('click',e=>{
+    const b=e.target.closest('button');if(!b)return;
+    const c=b.dataset.c;dayOf(curDate).scolor=c;writeField(curDate,'m','scolor',c);
+    paintStaff();box.classList.add('hidden');
+  });
+  $('palBtn').onclick=e=>{
+    e.stopPropagation();
+    const open=box.classList.contains('hidden');
+    if(open){const cur=staffColorOf(curDate);box.querySelectorAll('.dot8').forEach(b=>b.classList.toggle('cur',b.dataset.c===cur))}
+    box.classList.toggle('hidden',!open);
+  };
+  document.addEventListener('click',e=>{if(!box.classList.contains('hidden')&&!box.contains(e.target))box.classList.add('hidden')});
+})();
+
+/* ---------- 輸入過的名字：記住名字與顏色，輸入時自動列出 ---------- */
+let hiddenNames=(()=>{try{const a=JSON.parse(localStorage.getItem('pt_namehide')||'[]');return Array.isArray(a)?a:[]}catch(e){return[]}})();
+const getHiddenNames=()=>hiddenNames;
+function saveHiddenNames(){const j=JSON.stringify(hiddenNames);try{localStorage.setItem('pt_namehide',j)}catch(_){}try{store&&store.setNames&&store.setNames(j)}catch(_){}}
+function onNames(json){   // 雲端「不再顯示的名字」有變動 → 所有手機同步
+  if(json===null||json===undefined){if(hiddenNames.length)saveHiddenNames();return}   // 雲端還沒有資料：把這支手機原有的上傳
+  try{const a=JSON.parse(json);if(Array.isArray(a)){hiddenNames=a;try{localStorage.setItem('pt_namehide',json)}catch(_){}if(document.activeElement===$('staff'))showNameList()}}catch(e){}
+}
+function knownNames(){
+  const map=new Map();
+  Object.keys(S.days).sort().forEach(d=>{
+    if(d===curDate)return;                                   // 今天正在輸入的不算
+    const x=S.days[d],n=x&&x.staff?String(x.staff).trim():'';if(!n)return;
+    const c=x.scolor==='x'?'':(PCOLORS.includes(x.scolor)?x.scolor:null);
+    const prev=map.get(n);
+    map.set(n,{last:d,color:c===null?(prev?prev.color:''):c});   // 以最近一次選的顏色為準
+  });
+  const hid=getHiddenNames();
+  return [...map.entries()].filter(([n])=>!hid.includes(n)).sort((a,b)=>b[1].last.localeCompare(a[1].last)).map(([n,v])=>({name:n,color:v.color,last:v.last}));
+}
+function hideNameList(){$('nameList').classList.add('hidden')}
+function showNameList(){
+  const box=$('nameList'),inp=$('staff'),q=inp.value.trim().toLowerCase();
+  const list=knownNames().filter(k=>k.name.toLowerCase()!==q&&(!q||k.name.toLowerCase().includes(q))).slice(0,10);
+  if(!list.length||document.activeElement!==inp){if(!list.length)box.innerHTML='';hideNameList();return}
+  box.innerHTML='';
+  list.forEach(k=>{
+    const row=document.createElement('div');row.className='nrow';
+    const dot=document.createElement('span');dot.className='ndot';if(k.color)dot.style.background='var(--pc-'+k.color+')';
+    const nt=document.createElement('span');nt.className='nt'+(k.color?' pc-'+k.color:'');nt.textContent=k.name;
+    const lt=document.createElement('span');lt.className='nlast';lt.textContent=k.last.slice(5).replace('-','/');
+    const x=document.createElement('button');x.type='button';x.className='nx';x.textContent='✕';x.setAttribute('aria-label','不再顯示這個名字');
+    x.onclick=e=>{e.stopPropagation();if(!hiddenNames.includes(k.name))hiddenNames.push(k.name);saveHiddenNames();showNameList()};
+    row.onclick=()=>pickName(k);
+    row.append(dot,nt,lt,x);box.appendChild(row);
+  });
+  box.style.left=inp.offsetLeft+'px';
+  box.classList.remove('hidden');
+}
+function pickName(k){
+  const el=$('staff'),day=dayOf(curDate);
+  el.value=k.name;day.staff=k.name;writeField(curDate,'m','staff',k.name);
+  if(k.color){day.scolor=k.color;writeField(curDate,'m','scolor',k.color)}else{delete day.scolor;writeField(curDate,'m','scolor',null)}
+  paintStaff();flashEl(el);hideNameList();el.blur();
+}
+$('nameList').addEventListener('mousedown',e=>e.preventDefault());   // 點清單時不要讓輸入框失去焦點
+$('staff').addEventListener('focus',showNameList);
+$('staff').addEventListener('input',showNameList);
+$('staff').addEventListener('blur',()=>setTimeout(hideNameList,200));
 function syncMeta(flash){
   const r=S.days[curDate]||{};
   [['staff','staff']].forEach(([id,k])=>{
     const el=$(id),v=r[k]||'';
     if(document.activeElement!==el&&el.value!==v){el.value=v;if(flash&&Date.now()-BOOT_AT>4000){el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')}}
   });
+  paintStaff();
 }
 function updateProg(){
   const its=dayItems(curDate);const n=its.filter(i=>hasVal(valOf(curDate,i.id))).length;
   const pc=its.length?n/its.length*100:0,bar=$('progBar');
   bar.style.width=pc+'%';bar.style.setProperty('--p',Math.max(pc,1));
+  updateGroupHeads();
 }
-$('staff').addEventListener('input',e=>{dayOf(curDate).staff=e.target.value;writeField(curDate,'m','staff',e.target.value)});
+$('staff').addEventListener('input',e=>{dayOf(curDate).staff=e.target.value;writeField(curDate,'m','staff',e.target.value);paintStaff()});
 $('staff').addEventListener('change',e=>flashEl(e.target));
+$('btnUndo').onclick=doUndo;
 $('btnCopyPrev').onclick=()=>{
   const p=prevRecord(curDate);if(!p){toast('沒有更早的紀錄可帶入');return}
-  let n=0;const cs=[];dayItems(curDate).forEach(it=>{const v=p.rec.values&&p.rec.values[it.id];if(hasVal(v)&&!hasVal(valOf(curDate,it.id))){
-    const day=dayOf(curDate);day.values=day.values||{};day.values[it.id]=v;writeField(curDate,'v',it.id,v);n++;const c=it.cat||'未分類';if(!cs.includes(c))cs.push(c)}});
+  let n=0;const cs=[],ops=[];dayItems(curDate).forEach(it=>{const v=p.rec.values&&p.rec.values[it.id];if(hasVal(v)&&!hasVal(valOf(curDate,it.id))){
+    const day=dayOf(curDate);day.values=day.values||{};day.values[it.id]=v;writeField(curDate,'v',it.id,v);ops.push({id:it.id,prev:'',next:v});n++;const c=it.cat||'未分類';if(!cs.includes(c))cs.push(c)}});
+  if(ops.length)pushUndo(curDate,ops,'帶入前次紀錄');
   renderItems();renderChips();updateProg();toast(n?'已帶入：'+cs.join('、'):'沒有需要帶入的欄位');
 };
 let clrArm=0;
@@ -716,10 +942,12 @@ $('btnClear').onclick=async()=>{
   const b=$('btnClear');
   if(!clrArm){clrArm=1;b.textContent='再按確認';setTimeout(()=>{clrArm=0;b.textContent='清空'},3000);return}
   clrArm=0;b.textContent='清空';
+  {const vals=(S.days[curDate]&&S.days[curDate].values)||{};const ops=Object.keys(vals).filter(id=>hasVal(vals[id])).map(id=>({id,prev:vals[id],next:''}));if(ops.length)pushUndo(curDate,ops,'清空本日')}
   Object.keys(pendVals).filter(k=>k.startsWith(curDate+'|')).forEach(k=>{clearTimeout(timers[k]);delete pendVals[k]});
-  const keep={staff:dayOf(curDate).staff||null,note:dayOf(curDate).note||null};
-  try{await store.setDay(curDate,keep.staff||keep.note?{staff:keep.staff||'',note:keep.note||'',updatedAt:Date.now()}:null)}catch(e){toast('清空失敗')}
-  S.days[curDate]={staff:keep.staff||'',note:keep.note||''};renderItems();renderChips();updateProg();toast('已清空');
+  const keep={staff:dayOf(curDate).staff||null,note:dayOf(curDate).note||null},kin=dayOf(curDate).inotes&&Object.keys(dayOf(curDate).inotes).length?dayOf(curDate).inotes:null;
+  const keepObj=(keep.staff||keep.note||kin)?{staff:keep.staff||'',note:keep.note||'',updatedAt:Date.now()}:null;if(keepObj&&kin)keepObj.inotes=kin;
+  try{await store.setDay(curDate,keepObj)}catch(e){toast('清空失敗')}
+  S.days[curDate]={staff:keep.staff||'',note:keep.note||''};if(kin)S.days[curDate].inotes=kin;renderItems();renderChips();updateProg();toast('已清空');
 };
 
 /* ---------- 歷史 ---------- */
@@ -758,8 +986,8 @@ function renderHistory(scrollToday){
   let h=cg+'<tbody>';
   for(let d=1;d<=days;d++){
     const ds=y+'-'+pad(m)+'-'+pad(d),r=S.days[ds];
-    h+='<tr class="'+(hasData(r)?'has':'')+(ds===curDate?' cur':'')+'"><td class="day'+(ds===todayStr?' tdy':'')+'" data-d="'+ds+'">'+d+'</td><td>'+WD[new Date(y,m-1,d).getDay()]+'</td><td>'+esc(r&&r.staff||'')+'</td>'+
-      its.map(i=>{const v=r&&r.values?r.values[i.id]:'';return'<td'+(lowVal(i,v)?' class="lowc"':'')+'>'+(hasVal(v)?v:'')+'</td>'}).join('')+'</tr>';
+    h+='<tr class="'+(hasData(r)?'has':'')+(ds===curDate?' cur':'')+'"><td class="day'+(ds===todayStr?' tdy':'')+'" data-d="'+ds+'">'+d+'</td><td>'+WD[new Date(y,m-1,d).getDay()]+'</td><td class="'+(staffColorOf(ds)?'pc-'+staffColorOf(ds):'')+'">'+esc(r&&r.staff||'')+'</td>'+
+      its.map(i=>{const v=r&&r.values?r.values[i.id]:'';const nt=r&&r.inotes&&r.inotes[i.id]?r.inotes[i.id]:'';const cl=((lowVal(i,v)?'lowc ':'')+(nt?'hasn':'')).trim();return'<td'+(cl?' class="'+cl+'"':'')+(nt?' title="'+esc(nt)+'"':'')+'>'+(hasVal(v)?v:'')+'</td>'}).join('')+'</tr>';
   }
   t.innerHTML=h+'</tbody>';
   t.querySelectorAll('td.day').forEach(td=>td.onclick=()=>{switchTab('daily');loadDate(td.dataset.d)});
@@ -813,7 +1041,7 @@ function renderHItem(list){
   for(let i=pts.length-1;i>=0;i--){
     const p=pts[i],pv=i>0?pts[i-1].v:null,df=pv===null?'':r1(p.v-pv);
     const dd=new Date(y,m-1,p.d);
-    rows+='<div class="lrow" data-d="'+p.ds+'"><span class="d">'+m+'/'+p.d+'（週'+WD[dd.getDay()]+'）'+(p.ds===todayStr?' <span class="pill">今天</span>':'')+'</span><span class="df diff '+(df>0?'up':df<0?'down':'')+'">'+(df===''?'':(df>0?'+':'')+df)+'</span><span class="v">'+p.v+'</span></div>';
+    rows+='<div class="lrow" data-d="'+p.ds+'"><span class="d">'+m+'/'+p.d+'（週'+WD[dd.getDay()]+'）'+(p.ds===todayStr?' <span class="pill">今天</span>':'')+(noteOf(p.ds,it.id)?'<small class="lnote">📝 '+esc(noteOf(p.ds,it.id))+'</small>':'')+'</span><span class="df diff '+(df>0?'up':df<0?'down':'')+'">'+(df===''?'':(df>0?'+':'')+df)+'</span><span class="v">'+p.v+'</span></div>';
   }
   body.innerHTML='<div class="muted" style="margin-bottom:6px"><b style="color:var(--ink);font-size:17px">'+esc(it.name)+'</b> '+m+'月每日數量'+(unit?'（'+unit+'）':'')+'</div>'+
     '<div class="stats">'+stat(last.v,'最新 '+m+'/'+last.d)+stat(mn,'最低')+stat(mx,'最高')+stat(avg,'平均')+'</div>'+svg+
@@ -953,6 +1181,12 @@ function switchTab(t){
 }
 document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>switchTab(b.dataset.t));
 
+/* ---------- 顯示設定 ---------- */
+function paintFs(){const k=getPref('pt_fs','1');document.querySelectorAll('#fsSeg button').forEach(b=>b.classList.toggle('on',b.dataset.k===k))}
+document.querySelectorAll('#fsSeg button').forEach(b=>b.onclick=()=>{setPref('pt_fs',b.dataset.k);document.documentElement.style.setProperty('--k',b.dataset.k);paintFs()});
+paintFs();
+$('swGroup').checked=groupOn;
+$('swGroup').onchange=e=>{groupOn=e.target.checked;setPref('pt_group',groupOn?'1':'0');renderItems()};
 /* ---------- 同步設定 UI ---------- */
 function renderCfg(){
   if(!getCfg().dbUrl)$('syncBox').open=true;
@@ -975,11 +1209,27 @@ function buildWorkbook(){
   const itsM=itemsForDates(monthDates(curDate.slice(0,7))),itsA=itemsForDates(Object.keys(S.days));
   const label=i=>i.name+(i.unit?'('+i.unit+')':'');
   const p=prevRecord(curDate),cur=S.days[curDate]||{};const cv=cur.values||{};
-  const a1=[['青山巨城店 每日盤點表'],['日期',curDate,'星期','週'+WD[parse(curDate).getDay()]],['盤點人員',cur.staff||''],[],['分類','品項','單位','前次'+(p?'（'+p.date+'）':''),'今日盤點','增減','最低量','狀態']];
+  const a1=[['青山巨城店 每日盤點表'],['日期',curDate,'星期','週'+WD[parse(curDate).getDay()]],['盤點人員',cur.staff||''],[],['分類','品項','單位','前次'+(p?'（'+p.date+'）':''),'今日盤點','增減','最低量','狀態','備註']];
   its.forEach(i=>{const c=cv[i.id],pv=p&&p.rec.values?p.rec.values[i.id]:undefined;
-    a1.push([i.cat||'',i.name,i.unit||'',num(pv),num(c),(hasVal(c)&&hasVal(pv))?Math.round((c-pv)*100)/100:'',hasMin(i)?Number(i.min):'',lowVal(i,c)?'需叫貨':''])});
-  const ws1=XLSX.utils.aoa_to_sheet(a1);ws1['!cols']=[{wch:8},{wch:20},{wch:8},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8}];
+    a1.push([i.cat||'',i.name,i.unit||'',num(pv),num(c),(hasVal(c)&&hasVal(pv))?Math.round((c-pv)*100)/100:'',hasMin(i)?Number(i.min):'',lowVal(i,c)?'需叫貨':'',noteOf(curDate,i.id)])});
+  const ws1=XLSX.utils.aoa_to_sheet(a1);ws1['!cols']=[{wch:8},{wch:20},{wch:8},{wch:18},{wch:12},{wch:10},{wch:8},{wch:8},{wch:24}];
   XLSX.utils.book_append_sheet(wb,ws1,'當日盤點');
+
+  {
+    const [yy,mm]=curDate.split('-').map(Number),dn=new Date(yy,mm,0).getDate(),r1=v=>Math.round(v*10)/10;
+    const a4=[['月彙整 '+yy+'年'+mm+'月'],['估計用量／進貨：把相鄰兩次盤點的減少量／增加量加總。同一段時間內有進貨又有用量時會互相抵銷，僅供參考。'],[],
+      ['分類','品項','單位','有紀錄天數','月初','月底','增減','平均','最高','最低','估計用量','估計進貨','最低量','低於最低量天數']];
+    itsM.forEach(i=>{
+      const pts=[];for(let d=1;d<=dn;d++){const v=valOf(yy+'-'+pad(mm)+'-'+pad(d),i.id);if(hasVal(v)&&!isNaN(Number(v)))pts.push(Number(v))}
+      if(!pts.length){a4.push([i.cat||'',i.name+(i.off?'（停用）':''),i.unit||'',0,'','','','','','','','',hasMin(i)?Number(i.min):'','']);return}
+      let use=0,inn=0;for(let k=1;k<pts.length;k++){const df=pts[k]-pts[k-1];if(df<0)use-=df;else inn+=df}
+      const sum=pts.reduce((x,y)=>x+y,0);
+      a4.push([i.cat||'',i.name+(i.off?'（停用）':''),i.unit||'',pts.length,pts[0],pts[pts.length-1],r1(pts[pts.length-1]-pts[0]),r1(sum/pts.length),Math.max(...pts),Math.min(...pts),r1(use),r1(inn),
+        hasMin(i)?Number(i.min):'',hasMin(i)?pts.filter(v=>v<Number(i.min)).length:'']);
+    });
+    const ws4=XLSX.utils.aoa_to_sheet(a4);ws4['!cols']=[{wch:8},{wch:20},{wch:8},{wch:10},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:8},{wch:10},{wch:10},{wch:8},{wch:14}];
+    XLSX.utils.book_append_sheet(wb,ws4,'月彙整');
+  }
   const [y,m]=curDate.split('-').map(Number),days=new Date(y,m,0).getDate();
   const a2=[['日期','星期','盤點人員',...itsM.map(label)]];
   for(let d=1;d<=days;d++){const ds=y+'-'+pad(m)+'-'+pad(d),r=S.days[ds]||{};
@@ -990,6 +1240,11 @@ function buildWorkbook(){
   Object.keys(S.days).filter(d=>hasData(S.days[d])).sort().forEach(d=>{const r=S.days[d];a3.push([d,'週'+WD[parse(d).getDay()],r.staff||'',...itsA.map(i=>num(r.values&&r.values[i.id]))])});
   const ws3=XLSX.utils.aoa_to_sheet(a3);ws3['!cols']=[{wch:12},{wch:6},{wch:10},...itsA.map(()=>({wch:10}))];
   XLSX.utils.book_append_sheet(wb,ws3,'全部歷史');
+  {
+    const nm={};S.items.forEach(i=>nm[i.id]=i.name);const a5=[['日期','品項','備註']];
+    Object.keys(S.days).sort().forEach(d=>{const n=S.days[d]&&S.days[d].inotes;if(n)Object.keys(n).forEach(id=>{if(n[id])a5.push([d,nm[id]||id,n[id]])})});
+    if(a5.length>1){const ws5=XLSX.utils.aoa_to_sheet(a5);ws5['!cols']=[{wch:12},{wch:20},{wch:40}];XLSX.utils.book_append_sheet(wb,ws5,'品項備註')}
+  }
   return wb;
 }
 function download(name,blob){
@@ -1044,10 +1299,10 @@ async function boot(){
     store=makeLocalStore();
     if(!c.dbUrl){const b=$('banner');b.textContent='目前是「本機模式」：資料只存在這支手機。要讓大家即時同步，請到「設定」填入 Firebase 資料庫網址與店家代碼。';b.classList.remove('hidden')}
   }
-  store.subscribe(onDays,onItems,e=>{toast('同步錯誤：'+(e&&e.message||'請檢查資料庫規則'));const b=$('banner');b.textContent='雲端讀寫被拒絕，請檢查 Firebase 規則是否已設定（見設定說明）。';b.classList.remove('hidden')});
+  store.subscribe(onDays,onItems,e=>{toast('同步錯誤：'+(e&&e.message||'請檢查資料庫規則'));const b=$('banner');b.textContent='雲端讀寫被拒絕，請檢查 Firebase 規則是否已設定（見設定說明）。';b.classList.remove('hidden')},onNames);
   setStatus();loadDate(curDate);
   try{const pv=JSON.parse(localStorage.getItem('pt_pend_v1')||'{}');   // 上次離線時還沒送出的修改，重新送出
-    for(const k in pv){const [d,p]=k.split('|');if(p.startsWith('v:'))writeField(d,'v',p.slice(2),pv[k]);else if(p.startsWith('o:'))writeField(d,'o',p.slice(2),pv[k]);else writeField(d,'m',p,pv[k])}}catch(e){}
+    for(const k in pv){const [d,p]=k.split('|');if(p.startsWith('v:'))writeField(d,'v',p.slice(2),pv[k]);else if(p.startsWith('o:'))writeField(d,'o',p.slice(2),pv[k]);else if(p.startsWith('n:'))writeField(d,'n',p.slice(2),pv[k]);else writeField(d,'m',p,pv[k])}}catch(e){}
 }
 boot();
 if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
