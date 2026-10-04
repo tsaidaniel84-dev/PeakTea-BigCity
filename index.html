@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="49">
+<meta name="app-version" content="53">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -247,6 +247,15 @@ td.day{text-align:center!important}
 .chip.warnchip.on{background:var(--yel);border-color:var(--yel);color:#2b2100}
 .chip.warnchip.on small{color:#2b2100}
 .chips.searching .chip.warnchip.on{background:var(--yel-soft);border-color:var(--yel);color:var(--yel-ink)}
+
+/* v51：設定開關 */
+.swrow{display:flex;align-items:center;justify-content:space-between;gap:12px;font-weight:700}
+.swrow small{display:block;font-weight:500;font-size:12px;color:var(--muted);margin-top:2px}
+input.sw{appearance:none;-webkit-appearance:none;flex:none;width:52px;height:30px;border-radius:99px;background:var(--line);border:0;padding:0;position:relative;cursor:pointer;transition:background .2s}
+input.sw::after{content:"";position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .2s}
+input.sw:checked{background:var(--accent)}
+input.sw:checked::after{transform:translateX(22px)}
+input.sw:focus{outline:none}
 </style>
 </head>
 <body>
@@ -313,7 +322,7 @@ td.day{text-align:center!important}
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem">＋ 新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v49</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v53</div>
   <details class="card sync" id="syncBox">
     <summary>☁ 同步設定</summary>
     <div class="body">
@@ -535,15 +544,12 @@ function renderChips(){
   const hasAnyMin=NI.some(hasMin);
   if(hasAnyMin)list.splice(2,0,['需叫貨',NI.filter(isLow)]);
   if(catSel==='需叫貨'&&!hasAnyMin)catSel='全部';
-  const warnItems=NI.filter(isWarn);
-  if(warnItems.length)list.splice(2+(hasAnyMin?1:0),0,['需確認',warnItems]);
-  if(catSel==='需確認'&&!warnItems.length)catSel='全部';
-  if(catSel!=='全部'&&catSel!=='未填'&&catSel!=='需叫貨'&&catSel!=='需確認'&&!cats().includes(catSel))catSel='全部';
+  if(catSel!=='全部'&&catSel!=='未填'&&catSel!=='需叫貨'&&!cats().includes(catSel))catSel='全部';
   box.innerHTML='';box.classList.toggle('searching',!!query);
   list.forEach(([c,its])=>{
-    const b=document.createElement('button');b.className='chip'+(catSel===c?' on':'')+(c==='需叫貨'&&its.length?' alert':'')+(c==='需確認'?' warnchip':'');
+    const b=document.createElement('button');b.className='chip'+(catSel===c?' on':'')+(c==='需叫貨'&&its.length?' alert':'');
     const filled=its.filter(i=>hasVal(valOf(curDate,i.id))).length;
-    b.innerHTML=esc(c)+'<small>'+((c==='未填'||c==='需叫貨'||c==='需確認')?its.length:filled+'/'+its.length)+'</small>';
+    b.innerHTML=esc(c)+'<small>'+((c==='未填'||c==='需叫貨')?its.length:filled+'/'+its.length)+'</small>';
     b.onclick=()=>{catSel=c;renderChips();renderItems()};
     box.appendChild(b);
   });
@@ -554,7 +560,6 @@ function visible(it){
   if(query)return it.name.toLowerCase().includes(query)||(it.cat||'').toLowerCase().includes(query);   // 搜尋時一律搜全部分類
   if(catSel==='未填'){if(hasVal(valOf(curDate,it.id)))return false}
   else if(catSel==='需叫貨'){if(!isLow(it))return false}
-  else if(catSel==='需確認'){if(!isWarn(it))return false}
   else if(catSel!=='全部'&&(it.cat||'')!==catSel)return false;
   return true;
 }
@@ -570,13 +575,45 @@ function anomaly(it,date){
   if(!p||!hasVal(pv))return null;
   if((parse(date)-parse(p.date))/86400000>10)return null;      // 隔太久不比較
   const c=Number(v),b=Number(pv);if(isNaN(c)||isNaN(b)||b<=0)return null;
-  if(c===0)return '前次 '+b+'，今天變成 0';
-  if(c>=b*2&&c-b>=3)return '前次 '+b+'，今天 '+c+'（增加很多）';
-  if(c<=b*0.3&&b-c>=5)return '前次 '+b+'，今天 '+c+'（減少很多）';
+  // 只抓「差一個位數」這種明顯可能打錯的情況，正常用完、進貨不提醒
+  if(c>=b*5&&c-b>=20)return '前次 '+b+'，今天 '+c+'（增加很多）';
+  if(c<=b*0.2&&b-c>=10)return '前次 '+b+'，今天 '+c+'（減少很多）';
   return null;
 }
-const isConfirmed=(date,id)=>{const d=S.days[date];return !!(d&&d.ok&&d.ok[id])};
-const isWarn=it=>!!anomaly(it,curDate)&&!isConfirmed(curDate,it.id);
+/* 只提醒一次：數字輸入完（離開欄位或按 ＋／－ 停頓後）若差很多，所有人的畫面都會同步跳出黃色提醒，8 秒後自動消失 */
+const alerted={},warnTimers={},seenAlert={};let alertsInit=false;
+function showWarn(id,text){
+  const c=cards[id];if(!c)return false;
+  const wl=c.el.querySelector('.warnline');
+  const off=()=>{c.el.classList.remove('warn');wl.classList.add('hidden')};
+  c.el.classList.add('warn');wl.classList.remove('hidden');wl.textContent='⚠ 請再確認：'+text;wl.onclick=off;
+  clearTimeout(warnTimers[id]);warnTimers[id]=setTimeout(off,8000);
+  return true;
+}
+function checkAnomaly(it){
+  const key=curDate+'|'+it.id,v=valOf(curDate,it.id);
+  if(alerted[key]===v)return;            // 同一個數字不重複提醒
+  alerted[key]=v;
+  const t=anomaly(it,curDate);if(!t)return;
+  showWarn(it.id,t);
+  const ts=Date.now();seenAlert[key]=ts;   // 同步給其他人（自己不會再重複跳）
+  try{Promise.resolve(store.setField(curDate,'alert/'+it.id,{t:ts,x:t})).catch(()=>{})}catch(e){}
+}
+function detectAlerts(){
+  const first=!alertsInit;alertsInit=true;
+  for(const date in S.days){
+    const al=S.days[date]&&S.days[date].alert;if(!al)continue;
+    for(const id in al){
+      const a=al[id];if(!a||typeof a.t!=='number')continue;
+      const key=date+'|'+id;
+      if(seenAlert[key]===a.t)continue;seenAlert[key]=a.t;
+      if(first||date!==curDate||Date.now()-a.t>300000)continue;   // 剛連上時的舊提醒、其他日期、太久以前的都不跳
+      const it=S.items.find(x=>x.id===id);if(!it)continue;
+      showWarn(id,a.x);
+      toast('⚠ '+it.name+'：'+a.x);
+    }
+  }
+}
 
 /* ---------- 品項卡片 ---------- */
 function flashEl(el){el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')}
@@ -601,7 +638,6 @@ function renderItems(){
       const v=raw===''?'':Number(raw);if(v!==''&&isNaN(v))return;
       const day=dayOf(curDate);day.values=day.values||{};if(hasVal(v))day.values[it.id]=v;else delete day.values[it.id];
       writeField(curDate,'v',it.id,v);flashEl(inp);
-      const dd=S.days[curDate];if(dd&&dd.ok&&dd.ok[it.id]){delete dd.ok[it.id];writeField(curDate,'o',it.id,null)}   // 數字改了，要重新確認
       refreshCard(it.id);renderChips();updateProg();
     };
     inp.addEventListener('input',()=>commit(inp.value));
@@ -610,8 +646,9 @@ function renderItems(){
     const bump=d=>{
       if(d<0&&(inp.value===''||Number(inp.value)<=0)){inp.value='';commit('');return}
       const cur=inp.value===''?0:Number(inp.value);const n=Math.max(0,Math.round((cur+d)*100)/100);inp.value=n;commit(String(n))};
-    m.onclick=()=>bump(-1);p.onclick=()=>bump(1);
-    inp.addEventListener('blur',()=>{refreshCard(it.id);renderChips()});
+    m.onclick=()=>{bump(-1);clearTimeout(bt);bt=setTimeout(()=>checkAnomaly(it),1000)};p.onclick=()=>{bump(1);clearTimeout(bt);bt=setTimeout(()=>checkAnomaly(it),1000)};
+    let bt=null;
+    inp.addEventListener('blur',()=>{clearTimeout(bt);refreshCard(it.id);renderChips();checkAnomaly(it)});
     box.appendChild(el);cards[it.id]={el,inp};refreshCard(it.id,true);
   });
 }
@@ -621,10 +658,6 @@ function refreshCard(id,force){
   if(force&&document.activeElement!==c.inp)c.inp.value=sv;
   c.el.classList.toggle('filled',hasVal(v));
   const itm=S.items.find(x=>x.id===id);const low=lowVal(itm,v);c.el.classList.toggle('low',low);
-  const wl=c.el.querySelector('.warnline'),an=itm&&document.activeElement!==c.inp?anomaly(itm,curDate):null,warn=!!an&&!isConfirmed(curDate,id);
-  c.el.classList.toggle('warn',warn);wl.classList.toggle('hidden',!warn);
-  if(warn){wl.innerHTML='⚠ 請再確認：'+esc(an)+' <button class="okbtn" type="button">確認</button>';
-    wl.querySelector('.okbtn').onclick=()=>{const dd=dayOf(curDate);dd.ok=dd.ok||{};dd.ok[id]=true;writeField(curDate,'o',id,true);refreshCard(id);renderChips();toast('已確認')}}
   const p=prevRecord(curDate),pv=p&&p.rec.values?p.rec.values[id]:undefined,d=diffOf(id);
   c.el.querySelector('.sub').innerHTML=(hasVal(pv)?'前次 '+pv+'（'+p.date.slice(5).replace('-','/')+'）':'無前次紀錄')+(d.t?' · <span class="diff '+d.c+'">'+d.t+'</span>':'')+(hasMin(itm)?' · 最低 '+itm.min:'')+(low?' · <span class="lowtag">⚠ 低於最低量</span>':'');
 }
@@ -941,7 +974,7 @@ $('fileRestore').onchange=e=>{
 
 /* ---------- 資料更新回呼 ---------- */
 function onDays(d){
-  S.days=d||{};applyPending();saveCache();
+  S.days=d||{};applyPending();saveCache();detectAlerts();
   if(!$('tab-daily').classList.contains('hidden'))syncFromRemote();
   if(!$('tab-history').classList.contains('hidden'))renderHistory();
   setStatus();
