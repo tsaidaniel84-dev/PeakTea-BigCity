@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="62">
+<meta name="app-version" content="64">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -314,6 +314,9 @@ details.offbox summary{font-weight:800;cursor:pointer;color:var(--muted)}
 .pal{display:grid;grid-template-columns:repeat(7,34px);gap:8px;max-width:none;justify-content:center}
 .pal .rst{grid-column:1/-1;justify-self:stretch}
 
+/* v64：名字清單改成往下撐開（不蓋住下方內容） */
+.metarow{flex-wrap:wrap}
+.metarow .nlist{position:static!important;flex:0 0 100%;width:100%;max-width:none;min-width:0;max-height:240px;margin:2px 0 4px;box-shadow:none;left:auto!important}
 /* v61：輸入過的人員名字建議清單 */
 .nlist{position:absolute;top:calc(100% + 4px);z-index:45;min-width:200px;max-width:calc(100% - 20px);max-height:260px;overflow:auto;background:var(--card);border:1px solid var(--line);border-radius:12px;box-shadow:0 8px 24px rgba(0,0,0,.2);padding:4px}
 .nrow{display:flex;align-items:center;gap:10px;padding:9px 8px;border-radius:9px;font-weight:700;font-size:16px;cursor:pointer}
@@ -393,7 +396,7 @@ details.offbox summary{font-weight:800;cursor:pointer;color:var(--muted)}
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem">＋ 新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v62</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v64</div>
   <div class="card">
     <h2>🖥 顯示</h2>
     <div class="swrow2"><span>文字大小</span><div class="seg" id="fsSeg"><button data-k="1">標準</button><button data-k="1.15">大</button><button data-k="1.3">特大</button></div></div>
@@ -894,13 +897,11 @@ function showNameList(){
     const row=document.createElement('div');row.className='nrow';
     const dot=document.createElement('span');dot.className='ndot';if(k.color)dot.style.background='var(--pc-'+k.color+')';
     const nt=document.createElement('span');nt.className='nt'+(k.color?' pc-'+k.color:'');nt.textContent=k.name;
-    const lt=document.createElement('span');lt.className='nlast';lt.textContent=k.last.slice(5).replace('-','/');
     const x=document.createElement('button');x.type='button';x.className='nx';x.textContent='✕';x.setAttribute('aria-label','不再顯示這個名字');
     x.onclick=e=>{e.stopPropagation();if(!hiddenNames.includes(k.name))hiddenNames.push(k.name);saveHiddenNames();showNameList()};
     row.onclick=()=>pickName(k);
-    row.append(dot,nt,lt,x);box.appendChild(row);
+    row.append(dot,nt,x);box.appendChild(row);
   });
-  box.style.left=inp.offsetLeft+'px';
   box.classList.remove('hidden');
 }
 function pickName(k){
