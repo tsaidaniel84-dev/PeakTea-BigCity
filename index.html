@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="75">
+<meta name="app-version" content="76">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -404,7 +404,7 @@ details.offbox summary{font-weight:800;cursor:pointer;color:var(--muted)}
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem">＋ 新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v75</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v76</div>
   <div class="card">
     <h2>🖥 顯示</h2>
     <div class="swrow2"><span>文字大小</span><div class="seg" id="fsSeg"><button data-k="0.8">小</button><button data-k="1">標準</button><button data-k="1.15">大</button><button data-k="1.3">特大</button></div></div>
@@ -964,11 +964,13 @@ function revealStaffSoon(){[120,350,700].forEach(t=>setTimeout(()=>{if(document.
 $('staff').addEventListener('blur',revealStaffSoon);
 $('staff').addEventListener('focus',()=>setTimeout(revealStaff,450));
 if(window.visualViewport)window.visualViewport.addEventListener('resize',()=>{if(document.activeElement!==$('staff'))revealStaffSoon()});
+let staffEditAt=0;
 function syncMeta(flash){
   const r=S.days[curDate]||{};
   [['staff','staff']].forEach(([id,k])=>{
     const el=$(id),v=r[k]||'';
-    if(document.activeElement!==el&&el.value!==v){el.value=v;if(flash&&Date.now()-BOOT_AT>4000){el.classList.remove('flash');void el.offsetWidth;el.classList.add('flash')}}
+    if(Date.now()-staffEditAt<3000)return;   // 剛打完字：以本機輸入為準，不套用雲端來回的舊字（會造成閃一下）
+    if(document.activeElement!==el&&el.value!==v)el.value=v;   // 姓名欄不閃爍
   });
   paintStaff();
 }
@@ -978,8 +980,8 @@ function updateProg(){
   bar.style.width=pc+'%';bar.style.setProperty('--p',Math.max(pc,1));
   updateGroupHeads();
 }
-$('staff').addEventListener('input',e=>{dayOf(curDate).staff=e.target.value;writeField(curDate,'m','staff',e.target.value);paintStaff()});
-$('staff').addEventListener('change',rememberName);
+$('staff').addEventListener('input',e=>{staffEditAt=Date.now();dayOf(curDate).staff=e.target.value;writeField(curDate,'m','staff',e.target.value);paintStaff()});
+$('staff').addEventListener('change',()=>{staffEditAt=Date.now();rememberName()});
 $('btnUndo').onclick=doUndo;
 $('btnCopyPrev').onclick=()=>{
   const p=prevRecord(curDate);if(!p){toast('沒有更早的紀錄可帶入');return}
