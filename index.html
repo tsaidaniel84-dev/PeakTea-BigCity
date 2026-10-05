@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="80">
+<meta name="app-version" content="81">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -421,7 +421,7 @@ details.offbox summary{font-weight:800;cursor:pointer;color:var(--muted)}
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem">＋ 新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v80</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v81</div>
   <div class="card">
     <h2>🖥 顯示</h2>
     <div class="swrow2"><span>文字大小</span><div class="seg" id="fsSeg"><button data-k="0.8">小</button><button data-k="1">標準</button><button data-k="1.15">大</button><button data-k="1.3">特大</button></div></div>
@@ -1005,7 +1005,7 @@ function revealStaff(){
 function revealStaffSoon(){[120,350,700].forEach(t=>setTimeout(()=>{if(document.activeElement!==$('staff')||t>=350)revealStaff()},t))}
 $('staff').addEventListener('blur',revealStaffSoon);
 $('staff').addEventListener('focus',()=>setTimeout(revealStaff,450));
-if(window.visualViewport)window.visualViewport.addEventListener('resize',()=>{if(document.activeElement!==$('staff'))revealStaffSoon()});
+// （已移除：鍵盤彈出時不再自動捲回「盤點人員」，否則點任何輸入框畫面都會跳到最上面）
 let staffEditAt=0;
 function syncMeta(flash){
   const r=S.days[curDate]||{};
@@ -1032,11 +1032,7 @@ $('btnCopyPrev').onclick=()=>{
   if(ops.length)pushUndo(curDate,ops,'帶入前次紀錄');
   renderItems();renderChips();updateProg();toast(n?'已帶入：'+cs.join('、'):'沒有需要帶入的欄位');
 };
-let clrArm=0;
-$('btnClear').onclick=async()=>{
-  const b=$('btnClear');
-  if(!clrArm){clrArm=1;b.textContent='再按確認';setTimeout(()=>{clrArm=0;b.textContent='清空'},3000);return}
-  clrArm=0;b.textContent='清空';
+$('btnClear').onclick=async()=>{   // 不再二次確認（誤按可用「復原」）
   {const vals=(S.days[curDate]&&S.days[curDate].values)||{};const ops=Object.keys(vals).filter(id=>hasVal(vals[id])).map(id=>({id,prev:vals[id],next:''}));if(ops.length)pushUndo(curDate,ops,'清空本日')}
   Object.keys(pendVals).filter(k=>k.startsWith(curDate+'|')).forEach(k=>{clearTimeout(timers[k]);delete pendVals[k]});
   const keep={staff:dayOf(curDate).staff||null,note:dayOf(curDate).note||null},kin=dayOf(curDate).inotes&&Object.keys(dayOf(curDate).inotes).length?dayOf(curDate).inotes:null;
