@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="76">
+<meta name="app-version" content="77">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -286,6 +286,19 @@ details.offbox summary{font-weight:800;cursor:pointer;color:var(--muted)}
 .grp.done .gh{border-color:var(--flash)}
 .grp.done .gc{color:var(--flash)}
 .nbtn{border:0;background:none;font-size:14px;padding:0 4px;opacity:.35;vertical-align:1px}
+.nbtn:not(.has){font-size:15px;font-weight:800;color:var(--muted)}
+.grouped .item .ct{display:none}
+.pv{border:0;background:none;padding:2px 6px 2px 0;margin:-2px 0;font:inherit;color:var(--accent);font-weight:700;text-decoration:underline dotted;text-underline-offset:3px}
+.pd{font-size:11px;color:var(--muted);opacity:.55}
+.grp.done .gt{color:var(--flash)}
+.item:focus-within{border-color:var(--flash);box-shadow:0 0 0 2px var(--flash)}
+#items:has(.item:focus-within) .item:not(:focus-within){opacity:.55}
+.top.compact .bar,.top.compact .chips{display:none}
+.top{transition:padding .15s}
+#kbBar{position:fixed;left:0;right:0;z-index:70;display:none;justify-content:flex-end;gap:8px;padding:6px 10px;background:var(--card);border-top:1px solid var(--line)}
+#kbBar.show{display:flex}
+#kbBar button{min-width:84px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font-weight:800;font-size:15px}
+#kbBar .nx2{background:var(--accent);color:#fff;border-color:var(--accent)}
 .nbtn.has{opacity:1}
 .itext{margin-top:3px;font-weight:700;color:var(--ink);overflow-wrap:anywhere}
 .ninp{height:36px;font-size:15px;margin-top:6px;border-radius:10px}
@@ -404,7 +417,7 @@ details.offbox summary{font-weight:800;cursor:pointer;color:var(--muted)}
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem">＋ 新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v76</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v77</div>
   <div class="card">
     <h2>🖥 顯示</h2>
     <div class="swrow2"><span>文字大小</span><div class="seg" id="fsSeg"><button data-k="0.8">小</button><button data-k="1">標準</button><button data-k="1.15">大</button><button data-k="1.3">特大</button></div></div>
@@ -750,6 +763,7 @@ function diffOf(id){
   const d=Math.round((Number(c)-Number(pv))*100)/100;
   return{t:(d>0?'+':'')+d,c:d>0?'up':d<0?'down':''};
 }
+function goNext(inp){const all=[...document.querySelectorAll('#items input.qty')].filter(i=>!i.closest('.grp.closed'));const nx=all[all.indexOf(inp)+1];if(nx){nx.focus();nx.scrollIntoView({block:'center',behavior:'smooth'})}else inp.blur()}
 function renderItems(){
   updateProg();
   const box=$('items');box.innerHTML='';cards={};
@@ -757,12 +771,13 @@ function renderItems(){
   if(!list.length){box.innerHTML='<div class="empty">'+(S.items.length?'沒有符合的品項':'尚無品項，請到「設定」新增')+'</div>';return}
   const buildCard=(it,parent)=>{
     const el=document.createElement('div');el.className='item';
-    el.innerHTML='<div class="info"><div class="nm"></div><div class="sub"></div><div class="itext hidden"></div><div class="warnline hidden"></div><div class="noteedit hidden"><input class="ninp" maxlength="60" placeholder="備註"></div></div><div class="stp"><button class="sb" aria-label="減一">−</button><input class="qty" type="number" inputmode="decimal" step="any" min="0" placeholder="—"><button class="sb" aria-label="加一">＋</button></div>';
+    el.innerHTML='<div class="info"><div class="nm"></div><div class="sub"></div><div class="itext hidden"></div><div class="warnline hidden"></div><div class="noteedit hidden"><input class="ninp" maxlength="60" placeholder="備註"></div></div><div class="stp"><button class="sb" aria-label="減一">−</button><input class="qty" type="number" inputmode="decimal" enterkeyhint="next" step="any" min="0" placeholder="—"><button class="sb" aria-label="加一">＋</button></div>';
     const nm=el.querySelector('.nm');
-    nm.innerHTML=(it.off?'<span class="cat" style="margin:0 6px 0 0">已停用</span>':'')+esc(it.name)+(it.unit?' <span class="muted">('+esc(it.unit)+')</span>':'')+(it.cat?'<span class="cat">'+esc(it.cat)+'</span>':'');
-    const nb=document.createElement('button');nb.type='button';nb.className='nbtn';nb.setAttribute('aria-label','備註');nb.textContent='📝';nm.appendChild(nb);
+    nm.innerHTML=(it.off?'<span class="cat" style="margin:0 6px 0 0">已停用</span>':'')+esc(it.name)+(it.unit?' <span class="muted">('+esc(it.unit)+')</span>':'')+(it.cat?'<span class="cat ct">'+esc(it.cat)+'</span>':'');
+    const nb=document.createElement('button');nb.type='button';nb.className='nbtn';nb.setAttribute('aria-label','備註');nb.textContent='＋';nm.appendChild(nb);
     const inp=el.querySelector('input.qty'),[m,p]=el.querySelectorAll('.sb');
     const ne=el.querySelector('.noteedit'),ni=el.querySelector('.ninp');
+    el.querySelector('.sub').addEventListener('click',e=>{const b=e.target.closest('.pv');if(!b)return;inp.value=b.dataset.v;commit(b.dataset.v)});   // 點「前次 8」直接填入 8
     const commit=raw=>{
       const v=raw===''?'':Number(raw);if(v!==''&&isNaN(v))return;
       const prev=valOf(curDate,it.id);
@@ -770,17 +785,17 @@ function renderItems(){
       const day=dayOf(curDate);day.values=day.values||{};if(hasVal(v))day.values[it.id]=v;else delete day.values[it.id];
       writeField(curDate,'v',it.id,v);flashEl(inp);
       pushUndo(curDate,[{id:it.id,prev:hasVal(prev)?prev:'',next:v}]);
-      refreshCard(it.id);renderChips();updateProg();
+      refreshCard(it.id);renderChips();updateProg();scheduleDone();
     };
     inp.addEventListener('input',()=>commit(inp.value));
     inp.addEventListener('focus',()=>inp.select());
-    inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();const all=[...box.querySelectorAll('input.qty')].filter(i=>!i.closest('.grp.closed'));const nx=all[all.indexOf(inp)+1];if(nx)nx.focus();else inp.blur()}});
+    inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();goNext(inp)}});
     const bump=d=>{
       if(d<0&&(inp.value===''||Number(inp.value)<=0)){inp.value='';commit('');return}
       const cur=inp.value===''?0:Number(inp.value);const n=Math.max(0,Math.round((cur+d)*100)/100);inp.value=n;commit(String(n))};
     let bt=null;
     m.onclick=()=>{bump(-1);clearTimeout(bt);bt=setTimeout(()=>checkAnomaly(it),1000)};p.onclick=()=>{bump(1);clearTimeout(bt);bt=setTimeout(()=>checkAnomaly(it),1000)};
-    inp.addEventListener('blur',()=>{clearTimeout(bt);refreshCard(it.id);renderChips();checkAnomaly(it)});
+    inp.addEventListener('blur',()=>{clearTimeout(bt);refreshCard(it.id);renderChips();checkAnomaly(it);scheduleDone()});
     // 品項備註
     nb.addEventListener('mousedown',e=>e.preventDefault());
     nb.onclick=()=>{const open=ne.classList.contains('hidden');ne.classList.toggle('hidden',!open);if(open){ni.value=noteOf(curDate,it.id);ni.focus()}refreshCard(it.id)};
@@ -793,7 +808,7 @@ function renderItems(){
     ni.addEventListener('blur',()=>{ne.classList.add('hidden');refreshCard(it.id)});
     parent.appendChild(el);cards[it.id]={el,inp};refreshCard(it.id,true);
   };
-  const grouped=groupOn&&!query&&catSel==='全部';
+  const grouped=groupOn&&!query&&catSel==='全部';box.classList.toggle('grouped',!!grouped);
   if(grouped){
     const keys=[...cats()];list.forEach(it=>{const c=it.cat||'未分類';if(!keys.includes(c))keys.push(c)});
     keys.forEach(c=>{
@@ -807,15 +822,19 @@ function renderItems(){
       g.forEach(it=>buildCard(it,body));
     });
   }else list.forEach(it=>buildCard(it,box));
-  updateGroupHeads();
+  updateGroupHeads('init');
 }
-function updateGroupHeads(){
+const wasDone={};let doneT=0;
+function updateGroupHeads(auto){
   document.querySelectorAll('#items .grp').forEach(g=>{
-    const cs=[...g.querySelectorAll('.item')],n=cs.filter(x=>x.classList.contains('filled')).length;
-    g.querySelector('.gt').textContent=g.dataset.cat;g.querySelector('.gc').textContent=n+'/'+cs.length;
-    g.classList.toggle('done',cs.length>0&&n===cs.length);
+    const c=g.dataset.cat,cs=[...g.querySelectorAll('.item')],n=cs.filter(x=>x.classList.contains('filled')).length;
+    g.querySelector('.gt').textContent=c;g.querySelector('.gc').textContent=n+'/'+cs.length;
+    const done=cs.length>0&&n===cs.length;g.classList.toggle('done',done);
+    if(auto===true&&done&&wasDone[c]===false&&!g.contains(document.activeElement)){collapsed[c]=true;g.classList.add('closed');saveCollapsed()}
+    if(auto==='init'||auto===true)wasDone[c]=done;else if(!done)wasDone[c]=false;   // 只有「從沒填完 → 填完」才會自動收合
   });
 }
+function scheduleDone(){clearTimeout(doneT);doneT=setTimeout(()=>updateGroupHeads(true),900)}
 function refreshCard(id,force){
   const c=cards[id];if(!c)return;
   const v=valOf(curDate,id),sv=hasVal(v)?String(v):'';
@@ -823,11 +842,11 @@ function refreshCard(id,force){
   c.el.classList.toggle('filled',hasVal(v));
   const itm=S.items.find(x=>x.id===id);const low=lowVal(itm,v);c.el.classList.toggle('low',low);
   const p=prevRecord(curDate),pv=p&&p.rec.values?p.rec.values[id]:undefined,d=diffOf(id);
-  c.el.querySelector('.sub').innerHTML=(hasVal(pv)?'前次 '+pv+'（'+p.date.slice(5).replace('-','/')+'）':'無前次紀錄')+(d.t?' · <span class="diff '+d.c+'">'+d.t+'</span>':'')+(hasMin(itm)?' · 最低 '+itm.min:'')+(low?' · <span class="lowtag">⚠ 低於最低量</span>':'');
+  c.el.querySelector('.sub').innerHTML=(hasVal(pv)?'<button type="button" class="pv" data-v="'+pv+'">前次 '+pv+'</button><span class="pd">'+p.date.slice(5).replace('-','/')+'</span>':'無前次紀錄')+(d.t?' · <span class="diff '+d.c+'">'+d.t+'</span>':'')+(hasMin(itm)?' · 最低 '+itm.min:'')+(low?' · <span class="lowtag">⚠ 低於最低量</span>':'');
   const nt=noteOf(curDate,id),ne=c.el.querySelector('.noteedit'),ni=ne.querySelector('input'),tx=c.el.querySelector('.itext');
   const editing=!ne.classList.contains('hidden');
   tx.textContent=nt?'📝 '+nt:'';tx.classList.toggle('hidden',!nt||editing);
-  c.el.querySelector('.nbtn').classList.toggle('has',!!nt);
+  {const nb=c.el.querySelector('.nbtn');nb.classList.toggle('has',!!nt);nb.textContent=nt?'📝':'＋'}
   if(editing&&document.activeElement!==ni&&ni.value!==nt)ni.value=nt;
 }
 function syncFromRemote(){
@@ -1374,6 +1393,27 @@ boot();
 if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 (function(){const n=$('nav'),f=()=>document.documentElement.style.setProperty('--navh',(n.offsetHeight-parseFloat(getComputedStyle(n).paddingBottom||0))+'px');f();addEventListener('resize',f);setTimeout(f,300)})();
 ['gesturestart','gesturechange','gestureend'].forEach(g=>document.addEventListener(g,e=>{if(!zoomOK)e.preventDefault()}));
+/* ---------- 頂部收合／左右滑動換日／鍵盤「下一個」 ---------- */
+(function(){
+  const top=document.querySelector('#tab-daily .top');let ly=window.scrollY,lock=0;
+  window.addEventListener('scroll',()=>{const y=window.scrollY;if(Date.now()<lock){ly=y;return}
+    let ch=false;
+    if(y>ly+8&&y>90&&!top.classList.contains('compact')){top.classList.add('compact');ch=true}
+    else if((y<ly-8||y<40)&&top.classList.contains('compact')){top.classList.remove('compact');ch=true}
+    if(ch)lock=Date.now()+450;ly=y},{passive:true});   // 切換後鎖 0.45 秒，避免標題高度改變造成來回跳動
+  const tab=$('tab-daily');let sx=0,sy=0,ok=false;
+  tab.addEventListener('touchstart',e=>{const t=e.touches[0];sx=t.clientX;sy=t.clientY;ok=e.touches.length===1&&!e.target.closest('input,.stp,.chips,.metarow,.nlist,.noteedit')},{passive:true});
+  tab.addEventListener('touchend',e=>{if(!ok)return;const t=e.changedTouches[0],dx=t.clientX-sx,dy=t.clientY-sy;
+    if(Math.abs(dx)>80&&Math.abs(dy)<45&&Math.abs(dx)>Math.abs(dy)*2)$(dx<0?'prevDay':'nextDay').click()},{passive:true});   // 往左滑＝前一天，往右滑＝後一天
+  const bar=document.createElement('div');bar.id='kbBar';bar.innerHTML='<button type="button" class="dn">完成</button><button type="button" class="nx2">下一個 ›</button>';document.body.appendChild(bar);
+  let cur=null,hideT=0;const vv=window.visualViewport;
+  const place=()=>{if(!vv)return;bar.style.bottom=Math.max(0,window.innerHeight-(vv.height+vv.offsetTop))+'px'};
+  document.addEventListener('focusin',e=>{if(e.target.matches&&e.target.matches('#items input.qty')){cur=e.target;clearTimeout(hideT);bar.classList.add('show');place()}});
+  document.addEventListener('focusout',e=>{if(e.target.matches&&e.target.matches('#items input.qty')){hideT=setTimeout(()=>{if(!document.activeElement||!document.activeElement.matches('#items input.qty'))bar.classList.remove('show')},150)}});
+  bar.addEventListener('mousedown',e=>e.preventDefault());
+  bar.querySelector('.nx2').onclick=()=>{if(cur)goNext(cur)};bar.querySelector('.dn').onclick=()=>{if(cur)cur.blur()};
+  if(vv){vv.addEventListener('resize',place);vv.addEventListener('scroll',place)}
+})();
 /* ---------- 回到頂部 ---------- */
 (function(){
   const b=$('btnTop');
