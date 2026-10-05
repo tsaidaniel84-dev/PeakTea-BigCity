@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="78">
+<meta name="app-version" content="80">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -421,7 +421,7 @@ details.offbox summary{font-weight:800;cursor:pointer;color:var(--muted)}
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem">＋ 新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v78</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v80</div>
   <div class="card">
     <h2>🖥 顯示</h2>
     <div class="swrow2"><span>文字大小</span><div class="seg" id="fsSeg"><button data-k="0.8">小</button><button data-k="1">標準</button><button data-k="1.15">大</button><button data-k="1.3">特大</button></div></div>
@@ -621,7 +621,7 @@ function updateDateUI(){
   $('datePick').value=curDate;
   $('btnToday').classList.toggle('hidden',curDate===todayStr);
 }
-function loadDate(d){curDate=d;updateDateUI();renderItems();syncMeta(false);renderChips();updateProg()}
+function loadDate(d){curDate=d;updateDateUI();renderItems(false);syncMeta(false);renderChips();updateProg()}
 /* 從歷史頁跳到某天的某個品項：捲到位置並閃爍提示 */
 function goToItem(date,itemId){
   catSel='全部';query='';$('q').value='';$('qx').classList.add('hidden');
@@ -693,12 +693,12 @@ function renderChips(){
     const b=document.createElement('button');b.className='chip'+(catSel===c?' on':'')+(c==='需叫貨'&&its.length?' alert':'');
     const filled=its.filter(i=>hasVal(valOf(curDate,i.id))).length;
     b.innerHTML=esc(c)+'<small>'+((c==='未填'||c==='需叫貨')?its.length:filled+'/'+its.length)+'</small>';
-    b.onclick=()=>{catSel=c;renderChips();renderItems()};
+    b.onclick=()=>{catSel=c;renderChips();renderItems(false)};
     box.appendChild(b);
   });
 }
-$('q').oninput=e=>{query=e.target.value.trim().toLowerCase();$('qx').classList.toggle('hidden',!query);renderChips();renderItems()};
-$('qx').onclick=()=>{$('q').value='';query='';$('qx').classList.add('hidden');renderChips();renderItems()};
+$('q').oninput=e=>{query=e.target.value.trim().toLowerCase();$('qx').classList.toggle('hidden',!query);renderChips();renderItems(false)};
+$('qx').onclick=()=>{$('q').value='';query='';$('qx').classList.add('hidden');renderChips();renderItems(false)};
 function visible(it){
   if(query)return it.name.toLowerCase().includes(query)||(it.cat||'').toLowerCase().includes(query);   // 搜尋時一律搜全部分類
   if(catSel==='未填'){if(hasVal(valOf(curDate,it.id)))return false}
@@ -767,8 +767,12 @@ function diffOf(id){
   const d=Math.round((Number(c)-Number(pv))*100)/100;
   return{t:(d>0?'+':'')+d,c:d>0?'up':d<0?'down':''};
 }
-function goNext(inp){const all=[...document.querySelectorAll('#items input.qty')].filter(i=>!i.closest('.grp.closed'));const nx=all[all.indexOf(inp)+1];if(nx){nx.focus();nx.scrollIntoView({block:'center',behavior:'smooth'})}else inp.blur()}
-function renderItems(){
+function goNext(inp){const all=[...document.querySelectorAll('#items input.qty')].filter(i=>!i.closest('.grp.closed'));const nx=all[all.indexOf(inp)+1];if(nx){nx.focus({preventScroll:true});nx.scrollIntoView({block:'nearest'})}else inp.blur()}
+function renderItems(keep){   // keep!==false：保留捲動位置；換日期／換分類／搜尋時傳 false 回到頂端
+  const y=window.scrollY;renderItemsInner();
+  if(keep===false)window.scrollTo(0,0);else if(y>0&&Math.abs(window.scrollY-y)>2)window.scrollTo(0,y);
+}
+function renderItemsInner(){
   updateProg();
   const box=$('items');box.innerHTML='';cards={};
   const list=dayItems(curDate).filter(visible);
@@ -849,7 +853,7 @@ function updateGroupHeads(auto){
     const c=g.dataset.cat,cs=[...g.querySelectorAll('.item')],n=cs.filter(x=>x.classList.contains('filled')).length;
     g.querySelector('.gt').textContent=c;g.querySelector('.gc').textContent=n+'/'+cs.length;
     const done=cs.length>0&&n===cs.length;g.classList.toggle('done',done);
-    if(auto===true&&done&&wasDone[c]===false&&!g.contains(document.activeElement)){collapsed[c]=true;g.classList.add('closed');saveCollapsed()}
+    if(auto===true&&done&&wasDone[c]===false&&!g.contains(document.activeElement)){const gh=g.querySelector('.gh'),t0=gh.getBoundingClientRect().top;collapsed[c]=true;g.classList.add('closed');saveCollapsed();const t1=gh.getBoundingClientRect().top;if(Math.abs(t1-t0)>1)window.scrollBy(0,t1-t0)}
     if(auto==='init'||auto===true)wasDone[c]=done;else if(!done)wasDone[c]=false;   // 只有「從沒填完 → 填完」才會自動收合
   });
 }
@@ -1446,15 +1450,17 @@ if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){window.add
 })();
 /* ---------- 回到頂部 ---------- */
 (function(){
-  const b=$('btnTop');
+  const b=$('btnTop');let userMoved=false;
+  const mark=()=>{userMoved=true};
+  window.addEventListener('touchmove',mark,{passive:true});window.addEventListener('wheel',mark,{passive:true});
   const upd=()=>{
-    b.classList.toggle('show',window.scrollY>400||(window.__dragging&&window.scrollY>0));
+    b.classList.toggle('show',!!((userMoved&&window.scrollY>250)||(window.__dragging&&window.scrollY>0)));   // 要使用者真的往下滑過才出現，一進頁面不顯示
     const st=!$('tab-settings').classList.contains('hidden');   // 設定頁底部有「新增品項」按鈕，往上讓開
     b.style.bottom='calc(var(--navh,64px) + env(safe-area-inset-bottom,0px) + '+(st?70:14)+'px)';
   };
   b.onclick=()=>window.scrollTo({top:0,behavior:'smooth'});
   window.addEventListener('scroll',upd,{passive:true});window.addEventListener('resize',upd);
-  document.querySelectorAll('#nav button').forEach(x=>x.addEventListener('click',()=>setTimeout(upd,50)));
+  document.querySelectorAll('#nav button').forEach(x=>x.addEventListener('click',()=>{userMoved=false;setTimeout(upd,50)}));
   upd();
 })();
 /* ---------- 自動檢查更新（加入主畫面也會更新） ---------- */
