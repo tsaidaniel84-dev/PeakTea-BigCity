@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="81">
+<meta name="app-version" content="82">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -279,6 +279,10 @@ details.offbox summary{font-weight:800;cursor:pointer;color:var(--muted)}
 .chips .chip{font-size:calc(15px*var(--k,1))}
 .grp{margin-bottom:6px}
 .gh{width:100%;display:flex;align-items:center;gap:8px;background:var(--teal-soft);border:1px solid var(--teal-line);border-radius:12px;padding:10px 14px;margin:4px 0 8px;font-weight:800;font-size:calc(16px*var(--k,1));color:var(--ink);text-align:left}
+.gg{touch-action:none;cursor:grab;color:var(--muted);font-size:20px;line-height:1;padding:4px 8px 4px 0;margin-left:-4px;-webkit-user-select:none;user-select:none}
+#items.sorting .gb{display:none}
+.grp.gdrag{position:relative;z-index:30;opacity:.96}
+.grp.gdrag .gh{box-shadow:0 8px 22px rgba(0,0,0,.28);border-color:var(--accent)}
 .gh .gc{margin-left:auto;color:var(--muted);font-weight:700;font-size:calc(14px*var(--k,1))}
 .gh .gcar{color:var(--muted);transition:transform .15s}
 .grp.closed .gcar{transform:rotate(-90deg)}
@@ -421,7 +425,7 @@ details.offbox summary{font-weight:800;cursor:pointer;color:var(--muted)}
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem">＋ 新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v81</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v82</div>
   <div class="card">
     <h2>🖥 顯示</h2>
     <div class="swrow2"><span>文字大小</span><div class="seg" id="fsSeg"><button data-k="0.8">小</button><button data-k="1">標準</button><button data-k="1.15">大</button><button data-k="1.3">特大</button></div></div>
@@ -480,7 +484,7 @@ const hasVal=v=>(typeof v==='number'&&isFinite(v))||(typeof v==='string'&&v.trim
 const BOOT_AT=Date.now();
 
 /* ---------- 狀態 ---------- */
-let S={items:clone(DEFAULT_ITEMS),nextId:100,days:{}};
+let S={items:clone(DEFAULT_ITEMS),nextId:100,days:{},catOrder:[]};
 let todayStr=ymd(new Date()),curDate=todayStr,histMonth=todayStr.slice(0,7);
 let hCat='全部',hQ='',hMode='table',hItem=null;
 let catSel='全部',query='';
@@ -676,7 +680,8 @@ function doUndo(){
   toast('已復原：'+(it?it.name:e.label));
 }
 function cats(){
-  const set=[...DEFAULT_CATS];
+  const set=[...(S.catOrder||[])];
+  DEFAULT_CATS.forEach(c=>{if(!set.includes(c))set.push(c)});
   S.items.forEach(i=>{if(i.cat&&!set.includes(i.cat))set.push(i.cat)});
   return set.filter(c=>S.items.some(i=>i.name&&!i.off&&i.cat===c));
 }
@@ -768,6 +773,35 @@ function diffOf(id){
   return{t:(d>0?'+':'')+d,c:d>0?'up':d<0?'down':''};
 }
 function goNext(inp){const all=[...document.querySelectorAll('#items input.qty')].filter(i=>!i.closest('.grp.closed'));const nx=all[all.indexOf(inp)+1];if(nx){nx.focus({preventScroll:true});nx.scrollIntoView({block:'nearest'})}else inp.blur()}
+function startGroupDrag(e,wrap){   // 拖曳分類順序：拖動期間所有分類暫時收成一列，放開後恢復
+  e.preventDefault();e.stopPropagation();
+  const box=$('items'),pid=e.pointerId,noScroll=ev=>ev.preventDefault();
+  let active=true,y=e.clientY,off=0,raf=0;
+  box.classList.add('sorting');wrap.classList.add('gdrag');
+  off=e.clientY-wrap.getBoundingClientRect().top;
+  const grps=()=>[...box.querySelectorAll(':scope>.grp')];
+  const update=()=>{
+    wrap.style.transform='';const nat=wrap.getBoundingClientRect().top;const ty=y-off-nat;wrap.style.transform='translateY('+ty+'px)';
+    const h=wrap.offsetHeight,center=nat+ty+h/2,g=grps(),i=g.indexOf(wrap),prev=g[i-1],next=g[i+1];let moved=false;
+    if(prev){const r=prev.getBoundingClientRect();if(center<r.top+r.height/2){box.insertBefore(prev,wrap.nextSibling);moved=true}}
+    if(!moved&&next){const r=next.getBoundingClientRect();if(center>r.top+r.height/2){box.insertBefore(next,wrap);moved=true}}
+    if(moved)update();
+  };
+  const loop=()=>{if(!active)return;const vh=window.innerHeight;let dy=0;if(y<110)dy=-Math.ceil((110-y)/6);else if(y>vh-130)dy=Math.ceil((y-(vh-130))/6);if(dy){window.scrollBy(0,dy);update()}raf=requestAnimationFrame(loop)};
+  const mv=ev=>{if(ev.pointerId!==pid)return;y=ev.clientY;update()};
+  const end=ev=>{
+    if(ev&&ev.pointerId!==undefined&&ev.pointerId!==pid)return;
+    if(!active)return;active=false;cancelAnimationFrame(raf);
+    window.removeEventListener('pointermove',mv);window.removeEventListener('pointerup',end);window.removeEventListener('pointercancel',end);window.removeEventListener('blur',end);document.removeEventListener('touchmove',noScroll);
+    wrap.style.transform='';wrap.classList.remove('gdrag');
+    const order=grps().map(g=>g.dataset.cat),rest=(S.catOrder||[]).filter(c=>!order.includes(c));
+    S.catOrder=[...order,...rest];box.classList.remove('sorting');
+    saveItems();renderChips();
+  };
+  window.addEventListener('pointermove',mv);window.addEventListener('pointerup',end);window.addEventListener('pointercancel',end);window.addEventListener('blur',end);
+  document.addEventListener('touchmove',noScroll,{passive:false});
+  raf=requestAnimationFrame(loop);update();
+}
 function renderItems(keep){   // keep!==false：保留捲動位置；換日期／換分類／搜尋時傳 false 回到頂端
   const y=window.scrollY;renderItemsInner();
   if(keep===false)window.scrollTo(0,0);else if(y>0&&Math.abs(window.scrollY-y)>2)window.scrollTo(0,y);
@@ -833,8 +867,9 @@ function renderItemsInner(){
       const g=list.filter(it=>(it.cat||'未分類')===c);if(!g.length)return;
       const wrap=document.createElement('section');wrap.className='grp'+(collapsed[c]?' closed':'');wrap.dataset.cat=c;
       const head=document.createElement('button');head.type='button';head.className='gh';
-      head.innerHTML='<span class="gt"></span><span class="gc"></span><span class="gcar">▾</span>';
+      head.innerHTML='<span class="gg" aria-label="拖曳排序">≡</span><span class="gt"></span><span class="gc"></span><span class="gcar">▾</span>';
       const body=document.createElement('div');body.className='gb';
+      const gg=head.querySelector('.gg');gg.addEventListener('click',e=>e.stopPropagation());gg.addEventListener('pointerdown',e=>startGroupDrag(e,wrap));gg.addEventListener('contextmenu',e=>e.preventDefault());
       head.onclick=()=>{collapsed[c]=!collapsed[c];wrap.classList.toggle('closed',!!collapsed[c]);saveCollapsed()};
       wrap.appendChild(head);wrap.appendChild(body);box.appendChild(wrap);
       g.forEach(it=>buildCard(it,body));
@@ -1167,7 +1202,7 @@ let itemTimer=null,lastItemsJson='';
 function saveItems(){
   clearTimeout(itemTimer);
   itemTimer=setTimeout(async()=>{
-    const j=JSON.stringify({list:S.items,nextId:S.nextId});lastItemsJson=j;
+    const j=JSON.stringify({list:S.items,nextId:S.nextId,catOrder:S.catOrder||[]});lastItemsJson=j;
     try{await store.setItems(j)}catch(e){toast('品項儲存失敗')}
   },600);
 }
@@ -1382,9 +1417,10 @@ function onDays(d){
 function onItems(json){
   if(json===lastItemsJson)return;
   let list=clone(DEFAULT_ITEMS),nid=S.nextId;
-  if(json){try{const o=JSON.parse(json);if(Array.isArray(o.list)){list=o.list;nid=Math.max(nid,o.nextId||0)}}catch(e){}}
-  if(JSON.stringify(list)!==JSON.stringify(S.items)){
-    S.items=list;S.nextId=nid;saveCache();
+  let co=S.catOrder||[];
+  if(json){try{const o=JSON.parse(json);if(Array.isArray(o.list)){list=o.list;nid=Math.max(nid,o.nextId||0)}if(Array.isArray(o.catOrder))co=o.catOrder}catch(e){}}
+  if(JSON.stringify(list)!==JSON.stringify(S.items)||JSON.stringify(co)!==JSON.stringify(S.catOrder||[])){
+    S.items=list;S.nextId=nid;S.catOrder=co;saveCache();
     renderChips();renderItems();
     if(!$('tab-settings').classList.contains('hidden')&&!(document.activeElement&&$('itemList').contains(document.activeElement)))renderItemEditor();
   }
