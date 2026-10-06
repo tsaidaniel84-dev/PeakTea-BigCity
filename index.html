@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="89">
+<meta name="app-version" content="90">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -599,6 +599,13 @@ input.sw:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 @keyframes cele{0%,100%{filter:none}30%{filter:brightness(1.25) saturate(1.3);box-shadow:0 0 0 4px rgba(224,168,0,.5)}}
 #tab-daily:not(.hidden),#tab-history:not(.hidden),#tab-settings:not(.hidden){animation:tabin .2s ease}
 @keyframes tabin{from{opacity:0}to{opacity:1}}
+/* v90 細版漸層進度條 */
+.progrow{display:flex;align-items:center;gap:10px;margin-top:8px}
+.progrow .prog{flex:1;margin:0!important;height:8px!important;border:0!important;box-shadow:none!important;background:var(--progTrack,var(--line))!important}
+.progrow .prog .pf{background:linear-gradient(90deg,var(--accent),var(--sun,#e0a800))!important;border-radius:99px;min-width:0}
+.progrow .prog .pf::before,.progrow .prog .pf::after{display:none!important}
+.progrow .prog .pt{display:none}
+.ppct{flex:none;min-width:34px;text-align:right;font-size:12px;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums}
 </style>
 </head>
 <body>
@@ -638,7 +645,7 @@ input.sw:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
     </div>
     <div class="toolrow"><div class="search"><span class="ic"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg></span><input id="q" type="search" placeholder="搜尋品項" aria-label="搜尋品項" autocomplete="off"><button class="x hidden" id="qx" aria-label="清除"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></div><button class="btn sm hidden" id="btnUndo"><svg class="i" aria-hidden="true"><use href="#i-undo"/></svg>復原</button><button class="btn sm" id="btnCopyPrev">前次紀錄</button><button class="btn sm danger" id="btnClear">清空</button></div>
     <div class="chips" id="chips"></div>
-    <div class="prog" id="prog"><div class="pf" id="progBar"></div><span class="pt">PEAK TEA</span></div>
+    <div class="progrow"><div class="prog" id="prog"><div class="pf" id="progBar"></div><span class="pt">PEAK TEA</span></div><span class="ppct" id="ppct">0%</span></div>
   </div>
   <div class="banner hidden" id="banner" role="status"></div>
   <div class="list">
@@ -691,7 +698,7 @@ input.sw:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v89</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v90</div>
   <div class="card">
     <h2><svg class="i" aria-hidden="true"><use href="#i-monitor"/></svg>顯示</h2>
     <div class="swrow2"><span>文字大小</span><div class="seg" id="fsSeg"><button data-k="0.8">小</button><button data-k="1">標準</button><button data-k="1.15">大</button><button data-k="1.3">特大</button></div></div>
@@ -1324,9 +1331,9 @@ function updateProg(){
   const its=dayItems(curDate);const n=its.filter(i=>hasVal(valOf(curDate,i.id))).length;
   const pc=its.length?n/its.length*100:0,bar=$('progBar');
   bar.style.width=pc+'%';bar.style.setProperty('--p',Math.max(pc,1));
-  {const pt=document.querySelector('#prog .pt');if(pt)pt.textContent=pc>0?'PEAK TEA · '+Math.round(pc)+'%':'PEAK TEA';
+  {const pp=$('ppct');if(pp)pp.textContent=Math.round(pc)+'%';
    const all=its.length>0&&n===its.length;
-   if(progDone===false&&all){const pg=$('prog');pg.classList.add('cele');setTimeout(()=>pg.classList.remove('cele'),1600);toast('✓ 今日盤點完成');if(navigator.vibrate)navigator.vibrate([20,50,20])}
+   if(progDone===false&&all){const pg=$('prog');pg.classList.add('cele');setTimeout(()=>pg.classList.remove('cele'),1600); if(navigator.vibrate)navigator.vibrate([20,50,20])}
    progDone=all}
 
   updateGroupHeads();
