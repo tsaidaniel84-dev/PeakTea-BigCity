@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="91">
+<meta name="app-version" content="93">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -599,9 +599,15 @@ input.sw:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 @keyframes cele{0%,100%{filter:none}30%{filter:brightness(1.25) saturate(1.3);box-shadow:0 0 0 4px rgba(224,168,0,.5)}}
 #tab-daily:not(.hidden),#tab-history:not(.hidden),#tab-settings:not(.hidden){animation:tabin .2s ease}
 @keyframes tabin{from{opacity:0}to{opacity:1}}
+/* v92 開啟畫面 */
+#splash{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:var(--bg);transition:opacity .45s ease,visibility .45s}
+#splash.out{opacity:0;visibility:hidden;pointer-events:none}
+#splash img{width:112px;height:auto;animation:splin .7s cubic-bezier(.2,.8,.2,1) both}
+@keyframes splin{from{opacity:0;transform:scale(.78)}to{opacity:1;transform:none}}
 </style>
 </head>
 <body>
+<div id="splash"><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAEkAAAA8CAYAAAAqnJeuAAAFWklEQVR42u2cTWjbZhjHH4vNl4zKJiDBhjEoWQJByU5NmrKU1s1wC9lxTptlO4wcAknpfWSO87HeyxLIIeywZhn2jg1koZ1bkpKkGQwaq4EW2+A4LVgQLI3kkh20Q61MVmVb0vu+8gd+jo6sj5+f5//+n+cVceWP/oZmlA+qiaByfNDoD5hbX1VOkwKc5UVwexkAAGhp58Hbe73T3cq+NnMOVyOW20kyMZffi0/lnz8ue5y7lQU2eOttS3v3tXLAGgpS/vnjN/m9+McnyYTl7/pG7r719g1+0rCQzo5zHUer91/ZgaMN9sZtYG+OuBpOk06Sibn0T99PYdGvP34DAFD0oKgmoPdB5dZXlYaBdLR6f4rEefN/xeHsONdR95By66vK2XGOlMZBfu/PV/UP6Z1+EIvTpFDf5aYtBWLXyIv1DUlbCgR/iPqGpC0FUuFuZZsNbkVIhT6vJsykKMkcAADjodOiJHNCJvuI8dC/AADwft9MCX9E/L5a2vnqQxIlmXuy/zIV3dqBAiQQJVn9c6TwWeRadxcMX7nscvr+Wj7tnq9quYmSzC2sbZwDKnxmdBxEt3Ygurld5IC9fYPE7/Gj9u4fqgoptrWbEjJZ08frQbHBW51aYSUp2lWBJEoyF9+3vjo9SRyc65e7lX3tvRgAUqC8FwPVhbSwtpGyCbfou+zNERcpUN7e651VgyRkstNWyszg+yBkstN6ULhLTT+lpJzVop0IhkyMqGWngmJv3CZWao5CQs0ibdmFf/09FX8hFJUejrIrNZmkHNSiCK5ziZIMsWe7nLb0uIkfkVY87s69eSNAjkEKr8QUIx+ECkpbeuqKZ8MPAXfn3rzWF+mD+EaAkMlOh1diEVLn5/0+mB0NuTQty1x+Lz51mkxAuaGct28QvL2BsnAcgSRKMje+uJwinamTQ8F04DO+zWDc0XGWF7/59zj3HQDAh63sz24v88DspqQjkMIrMQWHWFcKxkPD0sQYsf6OmCZFN7cdAXSuTw83lLqCJGSy09rm1UpG2L7mYbHRrGlIoiRzdoR6djQUmRwKRlCyCYdZJQ5JyGSn7Qg17/cB7/fNMPSFB4jXB63JrDlI0c1txe5Sf7W7K10ot/TkUDCN1Po82+W0bUvNQIpubit2NEgN7fLN+31f8H4fcttSU5DiL4QUEqAeXi/e6dBAP5K24F7tKFRAC2sbSKkdGrjUZqBRMyjZBAAQ3xdgfHFZqRqkwgqmoAIK9PDAeOh0CRfdhmIJ1IwaX1xWUK2BZUjqCobDKBplkbbsUCyBvhFGAWWpLUEVaG0MD/Sb2ipaeLih2JmJ42xdTGdSeCWGDRAAmN5LK5dtVjPKroeizGYQzj5seKDfSgYgeydUD0WZ0SCcGcR4aMs7sqjeSe+h9JudSJBIDMzsiDEO76QFZbQrbAsSCUCBHr7kSxAmsmkGRzadS8jWjml7QDkFiPf7YPLLoAsxC9tw3pPZyQHlBCDGQxfNoRHOk8aZTerkoFI2UU4AwmEKcTrx91a9CtlE6VoN7CW2NDHmsqtDpbJp9uuvsIKqlE3U/zR3sY4XAj08lhJzCpQoyd9WhCQc4jWLqCLtNKiniQOO2DxJH7OjoYhTr+/hBCXK/1TWJIa+UFUfhAoKddUTJRlKtSwUxpslXmIV+rs2Kz2h0Q9carZ1DkkdxjvZbuAGNXzlsmtpYswyLMZDw9WeroipeZLdbWmzsyEnQ33Dt9zzMB4aQp9fMnyPoCQk9WXzp4kDzgwsxkNDQTjTUKOhvi/+8vAI1GcyC8cQkv7kQib76ODwDSfKctEFAMDSReo9XM3/MIE4T2rGu/gPznHuUyAmPmIAAAAASUVORK5CYII=" alt=""></div>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><defs>
 <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/></symbol>
 <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 3.5a8.5 8.5 0 1 0 0 17c1.2 0 1.9-.9 1.9-1.8 0-.5-.2-.9-.5-1.2-.3-.3-.5-.7-.5-1.2 0-.9.8-1.7 1.7-1.7H16.5a4.5 4.5 0 0 0 4.5-4.5c0-3.6-4-6.6-9-6.6z"/><circle cx="7.6" cy="11.4" r=".9" fill="currentColor"/><circle cx="10.2" cy="7.7" r=".9" fill="currentColor"/><circle cx="14.6" cy="7.7" r=".9" fill="currentColor"/></symbol>
@@ -691,7 +697,7 @@ input.sw:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v91</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v93</div>
   <div class="card">
     <h2><svg class="i" aria-hidden="true"><use href="#i-monitor"/></svg>顯示</h2>
     <div class="swrow2"><span>文字大小</span><div class="seg" id="fsSeg"><button data-k="0.8">小</button><button data-k="1">標準</button><button data-k="1.15">大</button><button data-k="1.3">特大</button></div></div>
@@ -1324,7 +1330,7 @@ function updateProg(){
   const its=dayItems(curDate);const n=its.filter(i=>hasVal(valOf(curDate,i.id))).length;
   const pc=its.length?n/its.length*100:0,bar=$('progBar');
   bar.style.width=pc+'%';bar.style.setProperty('--p',Math.max(pc,1));
-  {
+  {const pt=document.querySelector('#prog .pt');if(pt)pt.textContent=pc>0?'PEAK TEA · '+Math.round(pc)+'%':'PEAK TEA';
    const all=its.length>0&&n===its.length;
    if(progDone===false&&all){const pg=$('prog');pg.classList.add('cele');setTimeout(()=>pg.classList.remove('cele'),1600); if(navigator.vibrate)navigator.vibrate([20,50,20])}
    progDone=all}
@@ -1849,6 +1855,11 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdat
 window.addEventListener('pageshow',e=>{if(e.persisted)checkUpdate(false)});
 setTimeout(()=>checkUpdate(false),1500);
 })();
+</script>
+<script>
+/* 開啟畫面：至少顯示約 1 秒，等頁面載入完再淡出 */
+(function(){var t0=Date.now(),sp=document.getElementById('splash');function out(){if(!sp)return;var w=Math.max(0,1000-(Date.now()-t0));setTimeout(function(){sp.classList.add('out');setTimeout(function(){sp.remove()},600)},w)}
+if(document.readyState==='complete')out();else window.addEventListener('load',out);setTimeout(out,4000)})();
 </script>
 </body>
 </html>
