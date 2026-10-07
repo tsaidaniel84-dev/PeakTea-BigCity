@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="93">
+<meta name="app-version" content="94">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -604,6 +604,10 @@ input.sw:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 #splash.out{opacity:0;visibility:hidden;pointer-events:none}
 #splash img{width:112px;height:auto;animation:splin .7s cubic-bezier(.2,.8,.2,1) both}
 @keyframes splin{from{opacity:0;transform:scale(.78)}to{opacity:1;transform:none}}
+/* v94 歷史異常標示 */
+#histTable tr td.anom1,#histTable tr.has td.anom1{background:rgba(214,69,40,.30)!important;color:var(--down);font-weight:800;box-shadow:inset 0 0 0 1.5px var(--down)}
+#histTable tr td.anom2,#histTable tr.has td.anom2{background:rgba(230,160,20,.32)!important;font-weight:800}
+.trend .spark{display:block;width:100%!important;height:auto!important;margin-top:6px}
 </style>
 </head>
 <body>
@@ -697,7 +701,7 @@ input.sw:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v93</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v94</div>
   <div class="card">
     <h2><svg class="i" aria-hidden="true"><use href="#i-monitor"/></svg>顯示</h2>
     <div class="swrow2"><span>文字大小</span><div class="seg" id="fsSeg"><button data-k="0.8">小</button><button data-k="1">標準</button><button data-k="1.15">大</button><button data-k="1.3">特大</button></div></div>
@@ -1374,13 +1378,37 @@ function renderHChips(){
     b.onclick=()=>{hCat=c;renderHistory(false)};box.appendChild(b);
   });
 }
+/* 異常判斷：跟前次比差很多(紅)，或跟近期平均差很多(橘)；同一套結果用在歷史表格、折線圖 */
+let anCache={};
+function anomOf(id,ds){
+  let m=anCache[id];
+  if(!m){
+    m=anCache[id]={};
+    const ser=Object.keys(S.days).filter(d=>hasData(S.days[d])).sort().map(d=>({d,v:valOf(d,id)})).filter(x=>hasVal(x.v)&&!isNaN(Number(x.v))).map(x=>({d:x.d,v:Number(x.v)}));
+    ser.forEach((p,k)=>{
+      const pr=ser[k-1];
+      if(pr&&pr.v>0&&(parse(p.d)-parse(pr.d))/86400000<=10){
+        if(p.v>=pr.v*5&&p.v-pr.v>=20){m[p.d]={lvl:1,text:'前次 '+pr.v+'，當天 '+p.v+'（增加很多）'};return}
+        if(p.v<=pr.v*0.2&&pr.v-p.v>=10){m[p.d]={lvl:1,text:'前次 '+pr.v+'，當天 '+p.v+'（減少很多）'};return}
+      }
+      const prev=ser.slice(Math.max(0,k-10),k).map(x=>x.v);
+      if(prev.length>=4){
+        const so=[...prev].sort((a,b)=>a-b),med=so.length%2?so[(so.length-1)/2]:(so[so.length/2-1]+so[so.length/2])/2;
+        if(med>0&&p.v>=med*2.5&&p.v-med>=10)m[p.d]={lvl:2,text:'近期約 '+Math.round(med*10)/10+'，當天 '+p.v+'（比平常多很多）'};
+        else if(med>0&&p.v<=med*0.2&&med-p.v>=10)m[p.d]={lvl:2,text:'近期約 '+Math.round(med*10)/10+'，當天 '+p.v+'（比平常少很多）'};
+      }
+    });
+  }
+  return m[ds]||null;
+}
 function renderHistory(scrollToday){
+  anCache={};
   $('monthPick').value=histMonth;
   renderHChips();
   document.querySelectorAll('#hSeg button').forEach(b=>b.classList.toggle('on',b.dataset.m===hMode));
   $('hTableWrap').classList.toggle('hidden',hMode!=='table');
   $('hItemWrap').classList.toggle('hidden',hMode!=='item');
-  $('recCount').textContent='共 '+Object.keys(S.days).filter(d=>hasData(S.days[d])).length+' 天紀錄';
+  $('recCount').textContent='共 '+Object.keys(S.days).filter(d=>hasData(S.days[d])).length+' 天紀錄'+(hMode==='table'?' · 紅格＝跟前次差很多、橘格＝跟近期平均差很多':'');
   const its=hFiltered();
   if(hMode==='item'){renderHItem(its);return}
   const [y,m]=histMonth.split('-').map(Number),days=new Date(y,m,0).getDate();
@@ -1393,7 +1421,7 @@ function renderHistory(scrollToday){
   for(let d=1;d<=days;d++){
     const ds=y+'-'+pad(m)+'-'+pad(d),r=S.days[ds];
     h+='<tr class="'+(hasData(r)?'has':'')+(ds===curDate?' cur':'')+'"><td class="day'+(ds===todayStr?' tdy':'')+'" data-d="'+ds+'">'+d+'</td><td>'+WD[new Date(y,m-1,d).getDay()]+'</td><td class="'+(staffColorOf(ds)?'pc-'+staffColorOf(ds):'')+'">'+esc(r&&r.staff||'')+'</td>'+
-      its.map(i=>{const v=r&&r.values?r.values[i.id]:'';const nt=r&&r.inotes&&r.inotes[i.id]?r.inotes[i.id]:'';const cl=((lowVal(i,v)?'lowc ':'')+(nt?'hasn':'')).trim();return'<td'+(cl?' class="'+cl+'"':'')+(nt?' title="'+esc(nt)+'"':'')+'>'+(hasVal(v)?v:'')+'</td>'}).join('')+'</tr>';
+      its.map(i=>{const v=r&&r.values?r.values[i.id]:'';const nt=r&&r.inotes&&r.inotes[i.id]?r.inotes[i.id]:'';const an=(r&&r.values)?anomOf(i.id,ds):null;const cl=((lowVal(i,v)?'lowc ':'')+(nt?'hasn ':'')+(an?'anom'+an.lvl:'')).trim();return'<td'+(cl?' class="'+cl+'"':'')+((nt||an)?' title="'+esc(nt||an.text)+'"':'')+'>'+(hasVal(v)?v:'')+'</td>'}).join('')+'</tr>';
   }
   t.innerHTML=h+'</tbody>';
   t.querySelectorAll('td.day').forEach(td=>td.onclick=()=>{switchTab('daily');loadDate(td.dataset.d)});
@@ -1437,10 +1465,10 @@ function renderHItem(list){
     if(lastv<=0){est='目前已用完';cls='low'}
     else if(rate>0){const dl=lastv/rate;cls=dl<=3?'low':'';est=dl>60?'約可用 <b>60+</b> 天':'約可用 <b>'+Math.max(1,Math.round(dl))+'</b> 天';sub='近 30 天平均每天用 '+(Math.round(rate*10)/10)+unit+'（估算，僅供參考）'}
     else{est='近期沒有用量';cls='mute';sub='庫存沒有減少，無法估算'}
-    const w=340,h=44,pl=6,pr=6,pt2=6,pb=6,lv=tp.map(p=>p.v),a=Math.min(...lv),b=Math.max(...lv),rg=(b-a)||1;
+    const w=340,h=84,pl=6,pr=6,pt2=6,pb=6,lv=tp.map(p=>p.v),a=Math.min(...lv),b=Math.max(...lv),rg=(b-a)||1;
     const sx=i=>pl+i/29*(w-pl-pr),sy=v=>(b===a)?h/2:pt2+(1-(v-a)/rg)*(h-pt2-pb);
-    const lp=tp[tp.length-1];
-    const sp='<svg viewBox="0 0 '+w+' '+h+'" class="spark" aria-hidden="true"><polyline fill="none" points="'+tp.map(p=>sx(p.i)+','+sy(p.v)).join(' ')+'" style="stroke:var(--accent);stroke-width:2;stroke-linejoin:round;stroke-linecap:round"/><circle cx="'+sx(lp.i)+'" cy="'+sy(lp.v)+'" r="3.5" style="fill:var(--accent)"/></svg>';
+    const lp=tp[tp.length-1];const adots=tp.map(p=>{const an=anomOf(it.id,ymd(p.dt));return an?'<circle cx="'+sx(p.i)+'" cy="'+sy(p.v)+'" r="3.5" style="fill:'+(an.lvl===1?'var(--down)':'var(--sun)')+'"/>':''}).join('');
+    const sp='<svg viewBox="0 0 '+w+' '+h+'" class="spark" aria-hidden="true"><polyline fill="none" points="'+tp.map(p=>sx(p.i)+','+sy(p.v)).join(' ')+'" style="stroke:var(--accent);stroke-width:2;stroke-linejoin:round;stroke-linecap:round"/>'+adots+'<circle cx="'+sx(lp.i)+'" cy="'+sy(lp.v)+'" r="3.5" style="fill:var(--accent)"/></svg>';
     return '<div class="trend">'+head(est,cls,sub)+sp+'</div>';
   })();
   if(!pts.length){body.innerHTML=trendHtml+'<div class="empty">'+(m)+'月還沒有「'+esc(it.name)+'」的紀錄</div>';return}
@@ -1458,7 +1486,7 @@ function renderHItem(list){
   if(td)svg+='<line x1="'+X(td)+'" x2="'+X(td)+'" y1="'+T+'" y2="'+(H-B)+'" style="stroke:var(--sun);stroke-width:1;stroke-dasharray:3 3"/>';
   if(mv!==null)svg+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+Y(mv)+'" y2="'+Y(mv)+'" style="stroke:var(--down);stroke-width:1.5;stroke-dasharray:5 3"/><text x="'+(W-R)+'" y="'+(Y(mv)-3)+'" text-anchor="end" style="fill:var(--down);font-size:10px">最低 '+mv+'</text>';
   svg+='<polyline fill="none" points="'+pts.map(p=>X(p.d)+','+Y(p.v)).join(' ')+'" style="stroke:var(--accent);stroke-width:2.5;stroke-linejoin:round;stroke-linecap:round"/>';
-  pts.forEach(p=>{svg+='<circle cx="'+X(p.d)+'" cy="'+Y(p.v)+'" r="3.5" style="fill:var(--card);stroke:var(--accent);stroke-width:2"/>'});
+  pts.forEach(p=>{const an=anomOf(it.id,p.ds);svg+=an?'<circle cx="'+X(p.d)+'" cy="'+Y(p.v)+'" r="5" style="fill:'+(an.lvl===1?'var(--down)':'var(--sun)')+';stroke:var(--card);stroke-width:1.5"><title>'+esc(an.text)+'</title></circle>':'<circle cx="'+X(p.d)+'" cy="'+Y(p.v)+'" r="3.5" style="fill:var(--card);stroke:var(--accent);stroke-width:2"/>'});
   svg+='</svg>';
   const stat=(n,l)=>'<div class="stat"><b>'+n+'</b><span>'+l+'</span></div>';
   let rows='';
@@ -1468,7 +1496,7 @@ function renderHItem(list){
     rows+='<div class="lrow" data-d="'+p.ds+'"><span class="d">'+m+'/'+p.d+'（週'+WD[dd.getDay()]+'）'+(p.ds===todayStr?' <span class="pill">今天</span>':'')+(noteOf(p.ds,it.id)?'<small class="lnote">📝 '+esc(noteOf(p.ds,it.id))+'</small>':'')+'</span><span class="df diff '+(df>0?'up':df<0?'down':'')+'">'+(df===''?'':(df>0?'+':'')+df)+'</span><span class="v">'+p.v+'</span></div>';
   }
   body.innerHTML='<div class="muted" style="margin-bottom:6px"><b style="color:var(--ink);font-size:17px">'+esc(it.name)+'</b> '+m+'月每日數量'+(unit?'（'+unit+'）':'')+'</div>'+
-    '<div class="stats">'+stat(last.v,'最新 '+m+'/'+last.d)+stat(mn,'最低')+stat(mx,'最高')+stat(avg,'平均')+'</div>'+trendHtml+svg+
+    '<div class="stats">'+stat(last.v,'最新 '+m+'/'+last.d)+stat(mn,'最低')+stat(mx,'最高')+stat(avg,'平均')+'</div>'+trendHtml+svg+(pts.some(p=>anomOf(it.id,p.ds))?'<div class="muted" style="font-size:12px;margin-top:4px"><span style="color:var(--down)">●</span> 紅點＝跟前次差很多　<span style="color:var(--sun)">●</span> 橘點＝跟近期平均差很多</div>':'')+
     '<div class="muted" style="margin:10px 0 2px">每日紀錄（最新在上）</div>'+rows;
   body.querySelectorAll('.lrow').forEach(r=>r.onclick=()=>goToItem(r.dataset.d,it.id));
 }
