@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="97">
+<meta name="app-version" content="98">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -689,6 +689,13 @@ tr.cur td.day.tdy{background:var(--sun)!important}
 .trend .tr-h>span:first-child{font-size:var(--fs-xs);color:var(--muted);font-weight:600}
 .trend .spark{margin-top:0;max-height:58px}
 @media (max-width:350px){.trend{grid-template-columns:1fr}}
+
+/* ---- v98：長按說明、定位閃爍 ---- */
+.celltip{position:fixed;z-index:90;max-width:min(290px,calc(100vw - 16px));background:#1f2b25;color:#fff;border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:10px 12px;font-size:14px;line-height:1.55;box-shadow:var(--sh2);white-space:pre-line;pointer-events:none}
+.celltip::first-line{font-weight:700;color:#bfe3d0}
+#histTable td,#histTable th{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
+.item.locate{animation:loc .9s ease-in-out 4;border-color:var(--flash)}
+.item.locate .qty{border-color:var(--flash);box-shadow:0 0 0 3px var(--ring)}
 </style>
 </head>
 <body>
@@ -792,7 +799,7 @@ tr.cur td.day.tdy{background:var(--sun)!important}
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v97</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v98</div>
   <details class="card sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
     <div class="body">
@@ -995,12 +1002,14 @@ function goToItem(date,itemId){
   switchTab('daily');loadDate(date);
   if(!itemId)return;
   const go=()=>{
-    const c=cards[itemId];if(!c){return}
-    const topH=document.querySelector('#tab-daily .top').offsetHeight;
-    const y=c.el.getBoundingClientRect().top+window.pageYOffset-topH-16;
-    window.scrollTo(0,Math.max(0,y));
+    const c=cards[itemId];if(!c){toast('這天沒有這個品項');return}
+    const grp=c.el.closest('.grp');
+    if(grp&&grp.classList.contains('closed')){const k=grp.dataset.cat;collapsed[k]=false;grp.classList.remove('closed');saveCollapsed()}
+    const aim=()=>c.el.getBoundingClientRect().top+window.pageYOffset-Math.round(window.innerHeight*0.3);
+    window.scrollTo(0,Math.max(0,aim()));
     c.el.classList.remove('locate');void c.el.offsetWidth;c.el.classList.add('locate');
-    setTimeout(()=>c.el.classList.remove('locate'),3000);
+    setTimeout(()=>c.el.classList.remove('locate'),4200);
+    setTimeout(()=>{const y2=aim();if(Math.abs(y2-window.pageYOffset)>40)window.scrollTo(0,Math.max(0,y2))},350);
   };
   requestAnimationFrame(()=>requestAnimationFrame(go));
 }
@@ -1480,8 +1489,9 @@ function anomOf(id,ds){
       const prev=ser.slice(Math.max(0,k-10),k).map(x=>x.v);
       if(prev.length>=4){
         const so=[...prev].sort((a,b)=>a-b),med=so.length%2?so[(so.length-1)/2]:(so[so.length/2-1]+so[so.length/2])/2;
-        if(med>0&&p.v>=med*2.5&&p.v-med>=10)m[p.d]={lvl:2,text:'近期約 '+Math.round(med*10)/10+'，當天 '+p.v+'（比平常多很多）'};
-        else if(med>0&&p.v<=med*0.2&&med-p.v>=10)m[p.d]={lvl:2,text:'近期約 '+Math.round(med*10)/10+'，當天 '+p.v+'（比平常少很多）'};
+        const moved=!pr||Math.abs(p.v-pr.v)>=Math.max(5,pr.v*0.3);
+        if(moved&&med>0&&p.v>=med*2.5&&p.v-med>=10)m[p.d]={lvl:2,text:'近期約 '+Math.round(med*10)/10+'，當天 '+p.v+'（比平常多很多）'};
+        else if(moved&&med>0&&p.v<=med*0.2&&med-p.v>=10)m[p.d]={lvl:2,text:'近期約 '+Math.round(med*10)/10+'，當天 '+p.v+'（比平常少很多）'};
       }
     });
   }
@@ -1494,7 +1504,7 @@ function renderHistory(scrollToday){
   document.querySelectorAll('#hSeg button').forEach(b=>b.classList.toggle('on',b.dataset.m===hMode));
   $('hTableWrap').classList.toggle('hidden',hMode!=='table');
   $('hItemWrap').classList.toggle('hidden',hMode!=='item');
-  $('recCount').textContent='共 '+Object.keys(S.days).filter(d=>hasData(S.days[d])).length+' 天紀錄'+(hMode==='table'?' · 紅格＝跟前次差很多、橘格＝跟近期平均差很多':'');
+  $('recCount').textContent='共 '+Object.keys(S.days).filter(d=>hasData(S.days[d])).length+' 天紀錄'+(hMode==='table'?' · 紅格＝跟前次差很多、橘格＝跟近期平均差很多（長按格子看原因）':'');
   const its=hFiltered();
   if(hMode==='item'){renderHItem(its);return}
   const [y,m]=histMonth.split('-').map(Number),days=new Date(y,m,0).getDate();
@@ -1507,7 +1517,7 @@ function renderHistory(scrollToday){
   for(let d=1;d<=days;d++){
     const ds=y+'-'+pad(m)+'-'+pad(d),r=S.days[ds];
     h+='<tr class="'+(hasData(r)?'has':'')+(ds===curDate?' cur':'')+'"><td class="day'+(ds===todayStr?' tdy':'')+'" data-d="'+ds+'">'+d+'</td><td>'+WD[new Date(y,m-1,d).getDay()]+'</td><td class="'+(staffColorOf(ds)?'pc-'+staffColorOf(ds):'')+'">'+esc(r&&r.staff||'')+'</td>'+
-      its.map(i=>{const v=r&&r.values?r.values[i.id]:'';const nt=r&&r.inotes&&r.inotes[i.id]?r.inotes[i.id]:'';const an=(r&&r.values)?anomOf(i.id,ds):null;const cl=((lowVal(i,v)?'lowc ':'')+(nt?'hasn ':'')+(an?'anom'+an.lvl:'')).trim();return'<td'+(cl?' class="'+cl+'"':'')+((nt||an)?' title="'+esc(nt||an.text)+'"':'')+'>'+(hasVal(v)?v:'')+'</td>'}).join('')+'</tr>';
+      its.map(i=>{const v=r&&r.values?r.values[i.id]:'';const nt=r&&r.inotes&&r.inotes[i.id]?r.inotes[i.id]:'';const an=(r&&r.values)?anomOf(i.id,ds):null;const cl=((lowVal(i,v)?'lowc ':'')+(nt?'hasn ':'')+(an?'anom'+an.lvl:'')).trim();const tip=[an?an.text:'',lowVal(i,v)?'低於最低量（最低 '+i.min+'）':'',nt?'備註：'+nt:''].filter(Boolean);return'<td'+(cl?' class="'+cl+'"':'')+(tip.length?' title="'+esc(tip.join('；'))+'" data-tip="'+esc(ds.slice(5).replace('-','/')+' '+i.name+'\n'+tip.join('\n'))+'"':'')+'>'+(hasVal(v)?v:'')+'</td>'}).join('')+'</tr>';
   }
   t.innerHTML=h+'</tbody>';
   t.querySelectorAll('td.day').forEach(td=>td.onclick=()=>{switchTab('daily');loadDate(td.dataset.d)});
@@ -1976,6 +1986,32 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdat
   document.addEventListener('click',e=>{if(!mm.contains(e.target))close()});
   document.addEventListener('keydown',e=>{if(e.key==='Escape')close()});
   window.addEventListener('scroll',close,{passive:true});
+})();
+(function(){
+  const box=$('histBody');if(!box)return;
+  const tip=document.createElement('div');tip.className='celltip hidden';tip.setAttribute('role','status');document.body.appendChild(tip);
+  let timer=0,sx=0,sy=0,sup=false,hideT=0;
+  const hide=()=>{tip.classList.add('hidden');clearTimeout(hideT)};
+  const show=td=>{
+    tip.textContent=td.dataset.tip;tip.classList.remove('hidden');
+    const r=td.getBoundingClientRect(),w=tip.offsetWidth,h=tip.offsetHeight;
+    let x=r.left+r.width/2-w/2;x=Math.max(8,Math.min(x,window.innerWidth-w-8));
+    let y=r.top-h-10;if(y<8)y=r.bottom+10;
+    tip.style.left=x+'px';tip.style.top=y+'px';
+    clearTimeout(hideT);hideT=setTimeout(hide,5000);
+    if(navigator.vibrate){try{navigator.vibrate(15)}catch(_){}}
+  };
+  box.addEventListener('pointerdown',e=>{
+    hide();const td=e.target.closest('td[data-tip]');if(!td)return;
+    sx=e.clientX;sy=e.clientY;clearTimeout(timer);
+    timer=setTimeout(()=>{timer=0;sup=true;show(td);setTimeout(()=>{sup=false},800)},450);
+  });
+  box.addEventListener('pointermove',e=>{if(timer&&(Math.abs(e.clientX-sx)>10||Math.abs(e.clientY-sy)>10)){clearTimeout(timer);timer=0}});
+  ['pointerup','pointercancel','pointerleave'].forEach(t=>box.addEventListener(t,()=>{clearTimeout(timer);timer=0}));
+  box.addEventListener('click',e=>{if(sup){e.stopImmediatePropagation();e.preventDefault();sup=false}},true);
+  box.addEventListener('contextmenu',e=>{if(e.target.closest('td[data-tip]'))e.preventDefault()});
+  window.addEventListener('scroll',hide,{passive:true});box.addEventListener('scroll',hide,{passive:true});
+  document.addEventListener('pointerdown',e=>{if(!box.contains(e.target))hide()});
 })();
 (function(){const t=document.querySelector('#tab-daily .top');if(!t)return;const f=()=>t.classList.toggle('lift',window.scrollY>4);window.addEventListener('scroll',f,{passive:true});f()})();
 window.addEventListener('pageshow',e=>{if(e.persisted)checkUpdate(false)});
