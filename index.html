@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="95">
+<meta name="app-version" content="97">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -611,10 +611,15 @@ input.sw:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
 
 /* ================= v95 ================= */
 /* 1. 一般用量不標紅：減少用灰色，補貨用綠色，異常才紅／橘 */
-.diff.down{color:var(--muted)}
-.diff.an,.lrow .df.an{color:var(--down)}
-.item.warn .diff{color:var(--warn)}
-.diff{font-weight:700}
+.diff,.pdiff{--d-dn-bg:#dde2de;--d-dn-fg:#151917;--d-up-bg:#c6e8d3;--d-up-fg:#151917;--d-an-bg:#f6d4cf;--d-an-fg:#8f1f14;--d-wn-bg:#f5e2a8;--d-wn-fg:#4d3500}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .diff{--d-dn-bg:#3b4740;--d-dn-fg:#eef2ee;--d-up-bg:#2f5a45;--d-up-fg:#eef6f0;--d-an-bg:#5a2b27;--d-an-fg:#ffc9c2;--d-wn-bg:#574a1c;--d-wn-fg:#fbe9a5}}
+:root[data-theme="dark"] .diff{--d-dn-bg:#3b4740;--d-dn-fg:#eef2ee;--d-up-bg:#2f5a45;--d-up-fg:#eef6f0;--d-an-bg:#5a2b27;--d-an-fg:#ffc9c2;--d-wn-bg:#574a1c;--d-wn-fg:#fbe9a5}
+.diff{font-weight:800;display:inline-block;padding:0 9px;border-radius:99px;line-height:1.55}
+.diff.down{color:var(--d-dn-fg);background:var(--d-dn-bg)}
+.diff.up{color:var(--d-up-fg);background:var(--d-up-bg)}
+.diff.an,.lrow .df.an{color:var(--d-an-fg);background:var(--d-an-bg)}
+.item.warn .diff{color:var(--d-wn-fg);background:var(--d-wn-bg)}
+.lrow .df{min-width:0;margin-right:4px}
 /* 2. 歷史表：只高亮「今天」，有紀錄的日子用綠色日期＋細色條 */
 tr.has td.day{color:var(--accent)!important}
 tr.has:not(.cur) td.day{box-shadow:inset 3px 0 0 var(--flash)}
@@ -628,11 +633,15 @@ tr.cur td.day.tdy{background:var(--sun)!important}
 .irow2{background:transparent;border:0;border-bottom:1px solid var(--line);border-radius:0;padding:10px 0;margin-bottom:0}
 .irow2:last-child{border-bottom:0}
 .irow2.dragging{background:var(--card);border:1px solid var(--flash);border-radius:var(--r-md);padding:10px 8px}
-.irow2 .irow{grid-template-columns:1fr auto}
-.irow2 .irow.r2{grid-template-columns:1fr}
+.irow2 .irow{grid-template-columns:minmax(0,1fr)}
+.irow2 .irow.r2{grid-template-columns:minmax(0,5fr) minmax(0,6fr)}
+.irow2 input{height:38px;padding:0 10px}
+.irow2 .ib{width:40px;height:38px}
+.irow2 .fields{gap:6px}
+.irow2 .grip{width:36px}
 .irow2 .irow.r3{grid-template-columns:1fr 1fr;display:none}
 .irow2.ex .irow.r3{display:grid}
-.xt{display:flex;align-items:center;gap:4px;height:100%;min-height:42px;max-width:150px;padding:0 10px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--input);color:var(--muted);font-size:var(--fs-xs);font-weight:600;white-space:nowrap}
+.xt{display:flex;align-items:center;justify-content:space-between;gap:4px;height:38px;min-height:38px;min-width:0;padding:0 10px;border:1px solid var(--line);border-radius:var(--r-sm);background:var(--input);color:var(--muted);font-size:var(--fs-xs);font-weight:600;white-space:nowrap}
 .xt span{overflow:hidden;text-overflow:ellipsis}
 .xt .i{width:16px;height:16px;flex:none;transition:transform .2s}
 .irow2.ex .xt{color:var(--accent);border-color:var(--teal-line)}
@@ -664,6 +673,15 @@ tr.cur td.day.tdy{background:var(--sun)!important}
 .top.compact .dwrap .dchev{display:none}
 .top.compact .nb{width:36px}
 .top.compact .prog{flex:0 0 100%;margin-top:6px}
+/* 姓名顏色：30 色，6 欄 */
+.pal{grid-template-columns:repeat(6,38px);gap:9px;padding:12px}
+.pal .dot8{width:38px;height:38px}
+.pal .rst{grid-column:1/-1}
+:root{--pc-co:#e5694f;--pc-lv:#8e7cc3;--pc-pl:#6b2e7e;--pc-mn:#22a074;--pc-nv:#1d3a6e;--pc-cl:#a8812f;--pc-sl:#5b7083;--pc-ch:#5a3a2a;--pc-fo:#1f5a3a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--pc-co:#ff9f8a;--pc-lv:#bfb0ef;--pc-pl:#c58ad6;--pc-mn:#6fe0b3;--pc-nv:#8fb0e8;--pc-cl:#d8b878;--pc-sl:#a9bccb;--pc-ch:#c9a28c;--pc-fo:#7ad6a0}}
+:root[data-theme="dark"]{--pc-co:#ff9f8a;--pc-lv:#bfb0ef;--pc-pl:#c58ad6;--pc-mn:#6fe0b3;--pc-nv:#8fb0e8;--pc-cl:#d8b878;--pc-sl:#a9bccb;--pc-ch:#c9a28c;--pc-fo:#7ad6a0}
+.dot-co{background:var(--pc-co)}.dot-lv{background:var(--pc-lv)}.dot-pl{background:var(--pc-pl)}.dot-mn{background:var(--pc-mn)}.dot-nv{background:var(--pc-nv)}.dot-cl{background:var(--pc-cl)}.dot-sl{background:var(--pc-sl)}.dot-ch{background:var(--pc-ch)}.dot-fo{background:var(--pc-fo)}
+.pc-co{color:var(--pc-co)!important}.pc-lv{color:var(--pc-lv)!important}.pc-pl{color:var(--pc-pl)!important}.pc-mn{color:var(--pc-mn)!important}.pc-nv{color:var(--pc-nv)!important}.pc-cl{color:var(--pc-cl)!important}.pc-sl{color:var(--pc-sl)!important}.pc-ch{color:var(--pc-ch)!important}.pc-fo{color:var(--pc-fo)!important}
 /* 9. 近 30 天趨勢：左文字、右小線圖，高度約減半 */
 .trend{display:grid;grid-template-columns:1fr 150px;align-items:center;gap:0 10px;padding:8px 12px}
 .trend>.tr-l{min-width:0}
@@ -774,7 +792,7 @@ tr.cur td.day.tdy{background:var(--sun)!important}
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v95</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v97</div>
   <details class="card sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
     <div class="body">
@@ -1262,8 +1280,9 @@ function syncFromRemote(){
   syncMeta(true);renderChips();updateProg();
 }
 /* ---------- 人員姓名顏色 ---------- */
-const PCOLORS=['g', 'tl', 't', 'gr', 'lm', 'y', 'am', 'o', 'rd', 'wn', 'r', 'pk', 'mg', 'p', 'in', 'b', 'sk', 'br', 'ol', 'k', 'bk'];
-const PNAMES={g:'青山綠',tl:'湖水綠',t:'青藍',gr:'草綠',lm:'萊姆綠',y:'金黃',am:'琥珀',o:'橘色',rd:'紅色',wn:'酒紅',r:'玫瑰',pk:'粉紅',mg:'紫紅',p:'紫色',in:'靛藍',b:'藍色',sk:'天藍',br:'棕色',ol:'橄欖',k:'深灰',bk:'黑色'};
+const PCOLORS=['g', 'tl', 't', 'gr', 'lm', 'y', 'am', 'o', 'rd', 'wn', 'r', 'pk', 'mg', 'p', 'in', 'b', 'sk', 'br', 'ol', 'k', 'bk', 'co', 'lv', 'pl', 'mn', 'nv', 'cl', 'sl', 'ch', 'fo'];
+const PORDER=['g','fo','gr','mn','tl','t','sk','b','nv','in','lv','p','pl','mg','pk','r','co','rd','wn','o','am','y','lm','ol','cl','br','ch','sl','k','bk'];
+const PNAMES={g:'青山綠',tl:'湖水綠',t:'青藍',gr:'草綠',lm:'萊姆綠',y:'金黃',am:'琥珀',o:'橘色',rd:'紅色',wn:'酒紅',r:'玫瑰',pk:'粉紅',mg:'紫紅',p:'紫色',in:'靛藍',b:'藍色',sk:'天藍',br:'棕色',ol:'橄欖',k:'深灰',bk:'黑色',co:'珊瑚',lv:'薰衣草',pl:'李子',mn:'薄荷',nv:'海軍藍',cl:'卡其',sl:'石板灰',ch:'巧克力',fo:'森林綠'};
 function staffColorOf(date){
   const d=S.days[date];if(!d)return '';
   if(d.scolor==='x')return '';                                       // 手動選了「預設」
@@ -1282,7 +1301,7 @@ function paintStaff(){
 }
 (function(){
   const box=$('staffPal');
-  ['g','t','o','rd','pk','p','b','k'].forEach(c=>{const b=document.createElement('button');b.type='button';b.className='dot8 dot-'+c;b.dataset.c=c;b.setAttribute('aria-label',PNAMES[c]);box.appendChild(b)});
+  PORDER.forEach(c=>{const b=document.createElement('button');b.type='button';b.className='dot8 dot-'+c;b.dataset.c=c;b.setAttribute('aria-label',PNAMES[c]);box.appendChild(b)});
   const r=document.createElement('button');r.type='button';r.className='rst';r.textContent='預設';r.dataset.c='x';box.appendChild(r);
   box.addEventListener('click',e=>{
     const b=e.target.closest('button');if(!b)return;
@@ -1604,12 +1623,12 @@ function renderItemEditor(){
   $('catList').innerHTML=[...new Set([...DEFAULT_CATS,...S.items.map(i=>i.cat).filter(Boolean)])].map(c=>'<option value="'+esc(c)+'">').join('');
   S.items.filter(i=>!i.off).forEach((it)=>{
     const r=document.createElement('div');r.className='irow2';r.dataset.id=it.id;
-    r.innerHTML='<div class="grip" aria-label="拖曳排序"><i></i><i></i><i></i></div><div class="fields"><div class="irow"><input class="n" placeholder="品項名稱"><input class="u" placeholder="單位"></div><div class="irow r2"><input class="c" list="catList" placeholder="分類（粉／包裝／發票…）"><input class="mn" type="number" inputmode="decimal" min="0" placeholder="最低量"></div></div><div class="acts"><button class="ib offb" aria-label="停用">停用</button><button class="ib del" aria-label="刪除">'+ICN('x')+'</button></div>';
+    r.innerHTML='<div class="grip" aria-label="拖曳排序"><i></i><i></i><i></i></div><div class="fields"><div class="irow"><input class="n" placeholder="品項名稱"><input class="u" placeholder="單位"></div><div class="irow r2"><input class="c" list="catList" placeholder="分類"><input class="mn" type="number" inputmode="decimal" min="0" placeholder="最低量"></div></div><div class="acts"><button class="ib offb" aria-label="停用">停用</button><button class="ib del" aria-label="刪除">'+ICN('x')+'</button></div>';
     const n=r.querySelector('.n'),u=r.querySelector('.u'),c=r.querySelector('.c'),del=r.querySelector('.del'),grip=r.querySelector('.grip');
     n.value=it.name;u.value=it.unit||'';c.value=it.cat||'';
     const mn=r.querySelector('.mn');mn.value=hasMin(it)?it.min:'';
     const r1=r.querySelector('.irow'),r2=r.querySelector('.irow.r2'),r3=document.createElement('div');r3.className='irow r3';r3.appendChild(u);r3.appendChild(mn);r2.after(r3);
-    const xt=document.createElement('button');xt.type='button';xt.className='xt';xt.setAttribute('aria-expanded','false');r1.appendChild(xt);
+    const xt=document.createElement('button');xt.type='button';xt.className='xt';xt.setAttribute('aria-expanded','false');r2.appendChild(xt);
     const xsum=()=>{xt.innerHTML='<span>'+esc((it.unit||'')+(hasMin(it)?(it.unit?' · ':'')+'最低 '+it.min:'')||'單位・最低量')+'</span>'+ICN('chev-d')};xsum();
     xt.onclick=()=>{const o=r.classList.toggle('ex');xt.setAttribute('aria-expanded',String(o))};
     const upd=()=>{saveItems();renderChips();renderItems();xsum()};
