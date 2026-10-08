@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="98">
+<meta name="app-version" content="102">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -658,7 +658,7 @@ tr.cur td.day.tdy{background:var(--sun)!important}
 .moreWrap{position:relative;flex:none}
 #btnMore{width:38px;padding:0;display:flex;align-items:center;justify-content:center}
 #btnMore .i{width:20px;height:20px;margin:0}
-.menu{position:absolute;left:0;top:calc(100% + 6px);min-width:190px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:var(--sh2);padding:6px;z-index:40}
+.menu{position:absolute;left:0;top:calc(100% + 6px);min-width:120px;background:var(--card);border:1px solid var(--line);border-radius:var(--r-md);box-shadow:var(--sh2);padding:6px;z-index:40}
 .menu .btn{width:100%;justify-content:flex-start;border:0;box-shadow:none;background:transparent;min-height:44px;padding:0 12px;font-size:var(--fs-md);text-align:left}
 .menu .btn.danger{color:var(--down)}
 /* 8. 頂部列捲動後變成單行 */
@@ -696,6 +696,12 @@ tr.cur td.day.tdy{background:var(--sun)!important}
 #histTable td,#histTable th{-webkit-touch-callout:none;-webkit-user-select:none;user-select:none}
 .item.locate{animation:loc .9s ease-in-out 4;border-color:var(--flash)}
 .item.locate .qty{border-color:var(--flash);box-shadow:0 0 0 3px var(--ring)}
+
+
+/* ---- v102：歷史表人員欄用彩色膠囊 ---- */
+.htab td.stf{padding:4px 8px;text-align:center;white-space:nowrap}
+.sp{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;vertical-align:middle;padding:2px 8px;border-radius:99px;font-weight:700;font-size:13px;line-height:1.5;color:var(--c);background:rgba(127,127,127,.14);border:1px solid rgba(127,127,127,.3)}
+@supports (background:color-mix(in srgb,red 10%,transparent)){.sp{background:color-mix(in srgb,var(--c) 16%,transparent);border-color:color-mix(in srgb,var(--c) 45%,transparent)}}
 </style>
 </head>
 <body>
@@ -738,7 +744,7 @@ tr.cur td.day.tdy{background:var(--sun)!important}
       <button class="nb" id="nextDay" aria-label="後一天"><svg class="i" aria-hidden="true"><use href="#i-chev-r"/></svg></button>
       <button class="todaybtn hidden" id="btnToday">今天</button>
     </div>
-    <div class="toolrow"><div class="search"><span class="ic"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg></span><input id="q" type="search" placeholder="搜尋品項" aria-label="搜尋品項" autocomplete="off"><button class="x hidden" id="qx" aria-label="清除"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></div><button class="btn sm hidden" id="btnUndo"><svg class="i" aria-hidden="true"><use href="#i-undo"/></svg>復原</button><button class="btn sm" id="btnCopyPrev">前次紀錄</button><div class="moreWrap"><button class="btn sm" id="btnMore" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="更多"><svg class="i" aria-hidden="true"><use href="#i-more"/></svg></button><div class="menu hidden" id="moreMenu" role="menu"><button class="btn danger" id="btnClear" type="button" role="menuitem">清空這天的數字</button></div></div></div>
+    <div class="toolrow"><div class="search"><span class="ic"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg></span><input id="q" type="search" placeholder="搜尋品項" aria-label="搜尋品項" autocomplete="off"><button class="x hidden" id="qx" aria-label="清除"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></div><button class="btn sm hidden" id="btnUndo"><svg class="i" aria-hidden="true"><use href="#i-undo"/></svg>復原</button><button class="btn sm" id="btnCopyPrev">前次紀錄</button><div class="moreWrap"><button class="btn sm" id="btnMore" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="更多"><svg class="i" aria-hidden="true"><use href="#i-more"/></svg></button><div class="menu hidden" id="moreMenu" role="menu"><button class="btn danger" id="btnClear" type="button" role="menuitem">清空</button></div></div></div>
     <div class="chips" id="chips"></div>
     <div class="prog" id="prog"><div class="pf" id="progBar"></div><span class="pt">PEAK TEA</span></div>
   </div>
@@ -799,7 +805,7 @@ tr.cur td.day.tdy{background:var(--sun)!important}
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v98</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v102</div>
   <details class="card sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
     <div class="body">
@@ -1302,6 +1308,18 @@ function staffColorOf(date){
   }
   return '';
 }
+let autoMapCache=null;
+const AUTO_TONES=['b','o','mn','p','co','nv','am','pk','tl','br','lv','gr'];
+function histTone(ds,name){
+  const c=staffColorOf(ds);if(c)return c;
+  const d=S.days[ds];if(d&&d.scolor==='x')return 'sl';
+  const e=nameBook.find(x=>x.n===name);if(e&&PCOLORS.includes(e.c))return e.c;
+  if(!autoMapCache){
+    autoMapCache={};let n=0;
+    Object.keys(S.days).sort().forEach(k=>{const x=S.days[k],nm=x&&x.staff;if(!nm||autoMapCache[nm])return;const bk=nameBook.find(y=>y.n===nm);if(PCOLORS.includes(x.scolor)||(bk&&PCOLORS.includes(bk.c)))return;autoMapCache[nm]=AUTO_TONES[n%AUTO_TONES.length];n++});
+  }
+  return autoMapCache[name]||'sl';
+}
 function paintStaff(){
   const el=$('staff'),c=staffColorOf(curDate);
   PCOLORS.forEach(k=>el.classList.remove('pc-'+k));
@@ -1498,7 +1516,7 @@ function anomOf(id,ds){
   return m[ds]||null;
 }
 function renderHistory(scrollToday){
-  anCache={};
+  anCache={};autoMapCache=null;
   $('monthPick').value=histMonth;
   renderHChips();
   document.querySelectorAll('#hSeg button').forEach(b=>b.classList.toggle('on',b.dataset.m===hMode));
@@ -1508,7 +1526,7 @@ function renderHistory(scrollToday){
   const its=hFiltered();
   if(hMode==='item'){renderHItem(its);return}
   const [y,m]=histMonth.split('-').map(Number),days=new Date(y,m,0).getDate();
-  const W=[38,34,64,...its.map(()=>68)],total=W.reduce((p,c)=>p+c,0);
+  const W=[38,34,88,...its.map(()=>68)],total=W.reduce((p,c)=>p+c,0);
   const cg='<colgroup>'+W.map(w=>'<col style="width:'+w+'px">').join('')+'</colgroup>';
   const hh=$('histHeadTable'),t=$('histTable');
   hh.style.width=t.style.width=total+'px';
@@ -1516,7 +1534,7 @@ function renderHistory(scrollToday){
   let h=cg+'<tbody>';
   for(let d=1;d<=days;d++){
     const ds=y+'-'+pad(m)+'-'+pad(d),r=S.days[ds];
-    h+='<tr class="'+(hasData(r)?'has':'')+(ds===curDate?' cur':'')+'"><td class="day'+(ds===todayStr?' tdy':'')+'" data-d="'+ds+'">'+d+'</td><td>'+WD[new Date(y,m-1,d).getDay()]+'</td><td class="'+(staffColorOf(ds)?'pc-'+staffColorOf(ds):'')+'">'+esc(r&&r.staff||'')+'</td>'+
+    h+='<tr class="'+(hasData(r)?'has':'')+(ds===curDate?' cur':'')+'"><td class="day'+(ds===todayStr?' tdy':'')+'" data-d="'+ds+'">'+d+'</td><td>'+WD[new Date(y,m-1,d).getDay()]+'</td><td class="stf">'+(r&&r.staff?'<span class="sp" style="--c:var(--pc-'+histTone(ds,r.staff)+')">'+esc(r.staff)+'</span>':'')+'</td>'+
       its.map(i=>{const v=r&&r.values?r.values[i.id]:'';const nt=r&&r.inotes&&r.inotes[i.id]?r.inotes[i.id]:'';const an=(r&&r.values)?anomOf(i.id,ds):null;const cl=((lowVal(i,v)?'lowc ':'')+(nt?'hasn ':'')+(an?'anom'+an.lvl:'')).trim();const tip=[an?an.text:'',lowVal(i,v)?'低於最低量（最低 '+i.min+'）':'',nt?'備註：'+nt:''].filter(Boolean);return'<td'+(cl?' class="'+cl+'"':'')+(tip.length?' title="'+esc(tip.join('；'))+'" data-tip="'+esc(ds.slice(5).replace('-','/')+' '+i.name+'\n'+tip.join('\n'))+'"':'')+'>'+(hasVal(v)?v:'')+'</td>'}).join('')+'</tr>';
   }
   t.innerHTML=h+'</tbody>';
