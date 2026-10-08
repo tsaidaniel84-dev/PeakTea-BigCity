@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="104">
+<meta name="app-version" content="108">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -702,6 +702,20 @@ tr.cur td.day.tdy{background:var(--sun)!important}
 .htab td.stf{padding:4px 8px;text-align:center;white-space:nowrap}
 .sp{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;vertical-align:middle;padding:2px 8px;border-radius:99px;font-weight:700;font-size:13px;line-height:1.5;color:var(--c);background:rgba(127,127,127,.14);border:1px solid rgba(127,127,127,.3)}
 @supports (background:color-mix(in srgb,red 10%,transparent)){.sp{background:color-mix(in srgb,var(--c) 16%,transparent);border-color:color-mix(in srgb,var(--c) 45%,transparent)}}
+
+/* ---- v105 ---- */
+.nav button .nic2{position:relative}
+.nav button.dot .nic2::after{content:"";position:absolute;top:1px;right:9px;width:11px;height:11px;border-radius:50%;background:var(--sun);border:2px solid var(--card)}
+.dlg{position:fixed;inset:0;z-index:120;background:rgba(0,0,0,.45);display:flex;align-items:flex-end;justify-content:center;padding:12px;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
+.dlgbox{background:var(--card);border-radius:var(--r-lg);box-shadow:var(--sh2);width:100%;max-width:440px;padding:18px 18px 14px;max-height:85vh;overflow:auto}
+.dlgbox h3{margin:0 0 8px;font-size:var(--fs-lg)}
+.dlgbody p{margin:0 0 10px;font-size:var(--fs-sm);line-height:1.6}
+.dlgwarn{color:var(--warn);font-weight:600}
+.dlgnote{color:var(--muted)}
+.dlgck{display:flex;align-items:center;gap:8px;margin:4px 0 12px;font-size:var(--fs-sm)}
+.dlgck input{width:20px;height:20px}
+.dlgbtn{display:flex;gap:10px}
+.dlgbtn .btn{flex:1;min-height:46px;font-size:var(--fs-md)}
 </style>
 </head>
 <body>
@@ -805,7 +819,7 @@ tr.cur td.day.tdy{background:var(--sun)!important}
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v104</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v108</div>
   <details class="card sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
     <div class="body">
@@ -854,7 +868,7 @@ const parse=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)}
 const $=id=>document.getElementById(id);
 const clone=o=>JSON.parse(JSON.stringify(o));
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),2400)}
+function toast(m,ms){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),ms||2400)}
 const hasVal=v=>(typeof v==='number'&&isFinite(v))||(typeof v==='string'&&v.trim()!==''&&isFinite(Number(v)));
 const BOOT_AT=Date.now();
 const ICN=n=>'<svg class="i" aria-hidden="true"><use href="#i-'+n+'"/></svg>';
@@ -971,6 +985,15 @@ function fmtEdit(t){
   const d=new Date(t),n=new Date(),hm=pad(d.getHours())+':'+pad(d.getMinutes());
   return ymd(d)===ymd(n)?'今天 '+hm:(d.getMonth()+1)+'/'+d.getDate()+' '+hm;
 }
+function updateNavDot(){
+  const b=document.querySelector('#nav button[data-t="daily"]');if(!b)return;
+  const cur=document.querySelector('#nav button.on'),tab=cur?cur.dataset.t:'daily';
+  const its=itemsForDates([todayStr]),d=S.days[todayStr],vals=(d&&d.values)||{};
+  const left=its.filter(i=>!hasVal(vals[i.id])).length,show=tab!=='daily'&&its.length>0&&left>0;
+  b.classList.toggle('dot',show);
+  if(show)b.setAttribute('aria-label','盤點（今天還有 '+left+' 項未盤點）');else b.removeAttribute('aria-label');
+}
+setInterval(()=>{try{updateNavDot()}catch(e){}},30000);
 let statusText='';
 function setStatus(){
   const dot=$('syncDot'),le=$('lastEdit');
@@ -984,6 +1007,7 @@ function setStatus(){
   dot.className='dot'+(cls?' '+cls:'');
   statusText=txt;
   if(le)le.textContent=fmtEdit(lastEditTs());
+  try{updateNavDot()}catch(e){}
 }
 $('syncBox2').onclick=()=>toast(statusText);
 
@@ -1286,13 +1310,45 @@ function refreshCard(id,force){
   {const nb=c.el.querySelector('.nbtn');nb.classList.toggle('has',!!nt);nb.innerHTML=nt?'📝':ICN('plus')}
   if(editing&&document.activeElement!==ni&&ni.value!==nt)ni.value=nt;
 }
+let remoteQuietUntil=0,remoteBuf=[],otherBuf={},remoteT=0,firstDays=true;const warnedConf={};
+const fmtMD=d=>d.slice(5).replace('-','/');
+function flushRemote(){
+  const n=remoteBuf.length,show=remoteBuf.slice(0,3).join('、'),ds=Object.keys(otherBuf).sort(),parts=[];
+  if(n)parts.push(n+' 項：'+show+(n>3?'…':''));
+  if(ds.length===1){const nm=otherBuf[ds[0]];parts.push(fmtMD(ds[0])+' 的 '+nm.length+' 項（'+nm.slice(0,3).join('、')+(nm.length>3?'…':'')+'）')}
+  else if(ds.length>1)parts.push(ds.length+' 天的紀錄（'+ds.slice(0,3).map(fmtMD).join('、')+(ds.length>3?'…':'')+'）');
+  remoteBuf=[];otherBuf={};
+  if(parts.length)toast('其他人更新了 '+parts.join('；'),6000);
+}
+function queueRemote(list,byDate){
+  if(list)remoteBuf.push(...list);
+  if(byDate)for(const d in byDate)otherBuf[d]=[...new Set([...(otherBuf[d]||[]),...byDate[d]])];
+  clearTimeout(remoteT);remoteT=setTimeout(flushRemote,800);
+}
+function detectOtherDates(old){   // 別人改了「不是你正在看的那一天」：只提示，不影響操作
+  if(firstDays){firstDays=false;return}
+  if(!old||Date.now()-BOOT_AT<=4000||Date.now()<remoteQuietUntil)return;
+  const by={};
+  for(const d in S.days){
+    if(d===curDate)continue;
+    const nv=(S.days[d]&&S.days[d].values)||{},ov=(old[d]&&old[d].values)||{},names=[];
+    S.items.forEach(it=>{const a=hasVal(ov[it.id])?String(ov[it.id]):'',b=hasVal(nv[it.id])?String(nv[it.id]):'';if(a!==b)names.push(it.name)});
+    if(names.length)by[d]=names;
+  }
+  if(Object.keys(by).length)queueRemote(null,by);
+}
 function syncFromRemote(){
+  const chg=[],quiet=Date.now()-BOOT_AT<=4000||Date.now()<remoteQuietUntil;
   S.items.forEach(it=>{
     const c=cards[it.id];if(!c)return;
     const v=valOf(curDate,it.id),sv=hasVal(v)?String(v):'';
-    if(document.activeElement!==c.inp&&c.inp.value!==sv){c.inp.value=sv;if(Date.now()-BOOT_AT>4000){c.inp.classList.remove('flash');void c.inp.offsetWidth;c.inp.classList.add('flash')}}
+    if(document.activeElement!==c.inp&&c.inp.value!==sv){c.inp.value=sv;if(!quiet){c.inp.classList.remove('flash');void c.inp.offsetWidth;c.inp.classList.add('flash');chg.push(it.name+' '+(sv===''?'已清空':sv))}}
+    else if(document.activeElement===c.inp&&c.inp.value!==sv&&!quiet){   // 你正在編輯這一格，別人剛改了它
+      const k=curDate+'|'+it.id;if(warnedConf[k]!==sv){warnedConf[k]=sv;toast('「'+it.name+'」已被修改為'+(sv===''?'空白':sv),6000)}
+    }
     refreshCard(it.id);
   });
+  if(chg.length)queueRemote(chg);
   syncMeta(true);renderChips();updateProg();
 }
 /* ---------- 人員姓名顏色 ---------- */
@@ -1750,6 +1806,7 @@ let zoomOK=false;
 function switchTab(t){
   zoomOK=(t==='history');setZoom(zoomOK);
   document.querySelectorAll('#nav button').forEach(b=>{b.classList.toggle('on',b.dataset.t===t);if(b.dataset.t===t)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
+  try{updateNavDot()}catch(e){}
   ['daily','history','settings'].forEach(x=>$('tab-'+x).classList.toggle('hidden',x!==t));
   window.scrollTo(0,0);
   if(t==='history')renderHistory(false);
@@ -1834,19 +1891,42 @@ $('btnExport').onclick=()=>{
   catch(e){toast('匯出失敗：'+e.message)}
 };
 $('btnBackup').onclick=()=>download('盤點備份_'+todayStr+'.json',new Blob([JSON.stringify({items:S.items,nextId:S.nextId,days:S.days},null,1)],{type:'application/json'}));
+function askDialog(o){   // 簡單的確認視窗：回傳 {ok, check}
+  return new Promise(res=>{
+    const w=document.createElement('div');w.className='dlg';w.setAttribute('role','dialog');w.setAttribute('aria-modal','true');
+    w.innerHTML='<div class="dlgbox"><h3>'+esc(o.title)+'</h3><div class="dlgbody">'+o.html+'</div>'+(o.check?'<label class="dlgck"><input type="checkbox" checked> <span>'+esc(o.check)+'</span></label>':'')+'<div class="dlgbtn"><button type="button" class="btn" data-a="no">取消</button><button type="button" class="btn primary" data-a="ok">'+esc(o.ok||'確定')+'</button></div></div>';
+    const done=ok=>{const ck=w.querySelector('input');document.removeEventListener('keydown',kd);w.remove();res({ok,check:ck?ck.checked:false})};
+    const kd=e=>{if(e.key==='Escape')done(false)};document.addEventListener('keydown',kd);
+    w.addEventListener('click',e=>{const a=e.target.closest('[data-a]');if(a)done(a.dataset.a==='ok');else if(e.target===w)done(false)});
+    document.body.appendChild(w);w.querySelector('[data-a="no"]').focus();
+  });
+}
 $('fileRestore').onchange=e=>{
-  const f=e.target.files[0];if(!f)return;const rd=new FileReader();
+  const f=e.target.files[0];e.target.value='';if(!f)return;const rd=new FileReader();
   rd.onload=async()=>{try{
-    const s=JSON.parse(rd.result);if(!s||!Array.isArray(s.items)||typeof s.days!=='object')throw new Error('格式不符');
-    await store.setItems(JSON.stringify({list:s.items,nextId:s.nextId||100}));
-    let n=0;for(const d in s.days){await store.setDay(d,s.days[d]);n++}
+    const b=JSON.parse(rd.result);if(!b||!Array.isArray(b.items)||!b.days||typeof b.days!=='object')throw new Error('格式不符');
+    const keys=Object.keys(b.days).filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d)).sort(),skipped=Object.keys(b.days).length-keys.length;
+    const have=keys.filter(d=>hasData(b.days[d])),cur=Object.keys(S.days).filter(d=>hasData(S.days[d]));
+    const over=have.filter(d=>S.days[d]&&hasData(S.days[d])&&JSON.stringify(S.days[d])!==JSON.stringify(b.days[d]));
+    const rng=have.length?have[0]+' ～ '+have[have.length-1]:'（沒有數字紀錄）';
+    let html='<p><b>備份檔</b>：'+have.length+' 天紀錄<br>'+esc(rng)+'<br>'+b.items.length+' 個品項</p>'
+      +'<p><b>目前資料</b>：'+cur.length+' 天紀錄、'+S.items.length+' 個品項</p>'
+      +'<p class="dlgwarn">品項清單會換成備份檔裡的版本。'+(over.length?'<br>有 '+over.length+' 天目前已有不同內容，會被備份檔取代'+(over.length<=5?'：'+esc(over.map(d=>d.slice(5).replace('-','/')).join('、')):'')+'。':'')+'</p>'
+      +'<p class="dlgnote">目前有、但備份檔沒有的日期不會被刪除。'+(skipped?'<br>有 '+skipped+' 筆日期格式不正確，會略過。':'')+'</p>';
+    const r=await askDialog({title:'要還原這份備份嗎？',html,ok:'還原',check:'還原前先下載目前資料的備份'});
+    if(!r.ok){toast('已取消還原');return}
+    if(r.check)$('btnBackup').onclick();
+    remoteQuietUntil=Date.now()+4000;
+    await store.setItems(JSON.stringify({list:b.items,nextId:b.nextId||100}));
+    let n=0;for(const d of keys){remoteQuietUntil=Date.now()+4000;await store.setDay(d,b.days[d]);n++}
+    remoteQuietUntil=Date.now()+4000;
     toast('已還原 '+n+' 天紀錄')}catch(err){toast('還原失敗：'+err.message)}};
-  rd.readAsText(f);e.target.value='';
+  rd.readAsText(f);
 };
 
 /* ---------- 資料更新回呼 ---------- */
 function onDays(d){
-  S.days=d||{};applyPending();saveCache();detectAlerts();
+  const old=S.days;S.days=d||{};applyPending();detectOtherDates(old);saveCache();detectAlerts();
   if(!$('tab-daily').classList.contains('hidden'))syncFromRemote();
   if(!$('tab-history').classList.contains('hidden'))renderHistory();
   setStatus();
