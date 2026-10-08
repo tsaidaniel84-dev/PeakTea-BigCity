@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="103">
+<meta name="app-version" content="104">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -805,7 +805,7 @@ tr.cur td.day.tdy{background:var(--sun)!important}
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v103</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v104</div>
   <details class="card sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
     <div class="body">
@@ -1010,7 +1010,7 @@ function goToItem(date,itemId){
   const go=()=>{
     const c=cards[itemId];if(!c){toast('這天沒有這個品項');return}
     const grp=c.el.closest('.grp');
-    if(grp&&grp.classList.contains('closed')){const k=grp.dataset.cat;collapsed[k]=false;grp.classList.remove('closed');saveCollapsed()}
+    if(grp&&grp.classList.contains('closed')){const k=grp.dataset.cat;collapsed[k]=false;grp.classList.remove('closed');saveCollapsed();syncGall()}
     const aim=()=>c.el.getBoundingClientRect().top+window.pageYOffset-Math.round(window.innerHeight*0.3);
     window.scrollTo(0,Math.max(0,aim()));
     c.el.classList.remove('locate');void c.el.offsetWidth;c.el.classList.add('locate');
@@ -1253,7 +1253,7 @@ function renderItemsInner(){
       g.forEach(it=>buildCard(it,body));
     });
     if(_gk.length>1){const ga=document.createElement('button');ga.type='button';ga.className='gall';
-      const sync=()=>{ga.innerHTML=_gk.every(c=>collapsed[c])?ICN('chev-d')+' 全部展開':ICN('chev-u')+' 全部收合'};sync();
+      const sync=()=>{ga.innerHTML=_gk.every(c=>collapsed[c])?ICN('chev-d')+' 全部展開':ICN('chev-u')+' 全部收合'};ga._sync=sync;sync();
       ga.onclick=()=>{const close=!_gk.every(c=>collapsed[c]);_gk.forEach(c=>collapsed[c]=close);document.querySelectorAll('#items .grp').forEach(g=>g.classList.toggle('closed',close));saveCollapsed();sync()};
       box.insertBefore(ga,box.firstChild);
       box.addEventListener('click',e=>{if(e.target.closest('.gh'))sync()});}
@@ -1261,12 +1261,13 @@ function renderItemsInner(){
   updateGroupHeads('init');
 }
 const wasDone={};let doneT=0;
+function syncGall(){const b=document.querySelector('#items .gall');if(b&&b._sync)b._sync()}
 function updateGroupHeads(auto){
   document.querySelectorAll('#items .grp').forEach(g=>{
     const c=g.dataset.cat,cs=[...g.querySelectorAll('.item')],n=cs.filter(x=>x.classList.contains('filled')).length;
     g.querySelector('.gt').textContent=c;g.querySelector('.gc').textContent=n+'/'+cs.length;
     const done=cs.length>0&&n===cs.length;g.classList.toggle('done',done);
-    if(auto===true&&done&&wasDone[c]===false&&!g.contains(document.activeElement)){const gh=g.querySelector('.gh'),t0=gh.getBoundingClientRect().top;collapsed[c]=true;g.classList.add('closed');saveCollapsed();const t1=gh.getBoundingClientRect().top;if(Math.abs(t1-t0)>1)window.scrollBy(0,t1-t0)}
+    if(auto===true&&done&&wasDone[c]===false&&!g.contains(document.activeElement)){const gh=g.querySelector('.gh'),t0=gh.getBoundingClientRect().top;collapsed[c]=true;g.classList.add('closed');saveCollapsed();syncGall();const t1=gh.getBoundingClientRect().top;if(Math.abs(t1-t0)>1)window.scrollBy(0,t1-t0)}
     if(auto==='init'||auto===true)wasDone[c]=done;else if(!done)wasDone[c]=false;   // 只有「從沒填完 → 填完」才會自動收合
   });
 }
