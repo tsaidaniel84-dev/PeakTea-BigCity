@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="102">
+<meta name="app-version" content="103">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -805,7 +805,7 @@ tr.cur td.day.tdy{background:var(--sun)!important}
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v102</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v103</div>
   <details class="card sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
     <div class="body">
@@ -1308,17 +1308,9 @@ function staffColorOf(date){
   }
   return '';
 }
-let autoMapCache=null;
-const AUTO_TONES=['b','o','mn','p','co','nv','am','pk','tl','br','lv','gr'];
 function histTone(ds,name){
-  const c=staffColorOf(ds);if(c)return c;
-  const d=S.days[ds];if(d&&d.scolor==='x')return 'sl';
-  const e=nameBook.find(x=>x.n===name);if(e&&PCOLORS.includes(e.c))return e.c;
-  if(!autoMapCache){
-    autoMapCache={};let n=0;
-    Object.keys(S.days).sort().forEach(k=>{const x=S.days[k],nm=x&&x.staff;if(!nm||autoMapCache[nm])return;const bk=nameBook.find(y=>y.n===nm);if(PCOLORS.includes(x.scolor)||(bk&&PCOLORS.includes(bk.c)))return;autoMapCache[nm]=AUTO_TONES[n%AUTO_TONES.length];n++});
-  }
-  return autoMapCache[name]||'sl';
+  // 和盤點頁一致：只顯示有選過的顏色（含同名字之前選過的），沒選過或選「預設」都是灰色
+  return staffColorOf(ds)||'sl';
 }
 function paintStaff(){
   const el=$('staff'),c=staffColorOf(curDate);
@@ -1516,7 +1508,7 @@ function anomOf(id,ds){
   return m[ds]||null;
 }
 function renderHistory(scrollToday){
-  anCache={};autoMapCache=null;
+  anCache={};
   $('monthPick').value=histMonth;
   renderHChips();
   document.querySelectorAll('#hSeg button').forEach(b=>b.classList.toggle('on',b.dataset.m===hMode));
