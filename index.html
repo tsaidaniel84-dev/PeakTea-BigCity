@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="108">
+<meta name="app-version" content="109">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -716,6 +716,21 @@ tr.cur td.day.tdy{background:var(--sun)!important}
 .dlgck input{width:20px;height:20px}
 .dlgbtn{display:flex;gap:10px}
 .dlgbtn .btn{flex:1;min-height:46px;font-size:var(--fs-md)}
+
+/* ---- v109：捲動後頂部列不擠、搜尋鈕不出現多餘外框 ---- */
+.top.compact .datenav{overflow:hidden;gap:6px}
+.top.compact .nb{flex:none}
+.top.compact .dwrap{flex:1 1 0;min-width:0;overflow:hidden}
+.top.compact .dwrap #dateLabel{display:block;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.top.compact .dtd{display:none}
+.top.compact .toolrow{gap:6px}
+.top.compact #btnUndo{width:38px;padding:0;display:flex;align-items:center;justify-content:center}
+.top.compact #btnUndo.hidden{display:none}
+.top.compact #btnUndo .ulb{display:none}
+.top.compact #btnUndo .i{margin:0}
+.search{outline:none;-webkit-tap-highlight-color:transparent}
+.search.collapsed input{visibility:hidden}
+.search.collapsed,.search.collapsed:focus-within{box-shadow:none;outline:none}
 </style>
 </head>
 <body>
@@ -758,7 +773,7 @@ tr.cur td.day.tdy{background:var(--sun)!important}
       <button class="nb" id="nextDay" aria-label="後一天"><svg class="i" aria-hidden="true"><use href="#i-chev-r"/></svg></button>
       <button class="todaybtn hidden" id="btnToday">今天</button>
     </div>
-    <div class="toolrow"><div class="search"><span class="ic"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg></span><input id="q" type="search" placeholder="搜尋品項" aria-label="搜尋品項" autocomplete="off"><button class="x hidden" id="qx" aria-label="清除"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></div><button class="btn sm hidden" id="btnUndo"><svg class="i" aria-hidden="true"><use href="#i-undo"/></svg>復原</button><button class="btn sm" id="btnCopyPrev">前次紀錄</button><div class="moreWrap"><button class="btn sm" id="btnMore" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="更多"><svg class="i" aria-hidden="true"><use href="#i-more"/></svg></button><div class="menu hidden" id="moreMenu" role="menu"><button class="btn danger" id="btnClear" type="button" role="menuitem">清空</button></div></div></div>
+    <div class="toolrow"><div class="search"><span class="ic"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg></span><input id="q" type="search" placeholder="搜尋品項" aria-label="搜尋品項" autocomplete="off"><button class="x hidden" id="qx" aria-label="清除"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></div><button class="btn sm hidden" id="btnUndo" aria-label="復原"><svg class="i" aria-hidden="true"><use href="#i-undo"/></svg><span class="ulb">復原</span></button><button class="btn sm" id="btnCopyPrev">前次紀錄</button><div class="moreWrap"><button class="btn sm" id="btnMore" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="更多"><svg class="i" aria-hidden="true"><use href="#i-more"/></svg></button><div class="menu hidden" id="moreMenu" role="menu"><button class="btn danger" id="btnClear" type="button" role="menuitem">清空</button></div></div></div>
     <div class="chips" id="chips"></div>
     <div class="prog" id="prog"><div class="pf" id="progBar"></div><span class="pt">PEAK TEA</span></div>
   </div>
@@ -819,7 +834,7 @@ tr.cur td.day.tdy{background:var(--sun)!important}
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v108</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v109</div>
   <details class="card sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
     <div class="body">
@@ -1021,11 +1036,11 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick()});
 function shift(n){const d=parse(curDate);d.setDate(d.getDate()+n);loadDate(ymd(d))}
 function updateDateUI(){
   const d=parse(curDate);
-  $('dateLabel').textContent=(d.getMonth()+1)+'月'+d.getDate()+'日（週'+WD[d.getDay()]+'）'+(curDate===todayStr?' · 今天':'');
+  $('dateLabel').innerHTML=(d.getMonth()+1)+'月'+d.getDate()+'日（週'+WD[d.getDay()]+'）'+(curDate===todayStr?'<span class="dtd"> · 今天</span>':'');
   $('datePick').value=curDate;
   $('btnToday').classList.toggle('hidden',curDate===todayStr);
 }
-function loadDate(d){progDone=null;curDate=d;updateDateUI();renderItems(false);syncMeta(false);renderChips();updateProg()}
+function loadDate(d){progDone=null;curDate=d;updateDateUI();renderItems(false);syncMeta(false,true);renderChips();updateProg()}
 /* 從歷史頁跳到某天的某個品項：捲到位置並閃爍提示 */
 function goToItem(date,itemId){
   catSel='全部';query='';$('q').value='';$('qx').classList.add('hidden');
@@ -1482,10 +1497,11 @@ $('staff').addEventListener('blur',revealStaffSoon);
 $('staff').addEventListener('focus',()=>setTimeout(revealStaff,450));
 // （已移除：鍵盤彈出時不再自動捲回「盤點人員」，否則點任何輸入框畫面都會跳到最上面）
 let staffEditAt=0;
-function syncMeta(flash){
+function syncMeta(flash,force){
   const r=S.days[curDate]||{};
   [['staff','staff']].forEach(([id,k])=>{
     const el=$(id),v=r[k]||'';
+    if(force){el.value=v;staffEditAt=0;return}   // 換日期：直接顯示那一天的人員，不沿用剛輸入的字
     if(Date.now()-staffEditAt<3000)return;   // 剛打完字：以本機輸入為準，不套用雲端來回的舊字（會造成閃一下）
     if(document.activeElement!==el&&el.value!==v)el.value=v;   // 姓名欄不閃爍
   });
