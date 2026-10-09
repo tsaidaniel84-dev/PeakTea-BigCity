@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="109">
+<meta name="app-version" content="110">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -834,7 +834,7 @@ tr.cur td.day.tdy{background:var(--sun)!important}
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v109</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v110</div>
   <details class="card sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
     <div class="body">
@@ -950,9 +950,14 @@ async function makeCloudStore(url,code){
 function dayOf(d){return S.days[d]||(S.days[d]={})}
 function valOf(d,id){const x=S.days[d];return x&&x.values?x.values[id]:undefined}
 function hasData(r){return r&&r.values&&Object.values(r.values).some(hasVal)}
+let _pm=null;
 function prevRecord(date){
-  const ds=Object.keys(S.days).filter(d=>d<date&&hasData(S.days[d])).sort();
-  return ds.length?{date:ds[ds.length-1],rec:S.days[ds[ds.length-1]]}:null;
+  if(_pm&&_pm.d===date&&_pm.s===S.days)return _pm.v;
+  let best=null;
+  for(const d in S.days){if(d<date&&(best===null||d>best)&&hasData(S.days[d]))best=d}
+  const v=best?{date:best,rec:S.days[best]}:null;
+  _pm={d:date,s:S.days,v};queueMicrotask(()=>{_pm=null});
+  return v;
 }
 function applyPending(){
   for(const k in pendVals){
@@ -990,10 +995,10 @@ function writeField(date,kind,id,v){ // kind: 'v' 數量 / 'm' staff,note
   },400);
 }
 let localEditTs=0;
+let _le=null;
 function lastEditTs(){
-  let t=localEditTs;
-  for(const d in S.days){const u=S.days[d]&&S.days[d].updatedAt;if(typeof u==='number'&&u>t)t=u}
-  return t;
+  if(!_le||_le.s!==S.days){let m=0;for(const d in S.days){const u=S.days[d]&&S.days[d].updatedAt;if(typeof u==='number'&&u>m)m=u}_le={s:S.days,v:m}}
+  return Math.max(localEditTs,_le.v);
 }
 function fmtEdit(t){
   if(!t)return '—';
@@ -1346,7 +1351,9 @@ function detectOtherDates(old){   // 別人改了「不是你正在看的那一�
   const by={};
   for(const d in S.days){
     if(d===curDate)continue;
-    const nv=(S.days[d]&&S.days[d].values)||{},ov=(old[d]&&old[d].values)||{},names=[];
+    const nd=S.days[d],od=old[d];
+    if(od&&nd&&typeof nd.updatedAt==='number'&&nd.updatedAt===od.updatedAt)continue;   // 這天沒被動過
+    const nv=(nd&&nd.values)||{},ov=(od&&od.values)||{},names=[];
     S.items.forEach(it=>{const a=hasVal(ov[it.id])?String(ov[it.id]):'',b=hasVal(nv[it.id])?String(nv[it.id]):'';if(a!==b)names.push(it.name)});
     if(names.length)by[d]=names;
   }
@@ -1557,31 +1564,38 @@ function renderHChips(){
   });
 }
 /* 異常判斷：跟前次比差很多(紅)，或跟近期平均差很多(橘)；同一套結果用在歷史表格、折線圖 */
-let anCache={};
-function anomOf(id,ds){
-  let m=anCache[id];
-  if(!m){
-    m=anCache[id]={};
-    const ser=Object.keys(S.days).filter(d=>hasData(S.days[d])).sort().map(d=>({d,v:valOf(d,id)})).filter(x=>hasVal(x.v)&&!isNaN(Number(x.v))).map(x=>({d:x.d,v:Number(x.v)}));
-    ser.forEach((p,k)=>{
-      const pr=ser[k-1];
-      if(pr&&pr.v>0&&(parse(p.d)-parse(pr.d))/86400000<=10){
-        if(p.v>=pr.v*5&&p.v-pr.v>=20){m[p.d]={lvl:1,text:'前次 '+pr.v+'，當天 '+p.v+'（增加很多）'};return}
-        if(p.v<=pr.v*0.2&&pr.v-p.v>=10){m[p.d]={lvl:1,text:'前次 '+pr.v+'，當天 '+p.v+'（減少很多）'};return}
-      }
-      const prev=ser.slice(Math.max(0,k-10),k).map(x=>x.v);
-      if(prev.length>=4){
-        const so=[...prev].sort((a,b)=>a-b),med=so.length%2?so[(so.length-1)/2]:(so[so.length/2-1]+so[so.length/2])/2;
-        const moved=!pr||Math.abs(p.v-pr.v)>=Math.max(5,pr.v*0.3);
-        if(moved&&med>0&&p.v>=med*2.5&&p.v-med>=10)m[p.d]={lvl:2,text:'近期約 '+Math.round(med*10)/10+'，當天 '+p.v+'（比平常多很多）'};
-        else if(moved&&med>0&&p.v<=med*0.2&&med-p.v>=10)m[p.d]={lvl:2,text:'近期約 '+Math.round(med*10)/10+'，當天 '+p.v+'（比平常少很多）'};
-      }
-    });
+let anCache={},anDates=null;
+function anSeries(id){
+  let o=anCache[id];
+  if(!o){
+    if(!anDates)anDates=Object.keys(S.days).filter(d=>hasData(S.days[d])).sort();
+    const ser=[],idx={};
+    for(const d of anDates){const v=valOf(d,id);if(hasVal(v)&&!isNaN(Number(v))){idx[d]=ser.length;ser.push({d,v:Number(v)})}}
+    o=anCache[id]={ser,idx,res:{}};
   }
-  return m[ds]||null;
+  return o;
+}
+function anomOf(id,ds){
+  const o=anSeries(id);if(ds in o.res)return o.res[ds];
+  const k=o.idx[ds];if(k===undefined)return null;
+  const ser=o.ser,p=ser[k],pr=ser[k-1];let r=null;
+  if(pr&&pr.v>0&&(parse(p.d)-parse(pr.d))/86400000<=10){
+    if(p.v>=pr.v*5&&p.v-pr.v>=20)r={lvl:1,text:'前次 '+pr.v+'，當天 '+p.v+'（增加很多）'};
+    else if(p.v<=pr.v*0.2&&pr.v-p.v>=10)r={lvl:1,text:'前次 '+pr.v+'，當天 '+p.v+'（減少很多）'};
+  }
+  if(!r){
+    const prev=ser.slice(Math.max(0,k-10),k).map(x=>x.v);
+    if(prev.length>=4){
+      const so=[...prev].sort((x,y)=>x-y),med=so.length%2?so[(so.length-1)/2]:(so[so.length/2-1]+so[so.length/2])/2;
+      const moved=!pr||Math.abs(p.v-pr.v)>=Math.max(5,pr.v*0.3);
+      if(moved&&med>0&&p.v>=med*2.5&&p.v-med>=10)r={lvl:2,text:'近期約 '+Math.round(med*10)/10+'，當天 '+p.v+'（比平常多很多）'};
+      else if(moved&&med>0&&p.v<=med*0.2&&med-p.v>=10)r={lvl:2,text:'近期約 '+Math.round(med*10)/10+'，當天 '+p.v+'（比平常少很多）'};
+    }
+  }
+  return o.res[ds]=r;
 }
 function renderHistory(scrollToday){
-  anCache={};
+  anCache={};anDates=null;
   $('monthPick').value=histMonth;
   renderHChips();
   document.querySelectorAll('#hSeg button').forEach(b=>b.classList.toggle('on',b.dataset.m===hMode));
