@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="112">
+<meta name="app-version" content="113">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -850,7 +850,7 @@ body.locked #items .nbtn{opacity:.3}
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v112</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v113</div>
   <details class="card sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
     <div class="body">
@@ -1016,6 +1016,7 @@ function lastEditTs(){
   if(!_le||_le.s!==S.days){let m=0;for(const d in S.days){const u=S.days[d]&&S.days[d].updatedAt;if(typeof u==='number'&&u>m)m=u}_le={s:S.days,v:m}}
   return Math.max(localEditTs,_le.v);
 }
+function fmtEditFull(t){const d=new Date(t);return (d.getMonth()+1)+'/'+d.getDate()+' '+pad(d.getHours())+':'+pad(d.getMinutes())}
 function fmtEdit(t){
   if(!t)return '—';
   const d=new Date(t),n=new Date(),hm=pad(d.getHours())+':'+pad(d.getMinutes());
@@ -1634,7 +1635,7 @@ function renderHistory(scrollToday){
   document.querySelectorAll('#hSeg button').forEach(b=>b.classList.toggle('on',b.dataset.m===hMode));
   $('hTableWrap').classList.toggle('hidden',hMode!=='table');
   $('hItemWrap').classList.toggle('hidden',hMode!=='item');
-  $('recCount').textContent='共 '+Object.keys(S.days).filter(d=>hasData(S.days[d])).length+' 天紀錄'+(hMode==='table'?' · 紅格＝跟前次差很多、橘格＝跟近期平均差很多（長按格子看原因）':'');
+  $('recCount').textContent='共 '+Object.keys(S.days).filter(d=>hasData(S.days[d])).length+' 天紀錄'+(hMode==='table'?' · 紅格＝跟前次差很多、橘格＝跟近期平均差很多（長按格子看原因，長按人員看最後編輯時間）':'');
   const its=hFiltered();
   if(hMode==='item'){renderHItem(its);return}
   const [y,m]=histMonth.split('-').map(Number),days=new Date(y,m,0).getDate();
@@ -1646,7 +1647,7 @@ function renderHistory(scrollToday){
   let h=cg+'<tbody>';
   for(let d=1;d<=days;d++){
     const ds=y+'-'+pad(m)+'-'+pad(d),r=S.days[ds];
-    h+='<tr class="'+(hasData(r)?'has':'')+(ds===curDate?' cur':'')+'"><td class="day'+(ds===todayStr?' tdy':'')+'" data-d="'+ds+'">'+d+'</td><td>'+WD[new Date(y,m-1,d).getDay()]+'</td><td class="stf">'+(r&&r.staff?'<span class="sp" style="--c:var(--pc-'+histTone(ds,r.staff)+')">'+esc(r.staff)+'</span>':'')+'</td>'+
+    h+='<tr class="'+(hasData(r)?'has':'')+(ds===curDate?' cur':'')+'"><td class="day'+(ds===todayStr?' tdy':'')+'" data-d="'+ds+'">'+d+'</td><td>'+WD[new Date(y,m-1,d).getDay()]+'</td><td class="stf"'+(r&&(r.staff||typeof r.updatedAt==='number')?(()=>{const lt=typeof r.updatedAt==='number'?'最後編輯 '+fmtEditFull(r.updatedAt):'最後編輯時間未記錄';return' title="'+esc((+ds.slice(5,7))+'/'+(+ds.slice(8))+(r.staff?' '+r.staff:'')+'；'+lt)+'" data-tip="'+esc((+ds.slice(5,7))+'/'+(+ds.slice(8))+(r.staff?' '+r.staff:'')+'\n'+lt)+'"'})():'')+'>'+(r&&r.staff?'<span class="sp" style="--c:var(--pc-'+histTone(ds,r.staff)+')">'+esc(r.staff)+'</span>':'')+'</td>'+
       its.map(i=>{const v=r&&r.values?r.values[i.id]:'';const nt=r&&r.inotes&&r.inotes[i.id]?r.inotes[i.id]:'';const an=(r&&r.values)?anomOf(i.id,ds):null;const cl=((lowVal(i,v)?'lowc ':'')+(nt?'hasn ':'')+(an?'anom'+an.lvl:'')).trim();const tip=[an?an.text:'',lowVal(i,v)?'低於最低量（最低 '+i.min+'）':'',nt?'備註：'+nt:''].filter(Boolean);return'<td'+(cl?' class="'+cl+'"':'')+(tip.length?' title="'+esc(tip.join('；'))+'" data-tip="'+esc(ds.slice(5).replace('-','/')+' '+i.name+'\n'+tip.join('\n'))+'"':'')+'>'+(hasVal(v)?v:'')+'</td>'}).join('')+'</tr>';
   }
   t.innerHTML=h+'</tbody>';
