@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="110">
+<meta name="app-version" content="112">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -731,6 +731,20 @@ tr.cur td.day.tdy{background:var(--sun)!important}
 .search{outline:none;-webkit-tap-highlight-color:transparent}
 .search.collapsed input{visibility:hidden}
 .search.collapsed,.search.collapsed:focus-within{box-shadow:none;outline:none}
+
+/* ---- v111：過去的日期預設鎖定 ---- */
+.lockbtn{flex:none;width:38px;height:38px;padding:0;display:flex;align-items:center;justify-content:center;border:1.5px solid var(--warn);border-radius:var(--r-md);background:var(--warn-soft);color:var(--warn)}
+.lockbtn .i{width:20px;height:20px;stroke-width:2}
+.lockbtn.open{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.lockbtn.nudge{animation:nudge .5s}
+@keyframes nudge{20%{transform:translateX(-5px)}40%{transform:translateX(5px)}60%{transform:translateX(-3px)}80%{transform:translateX(3px)}}
+body.locked #items .stp{opacity:.5}
+body.locked #items .qty{background:transparent}
+body.locked #items .nbtn{opacity:.3}
+.btn:disabled,.palbtn:disabled,.metarow input:disabled{opacity:.5;pointer-events:none}
+.dwrap.lkd #dateLabel::before{content:"";display:inline-block;width:15px;height:15px;margin-right:5px;vertical-align:-2px;background:currentColor;
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5' y='11' width='14' height='10' rx='2'/%3E%3Cpath d='M8 11V8a4 4 0 0 1 8 0v3'/%3E%3C/svg%3E") center/contain no-repeat;
+  mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5' y='11' width='14' height='10' rx='2'/%3E%3Cpath d='M8 11V8a4 4 0 0 1 8 0v3'/%3E%3C/svg%3E") center/contain no-repeat}
 </style>
 </head>
 <body>
@@ -759,6 +773,8 @@ tr.cur td.day.tdy{background:var(--sun)!important}
 <symbol id="i-nav-list" viewBox="0 0 24 24"><rect x="8" y="2.5" width="8" height="4" rx="1"/><path d="M16 4.5h2a2 2 0 0 1 2 2V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6.5a2 2 0 0 1 2-2h2"/><path d="M8.5 14l2.2 2.2L15.5 11.5"/></symbol>
 <symbol id="i-nav-hist" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.7-6.2"/><path d="M3.5 4.2v4.3h4.3"/><path d="M12 7.6V12l3 2"/></symbol>
 <symbol id="i-nav-gear" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
+<symbol id="i-unlock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-1.9"/></symbol>
 </defs></svg>
 </div>
 <div class="wrap">
@@ -779,7 +795,7 @@ tr.cur td.day.tdy{background:var(--sun)!important}
   </div>
   <div class="banner hidden" id="banner" role="status"></div>
   <div class="list">
-    <div class="meta metarow"><span class="mi"><img class="avatar" src="data:image/jpeg;base64,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" alt="">盤點人員</span><input id="staff" placeholder="輸入姓名" aria-label="盤點人員姓名" autocomplete="off"><button class="palbtn" id="palBtn" type="button" aria-label="姓名顏色"><svg class="i" aria-hidden="true"><use href="#i-palette"/></svg></button><div class="pal hidden" id="staffPal"></div><div class="nlist hidden" id="nameList"></div></div>
+    <div class="meta metarow"><span class="mi"><img class="avatar" src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCABIAEgDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD23TmBvdOQdpCT+Rq7qkZGZE68g49K4jVPEB0Xw8+qJLbRzwx7YDcPtRpDwoJ/z0rofBOsTa14ctp7+Wza/aLdcJbyq4UknB+UnGRjivH5Xa57TavYt3k8bahFHLgxTxDbnsR1FU9UgkhiMsKGR4uSo4Lr3A9/SqniRmjTeOGjO5PajUfEmladocGqatqNvZxlduZH+ZzjkKOpP0FTy30KvbUSO6ikSOSGTzUkTerAds4OR6jvSGUEE7hjNeT6v8U9As9Y+0aNbXl1A5LSoyiJQx4JXPPOATx1FZdz8aGa5UxeH1EY+/uujuI/BcVi8HWcvdjoX9boRjrLU9pM6jvQLhf71ec6H8R9B1grEJnsblukVzgZPs3Q/pW82okHqaxnSlB2krG9OcaivF3OsE46AiiuUTVTnrRUWNOVkPiPT7/WPDKWunQpNImo28jK5GBGrgseeDx2rt/C2kaHpdzPPpmmWlnPOv7xok27xnOPpXOeEbnc7oT8sigj+tbc/nJD58B/eQtkD1FejzO1jg5Ve5J47mt7XTJb24mWK3hQvLJ/dUV8q+NdfuNe1l7sq4gX5LaMn/VRjoPqep9zXs/x818r4BjtYWKm/uVjk9lUFiPzAr5/yDzXZhaatzM4MZUd+RFeWRj8vT1qJWw3A4zUs6/MSKjAwDXejzJXuNmIPGc16n8MfEUmo6e2mXche5tVGxieXj6c+pHT6YryhBkknvWp4P1FtN8R2dzuwnmCOT3VuD/PP4Vz4qiqtNrqb4LEujWT6PRnuRk9DRUL8GivnT6650vhNgsMTjcGx0rsLWQYbP8AEOa5+TTrvT38ywjF5Eoy8IOJFHqpPX6H86u6ZfxX1v5ls4kA4YfdZT6Edq7jzmeZftHxJb6ZpaIwAkupGC59EHP614uEkESzMjCJmKq5HBIxkA+vI/Ouq+K3iI+I/F1xMjFrS2Jt7YZ/hU8t+Jyfyrm7PUJbdGhKiaMxSRqj9EL4yw9+BzXq0YuMEmeJiJqVRsrSN2qJm7Cr/maUZLQNa3KqkLLcEOCZJOdrD0GSAR6D1NZrmt0csmNdscd6jjYq4YdQc0rV3Xw18Cf23dLd6tKIbRPmEIP7yb0z6L+pqalSNON5CpUp1Z8sUejh98aP/eUH8xRUmpwy2c3lSKAv8BHRh7UV8u3qfarY7+81W5s2WytbNxJLhTOzJGqj15OTjrwK4S+vrzSfA2u6tNG8FyQ0cbsNu8u21WHuM5r0K2DS3c0smeBx6VhfErRJ/EPhW7022dVnbbJFuPyllOcZ7Z6V6ELcyueZUb5XY+YG6cdKhYVra1omr6RKY9S025tiP4mQ7T9GHBrKY9+1eync8GatuRnIPU0xiT1p7HvTD0qjBkthbm6vYbcdZHC8/rXrGhxTW1zEYi0bZG0oa4XwNp7TXTXbJuA+SMepPU17v4K8MPEi3V6mzPKxn+teXjKnNPlXQ9rL6XLTc31NCe0F1p6JdoCzJn0OfUUVb8UssYgVeMA8UV50kr6nqRcraM6NrS4iXb9nc98gZqnMNhPmKyf7wxRRXQjFoqXMMMyFWUFT1BGRXKa74C8MamS0+lRRuf8AlpbgxN+nB/KiitIzlHZmcoRlujh9V+Dkbux0jW9npFdx5/8AHl/wrN0z4Oa9LeKmoX1lbW+7DMjFyR7DFFFavE1Etzn+p0W72PWPB/g3SNARREhnmThZJB0HsO1dLf3sFnbmSRgMUUVySfU7Yroeb32vS3/iYKzfutpTb2FFFFYSN47H/9k=" alt="">盤點人員</span><input id="staff" placeholder="輸入姓名" aria-label="盤點人員姓名" autocomplete="off"><button class="palbtn" id="palBtn" type="button" aria-label="姓名顏色"><svg class="i" aria-hidden="true"><use href="#i-palette"/></svg></button><button class="lockbtn hidden" id="lockBtn" type="button" aria-label="解鎖編輯"></button><div class="pal hidden" id="staffPal"></div><div class="nlist hidden" id="nameList"></div></div>
     <div id="items"></div>
   </div>
 </section>
@@ -834,7 +850,7 @@ tr.cur td.day.tdy{background:var(--sun)!important}
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v110</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v112</div>
   <details class="card sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
     <div class="body">
@@ -1039,13 +1055,29 @@ function tick(){
 setInterval(tick,15000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick()});
 function shift(n){const d=parse(curDate);d.setDate(d.getDate()+n);loadDate(ymd(d))}
+let unlockedDate=null;
+const isLocked=d=>d<todayStr&&unlockedDate!==d;
+function lockHint(){
+  toast('這是過去的日期，已鎖定。按姓名旁的鎖頭可解鎖');
+  const b=$('lockBtn');if(b){b.classList.remove('nudge');void b.offsetWidth;b.classList.add('nudge')}
+}
+function applyLock(){
+  const past=curDate<todayStr,lk=isLocked(curDate);
+  document.body.classList.toggle('locked',lk);
+  const lb=$('lockBtn');lb.classList.toggle('hidden',!past);lb.classList.toggle('open',past&&!lk);
+  lb.innerHTML=ICN(lk?'lock':'unlock');
+  lb.setAttribute('aria-label',lk?'這是過去的日期，已鎖定。按一下解鎖編輯':'已解鎖。按一下重新鎖定');lb.title=lk?'解鎖編輯':'重新鎖定';
+  ['staff','palBtn','btnClear','btnCopyPrev','btnUndo'].forEach(id=>{const e=$(id);if(e)e.disabled=lk});
+  const dw=$('dateLabel').closest('.dwrap');if(dw)dw.classList.toggle('lkd',lk);
+}
 function updateDateUI(){
   const d=parse(curDate);
   $('dateLabel').innerHTML=(d.getMonth()+1)+'月'+d.getDate()+'日（週'+WD[d.getDay()]+'）'+(curDate===todayStr?'<span class="dtd"> · 今天</span>':'');
   $('datePick').value=curDate;
   $('btnToday').classList.toggle('hidden',curDate===todayStr);
+  applyLock();
 }
-function loadDate(d){progDone=null;curDate=d;updateDateUI();renderItems(false);syncMeta(false,true);renderChips();updateProg()}
+function loadDate(d){progDone=null;curDate=d;if(unlockedDate&&unlockedDate!==d)unlockedDate=null;updateDateUI();renderItems(false);syncMeta(false,true);renderChips();updateProg()}
 /* 從歷史頁跳到某天的某個品項：捲到位置並閃爍提示 */
 function goToItem(date,itemId){
   catSel='全部';query='';$('q').value='';$('qx').classList.add('hidden');
@@ -1243,6 +1275,7 @@ function renderItemsInner(){
     const ne=el.querySelector('.noteedit'),ni=el.querySelector('.ninp');
     el.querySelector('.sub').addEventListener('click',e=>{const b=e.target.closest('.pv');if(!b)return;inp.value=b.dataset.v;commit(b.dataset.v)});   // 點「前次 8」直接填入 8
     const commit=raw=>{
+      if(isLocked(curDate)){const pv0=valOf(curDate,it.id);inp.value=hasVal(pv0)?String(pv0):'';lockHint();return}
       const v=raw===''?'':Number(raw);if(v!==''&&isNaN(v))return;
       const prev=valOf(curDate,it.id);
       if((hasVal(prev)?Number(prev):'')===v)return;           // 沒有改變
@@ -2133,6 +2166,14 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdat
   box.addEventListener('contextmenu',e=>{if(e.target.closest('td[data-tip]'))e.preventDefault()});
   window.addEventListener('scroll',hide,{passive:true});box.addEventListener('scroll',hide,{passive:true});
   document.addEventListener('pointerdown',e=>{if(!box.contains(e.target))hide()});
+})();
+(function(){
+  $('lockBtn').onclick=()=>{unlockedDate=isLocked(curDate)?curDate:null;applyLock()};
+  const box=$('items');if(!box)return;
+  const hit=t=>t&&t.closest&&t.closest('.stp,.nbtn,.pv,.itext,.noteedit,.warnline button');
+  const stop=e=>{if(!isLocked(curDate)||!hit(e.target))return;e.preventDefault();e.stopPropagation();if(e.type==='click')lockHint()};
+  ['pointerdown','touchstart','click'].forEach(t=>box.addEventListener(t,stop,{capture:true,passive:false}));
+  box.addEventListener('focusin',e=>{const t=e.target;if(isLocked(curDate)&&t.matches&&t.matches('input.qty,.ninp'))t.blur()},true);
 })();
 (function(){const t=document.querySelector('#tab-daily .top');if(!t)return;const f=()=>t.classList.toggle('lift',window.scrollY>4);window.addEventListener('scroll',f,{passive:true});f()})();
 window.addEventListener('pageshow',e=>{if(e.persisted)checkUpdate(false)});
