@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="122">
+<meta name="app-version" content="125">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -779,6 +779,33 @@ body.locked #items .nbtn{opacity:.3}
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5' y='11' width='14' height='10' rx='2'/%3E%3Cpath d='M8 11V8a4 4 0 0 1 8 0v3'/%3E%3C/svg%3E") center/contain no-repeat;
   mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5' y='11' width='14' height='10' rx='2'/%3E%3Cpath d='M8 11V8a4 4 0 0 1 8 0v3'/%3E%3C/svg%3E") center/contain no-repeat}
 
+
+/* ---- v123：往下滑時鎖頭也在頂部列、不換行；「前次」字縮小；0 用灰色 ---- */
+.top:not(.compact) #lockBtn2{display:none}
+.top.compact .toolrow{flex-wrap:nowrap}
+.top.compact .search.collapsed{width:34px;max-width:34px}
+.top.compact #btnMore,.top.compact #btnUndo,.top.compact #lockBtn2{width:34px;height:34px}
+body.locked .top.compact #btnUndo{display:none}
+.item .sub{font-size:calc(12px*var(--k,1))}
+.diff:not(.up):not(.down):not(.an){color:var(--muted);font-weight:700}
+
+/* 往下滑時：日期較小的星期字、縮小的「今天」鈕，避免日期被擠成「10月10…」 */
+.top.compact .dwk{font-size:12px;font-weight:600;color:var(--muted)}
+.top.compact .dwrap.lkd #dateLabel::before{display:none}
+.top.compact #btnToday{width:34px;min-width:34px;height:34px;padding:0;font-size:0;display:flex;align-items:center;justify-content:center}
+.top.compact #btnToday::before{content:"今";font-size:14px;font-weight:800}
+.top.compact #btnToday.hidden{display:none}
+
+.top.compact:has(#btnToday:not(.hidden)) .dwk{display:none}
+.top.compact .nb{width:32px}
+.top.compact #btnToday,.top.compact .search.collapsed,.top.compact #btnMore,.top.compact #btnUndo,.top.compact #lockBtn2{width:32px;min-width:32px;max-width:32px}
+
+.top.compact{gap:0 4px}
+.top.compact .datenav,.top.compact .toolrow{gap:4px}
+.top.compact .dwrap{padding:0 2px}
+/* v125 「前次」列縮小：整行 12px，「前次」兩字 11px；點擊範圍往上下加大（不增加行高） */
+.pv{padding:9px 10px 9px 0!important;margin:-9px 0!important}
+.pv .pl{font-size:calc(11px*var(--k,1));font-weight:600}
 </style>
 </head>
 <body>
@@ -823,7 +850,7 @@ body.locked #items .nbtn{opacity:.3}
       <button class="nb" id="nextDay" aria-label="後一天"><svg class="i" aria-hidden="true"><use href="#i-chev-r"/></svg></button>
       <button class="todaybtn hidden" id="btnToday">今天</button>
     </div>
-    <div class="toolrow"><div class="search"><span class="ic"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg></span><input id="q" type="search" placeholder="搜尋品項" aria-label="搜尋品項" autocomplete="off"><button class="x hidden" id="qx" aria-label="清除"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></div><button class="btn sm hidden" id="btnUndo" aria-label="復原"><svg class="i" aria-hidden="true"><use href="#i-undo"/></svg><span class="ulb">復原</span></button><button class="btn sm" id="btnCopyPrev">前次紀錄</button><div class="moreWrap"><button class="btn sm" id="btnMore" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="更多"><svg class="i" aria-hidden="true"><use href="#i-more"/></svg></button><div class="menu hidden" id="moreMenu" role="menu"><button class="btn danger" id="btnClear" type="button" role="menuitem">清空</button></div></div></div>
+    <div class="toolrow"><div class="search"><span class="ic"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg></span><input id="q" type="search" placeholder="搜尋品項" aria-label="搜尋品項" autocomplete="off"><button class="x hidden" id="qx" aria-label="清除"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></div><button class="btn sm hidden" id="btnUndo" aria-label="復原"><svg class="i" aria-hidden="true"><use href="#i-undo"/></svg><span class="ulb">復原</span></button><button class="btn sm" id="btnCopyPrev">前次紀錄</button><button class="lockbtn hidden" id="lockBtn2" type="button" aria-label="解鎖編輯"></button><div class="moreWrap"><button class="btn sm" id="btnMore" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="更多"><svg class="i" aria-hidden="true"><use href="#i-more"/></svg></button><div class="menu hidden" id="moreMenu" role="menu"><button class="btn danger" id="btnClear" type="button" role="menuitem">清空</button></div></div></div>
     <div class="chips" id="chips"></div>
     <div class="prog" id="prog"><div class="pf" id="progBar"></div><span class="pt">PEAK TEA</span></div>
   </div>
@@ -884,7 +911,7 @@ body.locked #items .nbtn{opacity:.3}
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v122</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v125</div>
   <details class="card sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
     <div class="body">
@@ -1093,21 +1120,21 @@ function shift(n){const d=parse(curDate);d.setDate(d.getDate()+n);loadDate(ymd(d
 let unlockedDate=null;
 const isLocked=d=>d<todayStr&&unlockedDate!==d;
 function lockHint(){
-  toast('這是過去的日期，已鎖定。按姓名旁的鎖頭可解鎖');
-  const b=$('lockBtn');if(b){b.classList.remove('nudge');void b.offsetWidth;b.classList.add('nudge')}
+  toast('這是過去的日期，已鎖定。按鎖頭可解鎖');
+  ['lockBtn','lockBtn2'].forEach(id=>{const b=$(id);if(b){b.classList.remove('nudge');void b.offsetWidth;b.classList.add('nudge')}})
 }
 function applyLock(){
   const past=curDate<todayStr,lk=isLocked(curDate);
   document.body.classList.toggle('locked',lk);
-  const lb=$('lockBtn');lb.classList.toggle('hidden',!past);lb.classList.toggle('open',past&&!lk);
-  lb.innerHTML=ICN(lk?'lock':'unlock');
-  lb.setAttribute('aria-label',lk?'這是過去的日期，已鎖定。按一下解鎖編輯':'已解鎖。按一下重新鎖定');lb.title=lk?'解鎖編輯':'重新鎖定';
+  ['lockBtn','lockBtn2'].forEach(id=>{const lb=$(id);if(!lb)return;lb.classList.toggle('hidden',!past);lb.classList.toggle('open',past&&!lk);
+    lb.innerHTML=ICN(lk?'lock':'unlock');
+    lb.setAttribute('aria-label',lk?'這是過去的日期，已鎖定。按一下解鎖編輯':'已解鎖。按一下重新鎖定');lb.title=lk?'解鎖編輯':'重新鎖定'});
   ['staff','palBtn','btnClear','btnCopyPrev','btnUndo'].forEach(id=>{const e=$(id);if(e)e.disabled=lk});
   const dw=$('dateLabel').closest('.dwrap');if(dw)dw.classList.toggle('lkd',lk);
 }
 function updateDateUI(){
   const d=parse(curDate);
-  $('dateLabel').innerHTML=(d.getMonth()+1)+'月'+d.getDate()+'日（週'+WD[d.getDay()]+'）'+(curDate===todayStr?'<span class="dtd"> · 今天</span>':'');
+  $('dateLabel').innerHTML=(d.getMonth()+1)+'月'+d.getDate()+'日<span class="dwk">（週'+WD[d.getDay()]+'）</span>'+(curDate===todayStr?'<span class="dtd"> · 今天</span>':'');
   $('datePick').value=curDate;
   $('btnToday').classList.toggle('hidden',curDate===todayStr);
   applyLock();
@@ -1391,7 +1418,7 @@ function refreshCard(id,force){
   c.el.classList.toggle('filled',hasVal(v));
   const itm=S.items.find(x=>x.id===id);const low=lowVal(itm,v);c.el.classList.toggle('low',low);
   const p=prevRecord(curDate),pv=p&&p.rec.values?p.rec.values[id]:undefined,d=diffOf(id);
-  c.el.querySelector('.sub').innerHTML=[hasVal(pv)?'<button type="button" class="pv" data-v="'+pv+'">前次 '+pv+'</button><span class="pd">'+p.date.slice(5).replace('-','/')+'</span>':'',d.t?'<span class="diff '+d.c+'">'+d.t+'</span>':'',hasMin(itm)?'最低 '+itm.min:'',low?'<span class="lowtag">'+ICN('alert')+' 低於最低量</span>':''].filter(Boolean).join(' · ');
+  c.el.querySelector('.sub').innerHTML=[hasVal(pv)?'<button type="button" class="pv" data-v="'+pv+'"><span class="pl">前次</span> '+pv+'</button><span class="pd">'+p.date.slice(5).replace('-','/')+'</span>':'',d.t?'<span class="diff '+d.c+'">'+d.t+'</span>':'',hasMin(itm)?'最低 '+itm.min:'',low?'<span class="lowtag">'+ICN('alert')+' 低於最低量</span>':''].filter(Boolean).join(' · ');
   const nt=noteOf(curDate,id),ne=c.el.querySelector('.noteedit'),ni=ne.querySelector('input'),tx=c.el.querySelector('.itext');
   const editing=!ne.classList.contains('hidden');
   tx.textContent=nt?'📝 '+nt:'';tx.classList.toggle('hidden',!nt||editing);
@@ -2203,7 +2230,8 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden)checkUpdat
   document.addEventListener('pointerdown',e=>{if(!box.contains(e.target))hide()});
 })();
 (function(){
-  $('lockBtn').onclick=()=>{unlockedDate=isLocked(curDate)?curDate:null;applyLock()};
+  const tgl=()=>{unlockedDate=isLocked(curDate)?curDate:null;applyLock()};
+  $('lockBtn').onclick=tgl;$('lockBtn2').onclick=tgl;
   const box=$('items');if(!box)return;
   const hit=t=>t&&t.closest&&t.closest('.stp,.nbtn,.pv,.itext,.noteedit,.warnline button');
   const stop=e=>{if(!isLocked(curDate)||!hit(e.target))return;e.preventDefault();e.stopPropagation();if(e.type==='click')lockHint()};
