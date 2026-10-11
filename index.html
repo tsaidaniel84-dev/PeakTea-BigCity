@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="130">
+<meta name="app-version" content="131">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -921,7 +921,7 @@ body.locked .top.compact #btnUndo{display:none}
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v130</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v131</div>
   <details class="card sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
     <div class="body">
@@ -1149,7 +1149,7 @@ function updateDateUI(){
   $('btnToday').classList.toggle('hidden',curDate===todayStr);
   applyLock();
 }
-function loadDate(d){progDone=null;curDate=d;if(unlockedDate&&unlockedDate!==d)unlockedDate=null;updateDateUI();renderItems(false);syncMeta(false,true);renderChips();updateProg()}
+function loadDate(d){progDone=null;curDate=d;if(unlockedDate&&unlockedDate!==d)unlockedDate=null;updateDateUI();renderItems();syncMeta(false,true);renderChips();updateProg()}   // 切換日期保留目前捲動位置（不再回到最上面）
 /* 從歷史頁跳到某天的某個品項：捲到位置並閃爍提示 */
 function goToItem(date,itemId){
   catSel='全部';query='';$('q').value='';$('qx').classList.add('hidden');
