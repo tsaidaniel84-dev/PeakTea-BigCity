@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="125">
+<meta name="app-version" content="127">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -805,7 +805,9 @@ body.locked .top.compact #btnUndo{display:none}
 .top.compact .dwrap{padding:0 2px}
 /* v125 「前次」列縮小：整行 12px，「前次」兩字 11px；點擊範圍往上下加大（不增加行高） */
 .pv{padding:9px 10px 9px 0!important;margin:-9px 0!important}
-.pv .pl{font-size:calc(11px*var(--k,1));font-weight:600}
+.pv .pvl{font-size:calc(11px*var(--k,1));font-weight:600}
+.pv,.pv:focus,.pv:focus-visible,.pv:active{outline:none!important;box-shadow:none!important;background:none!important;-webkit-tap-highlight-color:transparent}
+.pv:active{opacity:.55}
 </style>
 </head>
 <body>
@@ -911,7 +913,7 @@ body.locked .top.compact #btnUndo{display:none}
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v125</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v127</div>
   <details class="card sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
     <div class="body">
@@ -1335,7 +1337,7 @@ function renderItemsInner(){
     const nb=document.createElement('button');nb.type='button';nb.className='nbtn';nb.setAttribute('aria-label','備註');nb.innerHTML=ICN('plus');nm.appendChild(nb);
     const inp=el.querySelector('input.qty'),[m,p]=el.querySelectorAll('.sb');inp.setAttribute('aria-label',(it.name||'')+' 數量');
     const ne=el.querySelector('.noteedit'),ni=el.querySelector('.ninp');
-    el.querySelector('.sub').addEventListener('click',e=>{const b=e.target.closest('.pv');if(!b)return;inp.value=b.dataset.v;commit(b.dataset.v)});   // 點「前次 8」直接填入 8
+    el.querySelector('.sub').addEventListener('click',e=>{const b=e.target.closest('.pv');if(!b)return;inp.value=b.dataset.v;commit(b.dataset.v);b.blur()});   // 點「前次 8」直接填入 8
     const commit=raw=>{
       if(isLocked(curDate)){const pv0=valOf(curDate,it.id);inp.value=hasVal(pv0)?String(pv0):'';lockHint();return}
       const v=raw===''?'':Number(raw);if(v!==''&&isNaN(v))return;
@@ -1418,7 +1420,7 @@ function refreshCard(id,force){
   c.el.classList.toggle('filled',hasVal(v));
   const itm=S.items.find(x=>x.id===id);const low=lowVal(itm,v);c.el.classList.toggle('low',low);
   const p=prevRecord(curDate),pv=p&&p.rec.values?p.rec.values[id]:undefined,d=diffOf(id);
-  c.el.querySelector('.sub').innerHTML=[hasVal(pv)?'<button type="button" class="pv" data-v="'+pv+'"><span class="pl">前次</span> '+pv+'</button><span class="pd">'+p.date.slice(5).replace('-','/')+'</span>':'',d.t?'<span class="diff '+d.c+'">'+d.t+'</span>':'',hasMin(itm)?'最低 '+itm.min:'',low?'<span class="lowtag">'+ICN('alert')+' 低於最低量</span>':''].filter(Boolean).join(' · ');
+  c.el.querySelector('.sub').innerHTML=[hasVal(pv)?'<button type="button" class="pv" data-v="'+pv+'"><span class="pvl">前次</span> '+pv+'</button><span class="pd">'+p.date.slice(5).replace('-','/')+'</span>':'',d.t?'<span class="diff '+d.c+'">'+d.t+'</span>':'',hasMin(itm)?'最低 '+itm.min:'',low?'<span class="lowtag">'+ICN('alert')+' 低於最低量</span>':''].filter(Boolean).join(' · ');
   const nt=noteOf(curDate,id),ne=c.el.querySelector('.noteedit'),ni=ne.querySelector('input'),tx=c.el.querySelector('.itext');
   const editing=!ne.classList.contains('hidden');
   tx.textContent=nt?'📝 '+nt:'';tx.classList.toggle('hidden',!nt||editing);
