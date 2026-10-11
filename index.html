@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="132">
+<meta name="app-version" content="133">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -832,6 +832,7 @@ html[data-layout="desktop"] #ptr,html[data-layout="desktop"] #kbBar{display:none
 html[data-layout="desktop"] .kp-open{padding-bottom:0!important}
 html[data-layout="desktop"] #items:not(.grouped),html[data-layout="desktop"] .grp .gb{display:grid;grid-template-columns:repeat(auto-fill,minmax(400px,1fr));gap:10px;align-items:start}
 html[data-layout="desktop"] #items:not(.grouped) .item,html[data-layout="desktop"] .grp .gb .item{margin:0}
+html[data-layout="desktop"] .grp.closed .gb,html[data-layout="desktop"] #items.sorting .gb{display:none}
 html[data-layout="desktop"] #items>.gall{grid-column:1/-1}
 html[data-layout="desktop"] .item:hover{box-shadow:var(--sh2)}
 html[data-layout="desktop"] button,html[data-layout="desktop"] .chip{cursor:pointer}
@@ -941,7 +942,7 @@ html[data-layout="desktop"] button,html[data-layout="desktop"] .chip{cursor:poin
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v132</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v133</div>
   <details class="card sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
     <div class="body">
