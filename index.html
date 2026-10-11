@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="117">
+<meta name="app-version" content="122">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -299,7 +299,7 @@ details.offbox summary{font-weight:800;cursor:pointer;color:var(--muted)}
 .nbtn{border:0;background:none;font-size:14px;padding:0 4px;opacity:.35;vertical-align:1px}
 .nbtn:not(.has){font-size:15px;font-weight:800;color:var(--muted)}
 .grouped .item .ct{display:none}
-.pv{border:0;background:none;padding:2px 6px 2px 0;margin:-2px 0;font:inherit;color:var(--accent);font-weight:700;text-decoration:underline dotted;text-underline-offset:3px}
+.pv{border:0;background:none;padding:2px 6px 2px 0;margin:-2px 0;font:inherit;color:var(--pc-b);font-weight:700;text-decoration:underline dotted;text-underline-offset:3px}
 .pd{font-size:11px;color:var(--muted);opacity:.55}
 .grp.done .gt{color:var(--flash)}
 .item:focus-within{border-color:var(--flash);box-shadow:0 0 0 2px var(--flash)}
@@ -644,11 +644,14 @@ body.enter .nav{animation:enterNav .6s cubic-bezier(.2,.8,.2,1) .15s backwards}
 .diff,.pdiff{--d-dn-bg:#dde2de;--d-dn-fg:#151917;--d-up-bg:#c6e8d3;--d-up-fg:#151917;--d-an-bg:#f6d4cf;--d-an-fg:#8f1f14;--d-wn-bg:#f5e2a8;--d-wn-fg:#4d3500}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .diff{--d-dn-bg:#3b4740;--d-dn-fg:#eef2ee;--d-up-bg:#2f5a45;--d-up-fg:#eef6f0;--d-an-bg:#5a2b27;--d-an-fg:#ffc9c2;--d-wn-bg:#574a1c;--d-wn-fg:#fbe9a5}}
 :root[data-theme="dark"] .diff{--d-dn-bg:#3b4740;--d-dn-fg:#eef2ee;--d-up-bg:#2f5a45;--d-up-fg:#eef6f0;--d-an-bg:#5a2b27;--d-an-fg:#ffc9c2;--d-wn-bg:#574a1c;--d-wn-fg:#fbe9a5}
-.diff{font-weight:800;display:inline-block;padding:0 9px;border-radius:99px;line-height:1.55}
-.diff.down{color:var(--d-dn-fg);background:var(--d-dn-bg)}
-.diff.up{color:var(--d-up-fg);background:var(--d-up-bg)}
-.diff.an,.lrow .df.an{color:var(--d-an-fg);background:var(--d-an-bg)}
-.item.warn .diff{color:var(--d-wn-fg);background:var(--d-wn-bg)}
+.diff{font-weight:800;display:inline-flex;align-items:center;gap:4px;padding:0;border-radius:99px;line-height:1.55;background:transparent}
+.diff.down{color:var(--down)}
+.diff.up{color:var(--flash)}
+.diff.down::before,.diff.up::before{content:"";width:0;height:0;border-left:4.5px solid transparent;border-right:4.5px solid transparent;flex:none}
+.diff.down::before{border-top:7px solid currentColor}
+.diff.up::before{border-bottom:7px solid currentColor}
+.diff.an,.lrow .df.an{color:var(--d-an-fg);background:var(--d-an-bg);padding:0 9px}
+.item.warn .diff{color:var(--d-wn-fg);background:var(--d-wn-bg);padding:0 9px}
 .lrow .df{min-width:0;margin-right:4px}
 /* 2. 歷史表：只高亮「今天」，有紀錄的日子用綠色日期＋細色條 */
 tr.has td.day{color:var(--accent)!important}
@@ -775,6 +778,7 @@ body.locked #items .nbtn{opacity:.3}
 .dwrap.lkd #dateLabel::before{content:"";display:inline-block;width:15px;height:15px;margin-right:5px;vertical-align:-2px;background:currentColor;
   -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5' y='11' width='14' height='10' rx='2'/%3E%3Cpath d='M8 11V8a4 4 0 0 1 8 0v3'/%3E%3C/svg%3E") center/contain no-repeat;
   mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='5' y='11' width='14' height='10' rx='2'/%3E%3Cpath d='M8 11V8a4 4 0 0 1 8 0v3'/%3E%3C/svg%3E") center/contain no-repeat}
+
 </style>
 </head>
 <body>
@@ -880,7 +884,7 @@ body.locked #items .nbtn{opacity:.3}
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>新增品項</button></div>
   <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v117</div>
+  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v122</div>
   <details class="card sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
     <div class="body">
@@ -1255,7 +1259,7 @@ function diffOf(id){
   const p=prevRecord(curDate),c=valOf(curDate,id),pv=p?p.rec.values&&p.rec.values[id]:undefined;
   if(!hasVal(c)||!hasVal(pv))return{t:'',c:''};
   const d=Math.round((Number(c)-Number(pv))*100)/100;
-  return{t:(d>0?'+':'')+d,c:d>0?'up':d<0?'down':''};
+  return{t:String(Math.abs(d)),c:d>0?'up':d<0?'down':''};
 }
 function goNext(inp){const all=[...document.querySelectorAll('#items input.qty')].filter(i=>!i.closest('.grp.closed'));const nx=all[all.indexOf(inp)+1];if(nx){nx.focus({preventScroll:true});nx.scrollIntoView({block:'nearest'})}else inp.blur()}
 function startGroupDrag(e,wrap){   // 拖曳分類順序：拖動期間所有分類暫時收成一列，放開後恢復
@@ -1750,7 +1754,7 @@ function renderHItem(list){
   for(let i=pts.length-1;i>=0;i--){
     const p=pts[i],pv=i>0?pts[i-1].v:null,df=pv===null?'':r1(p.v-pv);
     const dd=new Date(y,m-1,p.d);
-    rows+='<div class="lrow" data-d="'+p.ds+'"><span class="d">'+m+'/'+p.d+'（週'+WD[dd.getDay()]+'）'+(p.ds===todayStr?' <span class="pill">今天</span>':'')+(noteOf(p.ds,it.id)?'<small class="lnote">📝 '+esc(noteOf(p.ds,it.id))+'</small>':'')+'</span><span class="df diff '+(df>0?'up':df<0?'down':'')+(anomOf(it.id,p.ds)?' an':'')+'">'+(df===''?'':(df>0?'+':'')+df)+'</span><span class="v">'+p.v+'</span></div>';
+    rows+='<div class="lrow" data-d="'+p.ds+'"><span class="d">'+m+'/'+p.d+'（週'+WD[dd.getDay()]+'）'+(p.ds===todayStr?' <span class="pill">今天</span>':'')+(noteOf(p.ds,it.id)?'<small class="lnote">📝 '+esc(noteOf(p.ds,it.id))+'</small>':'')+'</span><span class="df diff '+(df>0?'up':df<0?'down':'')+(anomOf(it.id,p.ds)?' an':'')+'">'+(df===''?'':Math.abs(df))+'</span><span class="v">'+p.v+'</span></div>';
   }
   body.innerHTML='<div class="muted" style="margin-bottom:6px"><b style="color:var(--ink);font-size:17px">'+esc(it.name)+'</b> '+m+'月每日數量'+(unit?'（'+unit+'）':'')+'</div>'+
     '<div class="stats">'+stat(last.v,'最新 '+m+'/'+last.d)+stat(mn,'最低')+stat(mx,'最高')+stat(avg,'平均')+'</div>'+trendHtml+svg+(pts.some(p=>anomOf(it.id,p.ds))?'<div class="muted" style="font-size:12px;margin-top:4px"><span style="color:var(--down)">●</span> 紅點＝跟前次差很多　<span style="color:var(--sun)">●</span> 橘點＝跟近期平均差很多</div>':'')+
