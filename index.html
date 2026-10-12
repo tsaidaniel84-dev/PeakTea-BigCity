@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="133">
+<meta name="app-version" content="140">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -836,6 +836,139 @@ html[data-layout="desktop"] .grp.closed .gb,html[data-layout="desktop"] #items.s
 html[data-layout="desktop"] #items>.gall{grid-column:1/-1}
 html[data-layout="desktop"] .item:hover{box-shadow:var(--sh2)}
 html[data-layout="desktop"] button,html[data-layout="desktop"] .chip{cursor:pointer}
+
+/* ================================================================
+   v134：① 未填的分類標藍色　② 電腦版：歷史頁、設定頁排版
+   ================================================================ */
+
+/* ---------- ① 「未填」分類鈕：淺色模式深灰底、深色模式淺灰底、選取時實心藍；全部填完時不套用，回到和其他分類一樣 ---------- */
+:root{--td:#3a6ea5;--td-soft:#3f4447;--td-line:#2c3033;--td-ink:#a9cdf5;--td-fg:#fff;--td-on:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--td:#86b2e6;--td-soft:#cfd3d5;--td-line:#e6e9ea;--td-ink:#1f4a78;--td-fg:#1b2226;--td-on:#0c1a2b}}
+:root[data-theme="dark"]{--td:#86b2e6;--td-soft:#cfd3d5;--td-line:#e6e9ea;--td-ink:#1f4a78;--td-fg:#1b2226;--td-on:#0c1a2b}
+.chip.unf{background:var(--td-soft);border-color:var(--td-line);color:var(--td-fg)}
+.chip.unf small{color:var(--td-ink)}
+.chip.unf.on{background:var(--td);border-color:var(--td);color:var(--td-on);box-shadow:0 2px 8px -2px rgba(58,110,165,.5)}
+.chip.unf.on small{color:var(--td-on);opacity:.9}
+/* 搜尋中：原本就不顯示「選取」樣式，維持一致 */
+.chips.searching .chip.unf.on{background:var(--td-soft);border-color:var(--td-line);color:var(--td-fg);box-shadow:none}
+.chips.searching .chip.unf.on small{color:var(--td-ink);opacity:1}
+
+/* ---------- 共用小零件（手機版維持原樣，電腦版再覆蓋） ---------- */
+.ptop{margin-top:calc(10px + env(safe-area-inset-top,0px))}
+.hhdr{margin-bottom:10px;justify-content:space-between}
+.hhdr h2{margin:0}
+.mpick{width:auto}
+.hfilt{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.hfilt .hsearch{flex:1;min-width:0;margin-bottom:0}
+.hstaff{flex:none;width:auto;max-width:44%;height:42px;padding:0 10px;border-radius:12px;background-color:var(--card);font-weight:600}
+.hstaff.on{border-color:var(--accent);color:var(--accent);box-shadow:0 0 0 3px var(--ring)}
+.hstaff:disabled{opacity:.55;cursor:default}
+.reccount{margin-top:8px}
+.hi-h{margin-bottom:6px}
+.hi-lt{margin:10px 0 2px}
+.chead{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.chead h2{margin:0}   /* 標題包進 flex 後邊距不再與下一個元素合併，歸零才會和 v133 的手機版間距一致 */
+.dtonly{display:none}
+.stnote{text-align:center;margin:14px 12px 0}
+.stnote.v{margin-top:6px}
+
+/* ================================================================
+   ② 電腦版（html[data-layout="desktop"]）：歷史頁
+   ================================================================ */
+html[data-layout="desktop"] #tab-history{max-width:1600px}
+html[data-layout="desktop"] #tab-history .hmain{display:flex;flex-wrap:wrap;align-items:center;gap:12px 16px;margin:20px 12px 14px;padding:18px 20px 20px}
+html[data-layout="desktop"] .hmain .hhdr{flex:none;margin:0;gap:14px;justify-content:flex-start}
+html[data-layout="desktop"] .hmain .hhdr h2{font-size:18px}
+html[data-layout="desktop"] .hmain .mpick{height:40px;padding:0 12px}
+html[data-layout="desktop"] .hmain #hSeg{flex:0 0 272px;margin:0}
+html[data-layout="desktop"] .hmain .hfilt{flex:1 1 320px;max-width:540px;margin:0}
+html[data-layout="desktop"] .hmain .hsearch input,
+html[data-layout="desktop"] .hmain .hstaff{height:40px}
+html[data-layout="desktop"] .hmain #hChips,
+html[data-layout="desktop"] .hmain #hTableWrap,
+html[data-layout="desktop"] .hmain #hItemWrap{flex:1 0 100%;min-width:0}
+html[data-layout="desktop"] .hmain #hChips{flex-wrap:wrap;overflow:visible;margin:0;padding:0}
+html[data-layout="desktop"] .hmain #hChips .chip{padding:6px 14px;font-size:calc(14px*var(--k,1))}
+
+/* 月表：自己捲動的區塊（上下左右的捲軸都在表格邊上），表頭與日期欄固定 */
+html[data-layout="desktop"] #histHead{display:none}
+html[data-layout="desktop"] #histBody{max-height:calc(100vh - 290px);min-height:340px;overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+html[data-layout="desktop"] #histTable{width:100%!important}
+html[data-layout="desktop"] #histTable col:nth-child(n+4){width:auto!important}
+html[data-layout="desktop"] #histTable thead th{position:sticky;top:0;z-index:3;padding:10px 4px 9px;background:var(--card);border-bottom:2px solid var(--accent);vertical-align:bottom}
+html[data-layout="desktop"] #histTable thead th:nth-child(-n+2){z-index:6}
+html[data-layout="desktop"] #histTable thead th[data-id]:hover{background:var(--accent-soft);color:var(--accent)}
+html[data-layout="desktop"] #histTable tbody td{padding:7px 4px}
+html[data-layout="desktop"] #histTable tbody tr:not(.cur):hover td:not(.tdy):not(.anom1):not(.anom2){background:var(--accent-soft)!important}
+
+/* 單一品項：左邊品項清單、右邊圖表＋每日紀錄 */
+html[data-layout="desktop"] #hItemWrap{display:grid;grid-template-columns:210px minmax(0,1fr);gap:22px;align-items:start}
+html[data-layout="desktop"] #hPills{flex-direction:column;flex-wrap:nowrap;gap:2px;max-height:calc(100vh - 290px);min-height:200px;margin:0;padding:6px;overflow:auto;border:1px solid var(--line);border-radius:12px;background:var(--input)}
+html[data-layout="desktop"] #hPills .pl{width:100%;padding:8px 12px;border:0;border-radius:9px;background:transparent;text-align:left;font-size:14px;font-weight:600}
+html[data-layout="desktop"] #hPills .pl:hover{background:var(--accent-soft)}
+html[data-layout="desktop"] #hPills .pl.on{background:var(--accent);color:var(--accent-ink)}
+html[data-layout="desktop"] #hItemBody{display:grid;grid-template-columns:minmax(0,1fr) 320px;grid-template-areas:"top top" "chart log";gap:16px 24px;align-items:start}
+html[data-layout="desktop"] #hItemBody>.empty{grid-column:1/-1}
+html[data-layout="desktop"] #hItemBody>.hi-top{grid-area:top;display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:12px 20px}
+html[data-layout="desktop"] #hItemBody>.hi-top .hi-h{margin:0}
+html[data-layout="desktop"] #hItemBody>.hi-top .stats{width:min(100%,460px);margin:0}
+html[data-layout="desktop"] #hItemBody>.hi-chart{grid-area:chart;min-width:0}
+html[data-layout="desktop"] #hItemBody>.hi-chart .trend{margin-bottom:14px}
+html[data-layout="desktop"] #hItemBody>.hi-log{grid-area:log;max-height:calc(100vh - 340px);min-height:220px;overflow:auto;padding:0 12px 6px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+html[data-layout="desktop"] #hItemBody>.hi-log>.hi-lt{position:sticky;top:0;z-index:1;margin:0;padding:10px 0 6px;background:var(--card)}
+html[data-layout="desktop"] #hItemBody .lrow:hover{background:var(--accent-soft)}
+
+/* 匯出與備份：一整排 */
+html[data-layout="desktop"] #tab-history .hexp{display:flex;flex-wrap:wrap;align-items:center;gap:12px 18px;margin-top:0;padding:14px 20px}
+html[data-layout="desktop"] .hexp h2{margin:0}
+html[data-layout="desktop"] .hexp .expbar{flex:none;gap:8px!important}
+html[data-layout="desktop"] .hexp .expbar .btn{flex:none;min-height:38px;padding:0 16px;font-size:14px}
+html[data-layout="desktop"] .hexp .reccount{flex:1 1 320px;margin:0;text-align:right}
+
+/* ================================================================
+   ② 電腦版：設定頁
+   ================================================================ */
+html[data-layout="desktop"] #tab-settings{max-width:1320px;display:grid;grid-template-columns:minmax(0,1fr);gap:16px;align-content:start;padding:20px 12px 40px}
+html[data-layout="desktop"] #tab-settings>.card{margin:0}
+html[data-layout="desktop"] #tab-settings>.addbar{display:none}
+html[data-layout="desktop"] #tab-settings>.st-display{order:1}
+html[data-layout="desktop"] #tab-settings>.st-items{order:2}
+html[data-layout="desktop"] #tab-settings>.st-sync{order:3}
+html[data-layout="desktop"] #tab-settings>.st-foot{order:4;padding:0 4px}
+html[data-layout="desktop"] .stnote{text-align:left;margin:0 0 6px}
+html[data-layout="desktop"] .st-display .swrow2{margin-bottom:14px}
+
+/* 品項清單：像表格的一列（拖曳把手｜名稱｜分類｜單位｜最低量｜停用／刪除） */
+html[data-layout="desktop"] .st-items{--icols:36px minmax(0,2.4fr) minmax(0,1.3fr) 84px 96px 104px;padding:0 20px 16px}
+html[data-layout="desktop"] .st-items .ibar{position:sticky;top:0;z-index:6;padding-top:16px;background:var(--card);border-radius:var(--r-lg) var(--r-lg) 0 0}
+html[data-layout="desktop"] .st-items .chead h2{margin:0;font-size:18px}
+html[data-layout="desktop"] .chead .dtonly{display:inline-flex;align-items:center;padding:0 14px}
+html[data-layout="desktop"] .ihead.dtonly{display:grid;grid-template-columns:var(--icols);gap:10px;align-items:end;margin-top:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:12px;font-weight:700;color:var(--muted)}
+html[data-layout="desktop"] .st-items .dragtip{margin:0}
+html[data-layout="desktop"] .irow2{display:grid;grid-template-columns:var(--icols);gap:10px;align-items:center;padding:8px 0}
+html[data-layout="desktop"] .irow2 .fields,
+html[data-layout="desktop"] .irow2 .irow,
+html[data-layout="desktop"] .irow2 .irow.r2,
+html[data-layout="desktop"] .irow2 .irow.r3{display:contents}
+html[data-layout="desktop"] .irow2 .xt{display:none}
+html[data-layout="desktop"] .irow2 .grip{width:36px;height:36px}
+html[data-layout="desktop"] .irow2 .acts{flex-direction:row;justify-content:flex-end;gap:6px}
+html[data-layout="desktop"] .irow2.dragging{padding:8px}
+html[data-layout="desktop"] #itemListOff{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:8px}
+html[data-layout="desktop"] .offrow{margin-bottom:0}
+
+/* 寬螢幕：左邊品項清單、右邊顯示／同步設定 */
+@media (min-width:1280px){
+  html[data-layout="desktop"] #tab-settings{grid-template-columns:minmax(0,1fr) 340px;grid-template-rows:auto auto auto 1fr;align-items:start}
+  html[data-layout="desktop"] #tab-settings>.st-items{grid-column:1;grid-row:1/span 4}
+  html[data-layout="desktop"] #tab-settings>.st-display{grid-column:2;grid-row:1}
+  html[data-layout="desktop"] #tab-settings>.st-sync{grid-column:2;grid-row:2}
+  html[data-layout="desktop"] #tab-settings>.st-foot{grid-column:2;grid-row:3}
+  html[data-layout="desktop"] .st-display .swrow2{flex-direction:column;align-items:stretch;gap:6px}
+  html[data-layout="desktop"] .st-display .swrow2 .seg,
+  html[data-layout="desktop"] .st-display .swrow2 .seg#themeSeg{min-width:0;width:100%}
+}
+
 </style>
 </head>
 <body>
@@ -893,13 +1026,13 @@ html[data-layout="desktop"] button,html[data-layout="desktop"] .chip{cursor:poin
 
 <!-- ================= 歷史頁 ================= -->
 <section id="tab-history" class="hidden">
-  <div class="card" style="margin-top:calc(10px + env(safe-area-inset-top,0px))">
-    <div class="row" style="margin-bottom:10px;justify-content:space-between">
-      <h2 style="margin:0">月庫存管理表</h2>
-      <input type="month" id="monthPick" style="width:auto" aria-label="選擇月份">
+  <div class="card hmain ptop">
+    <div class="row hhdr">
+      <h2>月庫存管理表</h2>
+      <input type="month" id="monthPick" class="mpick" aria-label="選擇月份">
     </div>
     <div class="seg" id="hSeg"><button data-m="table" class="on">全品項列表</button><button data-m="item">單一品項</button></div>
-    <div class="hsearch"><span class="ic"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg></span><input id="hq" type="search" placeholder="搜尋品項…" aria-label="搜尋品項" autocomplete="off"><button class="x hidden" id="hqx" aria-label="清除"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></div>
+    <div class="hfilt"><div class="hsearch"><span class="ic"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg></span><input id="hq" type="search" placeholder="搜尋品項…" aria-label="搜尋品項" autocomplete="off"><button class="x hidden" id="hqx" aria-label="清除"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></div><select id="hStaff" class="hstaff" aria-label="篩選人員"></select></div>
     <div class="chips" id="hChips"></div>
     <div id="hTableWrap">
       <div class="hhead" id="histHead"><table class="htab" id="histHeadTable"></table></div>
@@ -910,28 +1043,34 @@ html[data-layout="desktop"] button,html[data-layout="desktop"] .chip{cursor:poin
       <div id="hItemBody"></div>
     </div>
   </div>
-  <div class="card">
+  <div class="card hexp">
     <h2>匯出與備份</h2>
     <div class="row expbar">
       <button class="btn primary" id="btnExport"><svg class="i" aria-hidden="true"><use href="#i-download"/></svg>匯出 Excel</button>
       <button class="btn" id="btnBackup">備份 JSON</button>
       <label class="btn">還原備份<input type="file" id="fileRestore" accept=".json,application/json" class="hidden"></label>
     </div>
-    <div class="muted" style="margin-top:8px" id="recCount"></div>
+    <div class="muted reccount" id="recCount"></div>
   </div>
 </section>
 
 <!-- ================= 設定頁 ================= -->
 <section id="tab-settings" class="hidden">
-  <div class="card" style="margin-top:calc(10px + env(safe-area-inset-top,0px))">
+  <div class="card ptop st-display">
     <h2><svg class="i" aria-hidden="true"><use href="#i-monitor"/></svg>顯示</h2>
     <div class="swrow2"><span>文字大小</span><div class="seg" id="fsSeg"><button data-k="0.8">小</button><button data-k="1">標準</button><button data-k="1.15">大</button><button data-k="1.3">特大</button></div></div>
     <div class="swrow2"><span>外觀</span><div class="seg" id="themeSeg"><button type="button" data-th="auto">跟隨系統</button><button type="button" data-th="light">淺色</button><button type="button" data-th="dark">深色</button></div></div>
     <div class="swrow2"><span>版面</span><div class="seg" id="lvSeg"><button type="button" data-lv="auto">自動</button><button type="button" data-lv="mobile">手機版</button><button type="button" data-lv="desktop">電腦版</button></div></div>
     <label class="swrow"><span>盤點頁按分類分組</span><input type="checkbox" class="sw" id="swGroup"></label>
   </div>
-  <div class="card">
-    <h2><svg class="i" aria-hidden="true"><use href="#i-box"/></svg>品項清單</h2>
+  <div class="card st-items">
+    <div class="ibar">
+      <div class="chead">
+        <h2><svg class="i" aria-hidden="true"><use href="#i-box"/></svg>品項清單</h2>
+        <button class="btn primary sm dtonly" id="btnAddItem2" type="button"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>新增品項</button>
+      </div>
+      <div class="ihead dtonly" aria-hidden="true"><span></span><span>名稱</span><span>分類</span><span>單位</span><span>最低量</span><span></span></div>
+    </div>
     <div class="dragtip"></div>
     <div id="itemList"></div>
     <details class="offbox hidden" id="offBox">
@@ -941,9 +1080,11 @@ html[data-layout="desktop"] button,html[data-layout="desktop"] .chip{cursor:poin
     </details>
   </div>
   <div class="addbar"><button class="btn primary" id="btnAddItem"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>新增品項</button></div>
-  <div class="muted" style="text-align:center;margin:14px 12px 0">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-  <div class="muted" style="text-align:center;margin:6px 12px 0">網頁版本：v133</div>
-  <details class="card sync" id="syncBox">
+  <div class="st-foot">
+    <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
+    <div class="muted stnote v">網頁版本：v140</div>
+  </div>
+  <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
     <div class="body">
     <label class="field"><span>Firebase</span><input id="cfgUrl" placeholder="https://xxxx-default-rtdb.firebaseio.com" inputmode="url" autocapitalize="off"></label>
@@ -989,6 +1130,7 @@ const pad=n=>String(n).padStart(2,'0');
 const ymd=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
 const parse=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
 const $=id=>document.getElementById(id);
+const isDesk=()=>document.documentElement.dataset.layout==='desktop';
 const clone=o=>JSON.parse(JSON.stringify(o));
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function toast(m,ms){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),ms||2400)}
@@ -999,7 +1141,7 @@ const ICN=n=>'<svg class="i" aria-hidden="true"><use href="#i-'+n+'"/></svg>';
 /* ---------- 狀態 ---------- */
 let S={items:clone(DEFAULT_ITEMS),nextId:100,days:{},catOrder:[]};
 let todayStr=ymd(new Date()),curDate=todayStr,histMonth=todayStr.slice(0,7);
-let hCat='全部',hQ='',hMode='table',hItem=null;
+let hCat='全部',hQ='',hMode='table',hItem=null,hStaff='';
 let catSel='全部',query='';
 let store=null,online=true,connected=false;
 const pendVals={};      // key -> 尚未被雲端確認的值
@@ -1170,7 +1312,8 @@ function updateDateUI(){
   $('btnToday').classList.toggle('hidden',curDate===todayStr);
   applyLock();
 }
-function loadDate(d){progDone=null;curDate=d;if(unlockedDate&&unlockedDate!==d)unlockedDate=null;updateDateUI();renderItems();syncMeta(false,true);renderChips();updateProg()}   // 切換日期保留目前捲動位置（不再回到最上面）
+function loadDate(d){progDone=null;curDate=d;if(catSel==='未填'&&!dayItems(d).some(i=>!hasVal(valOf(d,i.id))))catSel='全部';   // 換到已全部填完的日子：不要停在空的「未填」
+  if(unlockedDate&&unlockedDate!==d)unlockedDate=null;updateDateUI();renderItems();syncMeta(false,true);renderChips();updateProg()}   // 切換日期保留目前捲動位置（不再回到最上面）
 /* 從歷史頁跳到某天的某個品項：捲到位置並閃爍提示 */
 function goToItem(date,itemId){
   catSel='全部';query='';$('q').value='';$('qx').classList.add('hidden');
@@ -1235,14 +1378,16 @@ function cats(){
 function renderChips(){
   const box=$('chips');
   const NI=dayItems(curDate);
-  const list=[['全部',NI],['未填',NI.filter(i=>!hasVal(valOf(curDate,i.id)))],...cats().map(c=>[c,NI.filter(i=>i.cat===c)])];
+  const unfilled=NI.filter(i=>!hasVal(valOf(curDate,i.id)));
+  // 全部填完就隱藏「未填」鈕；正在看「未填」時先保留（不然畫面會突然空掉），切到別的分類後才消失
+  const list=[['全部',NI],...(unfilled.length||catSel==='未填'?[['未填',unfilled]]:[]),...cats().map(c=>[c,NI.filter(i=>i.cat===c)])];
   const hasAnyMin=NI.some(hasMin);
-  if(hasAnyMin)list.splice(2,0,['需叫貨',NI.filter(isLow)]);
+  if(hasAnyMin)list.splice(list[1]&&list[1][0]==='未填'?2:1,0,['需叫貨',NI.filter(isLow)]);
   if(catSel==='需叫貨'&&!hasAnyMin)catSel='全部';
   if(catSel!=='全部'&&catSel!=='未填'&&catSel!=='需叫貨'&&!cats().includes(catSel))catSel='全部';
   box.innerHTML='';box.classList.toggle('searching',!!query);
   list.forEach(([c,its])=>{
-    const b=document.createElement('button');b.className='chip'+(catSel===c?' on':'')+(c==='需叫貨'&&its.length?' alert':'');
+    const b=document.createElement('button');b.className='chip'+(catSel===c?' on':'')+(c==='需叫貨'&&its.length?' alert':'')+(c==='未填'&&its.length?' unf':'');
     const filled=its.filter(i=>hasVal(valOf(curDate,i.id))).length;
     b.innerHTML=esc(c)+'<small>'+((c==='未填'||c==='需叫貨')?its.length:filled+'/'+its.length)+'</small>';
     b.onclick=()=>{catSel=c;renderChips();renderItems(false)};
@@ -1720,31 +1865,44 @@ function anomOf(id,ds){
   }
   return o.res[ds]=r;
 }
+function renderHStaff(){   // 人員篩選：列出這個月出現過的盤點人員（括號是天數）
+  const sel=$('hStaff'),cnt={};
+  monthDates(histMonth).forEach(ds=>{const r=S.days[ds];if(r&&r.staff)cnt[r.staff]=(cnt[r.staff]||0)+1});
+  const names=Object.keys(cnt).sort((a,b)=>cnt[b]-cnt[a]||(a<b?-1:1));
+  if(hStaff&&!cnt[hStaff])hStaff='';                       // 換月份後這個人沒出現就回到「全部人員」
+  const key=names.map(n=>n+':'+cnt[n]).join('|')+'#'+names.length;
+  if(sel._k!==key){sel._k=key;sel.innerHTML=names.length?'<option value="">全部人員</option>'+names.map(n=>'<option value="'+esc(n)+'">'+esc(n)+'（'+cnt[n]+'）</option>').join(''):'<option value="">無人員紀錄</option>'}
+  sel.disabled=!names.length;                               // 一律顯示；這個月沒有人員紀錄時變灰、不能選
+  sel.value=hStaff;sel.classList.toggle('on',!!hStaff);
+}
+$('hStaff').onchange=e=>{hStaff=e.target.value;renderHistory(false)};
 function renderHistory(scrollToday){
   anCache={};anDates=null;
   $('monthPick').value=histMonth;
-  renderHChips();
+  renderHChips();renderHStaff();
   document.querySelectorAll('#hSeg button').forEach(b=>b.classList.toggle('on',b.dataset.m===hMode));
   $('hTableWrap').classList.toggle('hidden',hMode!=='table');
   $('hItemWrap').classList.toggle('hidden',hMode!=='item');
-  $('recCount').textContent='共 '+Object.keys(S.days).filter(d=>hasData(S.days[d])).length+' 天紀錄'+(hMode==='table'?' · 紅格＝跟前次差很多、橘格＝跟近期平均差很多（長按格子看原因，長按人員看最後編輯時間）':'');
+  $('recCount').textContent='共 '+Object.keys(S.days).filter(d=>hasData(S.days[d])).length+' 天紀錄'+(hMode==='table'?' · 紅格＝跟前次差很多、橘格＝跟近期平均差很多'+(isDesk()?'（滑鼠停在格子或人員上可看原因與最後編輯時間）':'（長按格子看原因，長按人員看最後編輯時間）'):'');
   const its=hFiltered();
   if(hMode==='item'){renderHItem(its);return}
   const [y,m]=histMonth.split('-').map(Number),days=new Date(y,m,0).getDate();
-  const W=[38,34,88,...its.map(()=>68)],total=W.reduce((p,c)=>p+c,0);
+  const W=[38,34,88,...its.map(()=>68)],total=W.reduce((p,c)=>p+c,0),desk=isDesk();
   const cg='<colgroup>'+W.map(w=>'<col style="width:'+w+'px">').join('')+'</colgroup>';
   const hh=$('histHeadTable'),t=$('histTable');
-  hh.style.width=t.style.width=total+'px';
-  hh.innerHTML=cg+'<thead><tr><th>日</th><th>週</th><th>人員</th>'+its.map(i=>'<th data-id="'+i.id+'">'+esc(i.name)+(i.off?'<br><small class="offtag">停用</small>':'')+'</th>').join('')+'</tr></thead>';
-  let h=cg+'<tbody>';
+  hh.style.width=t.style.width=total+'px';hh.style.minWidth=t.style.minWidth=total+'px';
+  const thead='<thead><tr><th>日</th><th>週</th><th>人員</th>'+its.map(i=>'<th data-id="'+i.id+'">'+esc(i.name)+(i.off?'<br><small class="offtag">停用</small>':'')+'</th>').join('')+'</tr></thead>';
+  hh.innerHTML=cg+thead;
+  let h=cg+(desk?thead:'')+'<tbody>';   // 電腦版：表頭直接放進主表格（thead 固定在表格上緣），不用另一個表頭表格
   for(let d=1;d<=days;d++){
     const ds=y+'-'+pad(m)+'-'+pad(d),r=S.days[ds];
+    if(hStaff&&!(r&&r.staff===hStaff))continue;   // 人員篩選：只留這個人盤點的日子
     h+='<tr class="'+(hasData(r)?'has':'')+(ds===curDate?' cur':'')+'"><td class="day'+(ds===todayStr?' tdy':'')+'" data-d="'+ds+'">'+d+'</td><td>'+WD[new Date(y,m-1,d).getDay()]+'</td><td class="stf"'+(r&&(r.staff||typeof r.updatedAt==='number')?(()=>{const lt=typeof r.updatedAt==='number'?'最後編輯 '+fmtEditFull(r.updatedAt):'最後編輯時間未記錄';return' title="'+esc((+ds.slice(5,7))+'/'+(+ds.slice(8))+(r.staff?' '+r.staff:'')+'；'+lt)+'" data-tip="'+esc((+ds.slice(5,7))+'/'+(+ds.slice(8))+(r.staff?' '+r.staff:'')+'\n'+lt)+'"'})():'')+'>'+(r&&r.staff?'<span class="sp" style="--c:var(--pc-'+histTone(ds,r.staff)+')">'+esc(r.staff)+'</span>':'')+'</td>'+
       its.map(i=>{const v=r&&r.values?r.values[i.id]:'';const nt=r&&r.inotes&&r.inotes[i.id]?r.inotes[i.id]:'';const an=(r&&r.values)?anomOf(i.id,ds):null;const cl=((lowVal(i,v)?'lowc ':'')+(nt?'hasn ':'')+(an?'anom'+an.lvl:'')).trim();const tip=[an?an.text:'',lowVal(i,v)?'低於最低量（最低 '+i.min+'）':'',nt?'備註：'+nt:''].filter(Boolean);return'<td'+(cl?' class="'+cl+'"':'')+(tip.length?' title="'+esc(tip.join('；'))+'" data-tip="'+esc(ds.slice(5).replace('-','/')+' '+i.name+'\n'+tip.join('\n'))+'"':'')+'>'+(hasVal(v)?v:'')+'</td>'}).join('')+'</tr>';
   }
   t.innerHTML=h+'</tbody>';
   t.querySelectorAll('td.day').forEach(td=>td.onclick=()=>{switchTab('daily');loadDate(td.dataset.d)});
-  hh.querySelectorAll('th[data-id]').forEach(th=>th.onclick=()=>{hMode='item';hItem=th.dataset.id;renderHistory(false);window.scrollTo(0,0)});
+  [hh,t].forEach(el=>el.querySelectorAll('th[data-id]').forEach(th=>th.onclick=()=>{hMode='item';hItem=th.dataset.id;renderHistory(false);window.scrollTo(0,0)}));
   t.querySelectorAll('tbody td:not(.day)').forEach(td=>td.onclick=()=>{
     const th=hh.querySelectorAll('th')[td.cellIndex];
     const date=td.parentElement.querySelector('td.day').dataset.d;
@@ -1769,8 +1927,9 @@ function renderHItem(list){
     b.onclick=()=>{hItem=it.id;renderHistory(false)};pills.appendChild(b)});
   const it=list.find(i=>i.id===hItem);
   const [y,m]=histMonth.split('-').map(Number),days=new Date(y,m,0).getDate();
-  const pts=[];
-  for(let d=1;d<=days;d++){const ds=y+'-'+pad(m)+'-'+pad(d),v=valOf(ds,it.id);if(hasVal(v))pts.push({d,ds,v:Number(v)})}
+  const ptsAll=[];
+  for(let d=1;d<=days;d++){const ds=y+'-'+pad(m)+'-'+pad(d),v=valOf(ds,it.id);if(hasVal(v))ptsAll.push({d,ds,v:Number(v)})}
+  const pts=hStaff?ptsAll.filter(p=>{const r=S.days[p.ds];return r&&r.staff===hStaff}):ptsAll;   // 人員篩選：圖表與每日紀錄只留這個人盤點的日子
   const unit=it.unit?esc(it.unit):'';
   const trendHtml=(()=>{
     const base=parse(todayStr),tp=[];
@@ -1790,16 +1949,16 @@ function renderHItem(list){
     const sp='<svg viewBox="0 0 '+w+' '+h+'" class="spark" aria-hidden="true"><polyline fill="none" points="'+tp.map(p=>sx(p.i)+','+sy(p.v)).join(' ')+'" style="stroke:var(--accent);stroke-width:2;stroke-linejoin:round;stroke-linecap:round"/>'+adots+'<circle cx="'+sx(lp.i)+'" cy="'+sy(lp.v)+'" r="3.5" style="fill:var(--accent)"/></svg>';
     return '<div class="trend"><div class="tr-l">'+head(est,cls,sub)+'</div>'+sp+'</div>';
   })();
-  if(!pts.length){body.innerHTML=trendHtml+'<div class="empty">'+(m)+'月還沒有「'+esc(it.name)+'」的紀錄</div>';return}
+  if(!pts.length){body.innerHTML='<div class="hi-chart">'+trendHtml+'<div class="empty">'+(m)+'月'+(hStaff?'「'+esc(hStaff)+'」':'')+'還沒有「'+esc(it.name)+'」的紀錄</div></div>';return}
   const vs=pts.map(p=>p.v),mn=Math.min(...vs),mx=Math.max(...vs),avg=Math.round(vs.reduce((a,b)=>a+b,0)/vs.length*10)/10,last=pts[pts.length-1];
-  const W=340,H=170,L=34,R=12,T=14,B=24;
+  const dk=isDesk(),W=dk?720:340,H=dk?250:170,L=34,R=12,T=14,B=24;   // 電腦版圖表畫大一點，字才不會被放大
   const mv=hasMin(it)?Number(it.min):null;const rmn=mv===null?mn:Math.min(mn,mv),rmx=mv===null?mx:Math.max(mx,mv);const pad2=(rmx-rmn)*0.15||1;let lo=rmn-pad2,hi=rmx+pad2;if(mn>=0&&lo<0)lo=0;
   const X=d=>L+(days===1?0:(d-1)/(days-1))*(W-L-R),Y=v=>T+(1-(v-lo)/(hi-lo))*(H-T-B);
   const r1=v=>Math.round(v*10)/10;
   let svg='<svg viewBox="0 0 '+W+' '+H+'" style="width:100%;height:auto;display:block">';
   [lo,(lo+hi)/2,hi].forEach(v=>{const y=Y(v);
     svg+='<line x1="'+L+'" x2="'+(W-R)+'" y1="'+y+'" y2="'+y+'" style="stroke:var(--line);stroke-width:1"/><text x="'+(L-4)+'" y="'+(y+3)+'" text-anchor="end" style="fill:var(--muted);font-size:10px">'+r1(v)+'</text>'});
-  [...new Set([1,5,10,15,20,25,days])].filter(d=>d<=days).forEach(d=>{
+  (dk?Array.from({length:days},(_,i)=>i+1).filter(d=>d%2===1||d===days):[...new Set([1,5,10,15,20,25,days])].filter(d=>d<=days)).forEach(d=>{
     svg+='<text x="'+X(d)+'" y="'+(H-8)+'" text-anchor="middle" style="fill:var(--muted);font-size:10px">'+d+'</text>'});
   const td=todayStr.startsWith(y+'-'+pad(m))?parseInt(todayStr.slice(8)):0;
   if(td)svg+='<line x1="'+X(td)+'" x2="'+X(td)+'" y1="'+T+'" y2="'+(H-B)+'" style="stroke:var(--sun);stroke-width:1;stroke-dasharray:3 3"/>';
@@ -1810,13 +1969,13 @@ function renderHItem(list){
   const stat=(n,l)=>'<div class="stat"><b>'+n+'</b><span>'+l+'</span></div>';
   let rows='';
   for(let i=pts.length-1;i>=0;i--){
-    const p=pts[i],pv=i>0?pts[i-1].v:null,df=pv===null?'':r1(p.v-pv);
+    const p=pts[i],k0=ptsAll.indexOf(p),pv=k0>0?ptsAll[k0-1].v:null,df=pv===null?'':r1(p.v-pv);   // 增減永遠跟「前一次盤點」比，不因篩選而跳著比
     const dd=new Date(y,m-1,p.d);
     rows+='<div class="lrow" data-d="'+p.ds+'"><span class="d">'+m+'/'+p.d+'（週'+WD[dd.getDay()]+'）'+(p.ds===todayStr?' <span class="pill">今天</span>':'')+(noteOf(p.ds,it.id)?'<small class="lnote">📝 '+esc(noteOf(p.ds,it.id))+'</small>':'')+'</span><span class="df diff '+(df>0?'up':df<0?'down':'')+(anomOf(it.id,p.ds)?' an':'')+'">'+(df===''?'':Math.abs(df))+'</span><span class="v">'+p.v+'</span></div>';
   }
-  body.innerHTML='<div class="muted" style="margin-bottom:6px"><b style="color:var(--ink);font-size:17px">'+esc(it.name)+'</b> '+m+'月每日數量'+(unit?'（'+unit+'）':'')+'</div>'+
-    '<div class="stats">'+stat(last.v,'最新 '+m+'/'+last.d)+stat(mn,'最低')+stat(mx,'最高')+stat(avg,'平均')+'</div>'+trendHtml+svg+(pts.some(p=>anomOf(it.id,p.ds))?'<div class="muted" style="font-size:12px;margin-top:4px"><span style="color:var(--down)">●</span> 紅點＝跟前次差很多　<span style="color:var(--sun)">●</span> 橘點＝跟近期平均差很多</div>':'')+
-    '<div class="muted" style="margin:10px 0 2px">每日紀錄（最新在上）</div>'+rows;
+  body.innerHTML='<div class="hi-top"><div class="muted hi-h"><b style="color:var(--ink);font-size:17px">'+esc(it.name)+'</b> '+m+'月每日數量'+(unit?'（'+unit+'）':'')+'</div>'+
+    '<div class="stats">'+stat(last.v,'最新 '+m+'/'+last.d)+stat(mn,'最低')+stat(mx,'最高')+stat(avg,'平均')+'</div></div><div class="hi-chart">'+trendHtml+svg+(pts.some(p=>anomOf(it.id,p.ds))?'<div class="muted" style="font-size:12px;margin-top:4px"><span style="color:var(--down)">●</span> 紅點＝跟前次差很多　<span style="color:var(--sun)">●</span> 橘點＝跟近期平均差很多</div>':'')+'</div>'+
+    '<div class="hi-log"><div class="muted hi-lt">每日紀錄（最新在上）</div>'+rows+'</div>';
   body.querySelectorAll('.lrow').forEach(r=>r.onclick=()=>goToItem(r.dataset.d,it.id));
 }
 $('hq').oninput=e=>{hQ=e.target.value.trim().toLowerCase();$('hqx').classList.toggle('hidden',!hQ);renderHistory(false)};
@@ -1954,6 +2113,7 @@ $('btnAddItem').onclick=()=>{
   saveItems();renderItemEditor();renderChips();
   const ins=$('itemList').querySelectorAll('input.n');ins[ins.length-1].focus();
 };
+$('btnAddItem2').onclick=()=>$('btnAddItem').click();   // 電腦版放在品項清單標題列的同一顆按鈕
 
 /* ---------- 分頁 ---------- */
 const VP=document.querySelector('meta[name=viewport]');
@@ -1973,8 +2133,10 @@ document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>switchTab(b.da
 /* ---------- 顯示設定 ---------- */
 function applyLayout(){   // 版面：自動(依螢幕寬度)／手機版／電腦版；只存在這台裝置
   const m=getPref('pt_layout','auto'),dt=m==='desktop'||(m==='auto'&&window.innerWidth>=1000);
-  document.documentElement.dataset.layout=dt?'desktop':'mobile';
+  const prevLy=document.documentElement.dataset.layout,nextLy=dt?'desktop':'mobile';
+  document.documentElement.dataset.layout=nextLy;
   document.querySelectorAll('#lvSeg button').forEach(b=>b.classList.toggle('on',b.dataset.lv===m));
+  if(prevLy&&prevLy!==nextLy&&!$('tab-history').classList.contains('hidden'))renderHistory(false);   // 歷史表的結構兩種版面不同
 }
 document.querySelectorAll('#lvSeg button').forEach(b=>b.onclick=()=>{setPref('pt_layout',b.dataset.lv);applyLayout()});
 window.addEventListener('resize',applyLayout);applyLayout();
