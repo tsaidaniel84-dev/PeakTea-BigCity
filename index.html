@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="142">
+<meta name="app-version" content="143">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -841,8 +841,8 @@ html[data-layout="desktop"] button,html[data-layout="desktop"] .chip{cursor:poin
    v134：① 未填的分類標藍色　② 電腦版：歷史頁、設定頁排版
    ================================================================ */
 
-/* ---------- ① 「未填」分類鈕（配色 A：暖炭灰＋陶土橘）：淺色模式暖灰底、深色模式暖淺灰底、選取時實心橘；全部填完就隱藏 ---------- */
-:root{--td:#c1531b;--td-soft:#68675f;--td-line:#57564f;--td-ink:#ffd7b5;--td-fg:#fffdf9;--td-on:#fff;--td-sh:rgba(193,83,27,.45)}
+/* ---------- ① 「未填」分類鈕（配色 A：暖炭灰＋陶土橘）：淺色模式暖淺灰底（深字）、深色模式更亮的暖淺灰底、選取時實心橘；全部填完就隱藏 ---------- */
+:root{--td:#c1531b;--td-soft:#cfccbd;--td-line:#b3af9e;--td-ink:#8f3a0b;--td-fg:#1f2f28;--td-on:#fff;--td-sh:rgba(193,83,27,.45)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--td:#e58a55;--td-soft:#d9d6c8;--td-line:#ece8da;--td-ink:#8f3a0b;--td-fg:#1f2f28;--td-on:#1b1208;--td-sh:rgba(229,138,85,.35)}}
 :root[data-theme="dark"]{--td:#e58a55;--td-soft:#d9d6c8;--td-line:#ece8da;--td-ink:#8f3a0b;--td-fg:#1f2f28;--td-on:#1b1208;--td-sh:rgba(229,138,85,.35)}
 .chip.unf{background:var(--td-soft);border-color:var(--td-line);color:var(--td-fg)}
@@ -1082,7 +1082,7 @@ html[data-layout="desktop"] .offrow{margin-bottom:0}
   <div class="addbar"><button class="btn primary" id="btnAddItem"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>新增品項</button></div>
   <div class="st-foot">
     <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-    <div class="muted stnote v">網頁版本：v142</div>
+    <div class="muted stnote v">網頁版本：v143</div>
   </div>
   <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
