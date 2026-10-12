@@ -969,6 +969,40 @@ html[data-layout="desktop"] .offrow{margin-bottom:0}
   html[data-layout="desktop"] .st-display .swrow2 .seg#themeSeg{min-width:0;width:100%}
 }
 
+
+/* ---------- v144：分類鈕改成圓形漸層外框（IG 限時動態風） ---------- */
+.chips{gap:12px;padding:4px 2px 6px}
+.chips .chip{
+  --ring:linear-gradient(45deg,#f9a03f 0%,#e8407a 55%,#8a3ab9 100%);
+  --sz:calc(64px*var(--k,1));
+  width:var(--sz);height:var(--sz);flex:none;
+  padding:0!important;margin:0;
+  border:3px solid transparent!important;border-radius:50%!important;
+  background:linear-gradient(var(--card),var(--card)) padding-box,var(--ring) border-box!important;
+  color:var(--ink)!important;box-shadow:none!important;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  line-height:1.1;white-space:nowrap;
+  transition:transform .12s,background .15s;
+}
+.chips .chip .cl{font-size:calc(15px*var(--k,1));font-weight:800;letter-spacing:0}
+.chips .chip[data-n="4"] .cl{font-size:calc(12.5px*var(--k,1))}
+.chips .chip[data-n="5"] .cl,.chips .chip[data-n="6"] .cl{font-size:calc(10.5px*var(--k,1))}
+.chips .chip small{margin:0!important;font-size:calc(11px*var(--k,1));font-weight:700;color:var(--muted)!important;opacity:1}
+/* 選取：深色實心，保留漸層外框 */
+.chips .chip.on{background:linear-gradient(var(--ink),var(--ink)) padding-box,var(--ring) border-box!important;color:var(--bg)!important}
+.chips .chip.on small{color:var(--bg)!important;opacity:.75}
+/* 搜尋中：不顯示選取狀態（因為搜尋會跨所有分類） */
+.chips.searching .chip.on{background:linear-gradient(var(--card),var(--card)) padding-box,var(--ring) border-box!important;color:var(--ink)!important}
+.chips.searching .chip.on small{color:var(--muted)!important;opacity:1}
+/* 未填：藍色外框 */
+.chips .chip.unf{--ring:linear-gradient(#0a9bf5,#0a9bf5)}
+/* 需叫貨：紅色外框 */
+.chips .chip.alert{--ring:linear-gradient(45deg,#ff8a5c,#d93a2b)}
+.chips .chip.alert small{color:var(--down)!important}
+.chips .chip.alert.on small{color:var(--bg)!important}
+.chips.searching .chip.alert.on small{color:var(--down)!important}
+.chips .chip.warnchip{--ring:linear-gradient(var(--yel,#e0a800),var(--yel,#e0a800))}
+html[data-layout="desktop"] .hmain #hChips .chip{padding:0!important}
 </style>
 </head>
 <body>
@@ -1082,7 +1116,7 @@ html[data-layout="desktop"] .offrow{margin-bottom:0}
   <div class="addbar"><button class="btn primary" id="btnAddItem"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>新增品項</button></div>
   <div class="st-foot">
     <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-    <div class="muted stnote v">網頁版本：v143</div>
+    <div class="muted stnote v">網頁版本：v144</div>
   </div>
   <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
@@ -1389,7 +1423,7 @@ function renderChips(){
   list.forEach(([c,its])=>{
     const b=document.createElement('button');b.className='chip'+(catSel===c?' on':'')+(c==='需叫貨'&&its.length?' alert':'')+(c==='未填'&&its.length?' unf':'');
     const filled=its.filter(i=>hasVal(valOf(curDate,i.id))).length;
-    b.innerHTML=esc(c)+'<small>'+((c==='未填'||c==='需叫貨')?its.length:filled+'/'+its.length)+'</small>';
+    b.dataset.n=Math.min([...c].length,6);b.innerHTML='<span class="cl">'+esc(c)+'</span><small>'+((c==='未填'||c==='需叫貨')?its.length:filled+'/'+its.length)+'</small>';
     b.onclick=()=>{catSel=c;renderChips();renderItems(false)};
     box.appendChild(b);
   });
@@ -1830,7 +1864,7 @@ function renderHChips(){
   const all=itemsForDates(monthDates(histMonth));
   [['全部',all],...cats().map(c=>[c,all.filter(i=>i.cat===c)])].forEach(([c,its])=>{
     const b=document.createElement('button');b.className='chip'+(hCat===c?' on':'');
-    b.innerHTML=esc(c)+'<small>'+its.length+'</small>';
+    b.dataset.n=Math.min([...c].length,6);b.innerHTML='<span class="cl">'+esc(c)+'</span><small>'+its.length+'</small>';
     b.onclick=()=>{hCat=c;renderHistory(false)};box.appendChild(b);
   });
 }
