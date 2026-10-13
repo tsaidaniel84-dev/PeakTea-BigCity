@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="145">
+<meta name="app-version" content="147">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -1139,7 +1139,7 @@ html[data-layout="desktop"] body.enter .nav{animation:enterNavSide .5s cubic-bez
   <div class="st-side" id="stSide"></div>
   <div class="st-foot">
     <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-    <div class="muted stnote v">網頁版本：v145</div>
+    <div class="muted stnote v">網頁版本：v147</div>
   </div>
   <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
@@ -1933,7 +1933,7 @@ function renderHStaff(){   // 人員篩選：列出這個月出現過的盤點�
   sel.value=hStaff;sel.classList.toggle('on',!!hStaff);
 }
 $('hStaff').onchange=e=>{hStaff=e.target.value;renderHistory(false)};
-const shiftMonth=n=>{const [y,m]=histMonth.split('-').map(Number),d=new Date(y,m-1+n,1);histMonth=d.getFullYear()+'-'+pad(d.getMonth()+1);renderHistory(true)};
+const shiftMonth=n=>{const [y,m]=histMonth.split('-').map(Number),d=new Date(y,m-1+n,1);histMonth=d.getFullYear()+'-'+pad(d.getMonth()+1);renderHistory(false)};
 $('hPrevM').onclick=()=>shiftMonth(-1);$('hNextM').onclick=()=>shiftMonth(1);
 function renderHistory(scrollToday){
   anCache={};anDates=null;
@@ -1972,11 +1972,7 @@ function renderHistory(scrollToday){
 }
 function scrollToTodayRow(t){
   requestAnimationFrame(()=>{
-    const tdy=t.querySelector('td.day.tdy');
-    if(isDesk()){   // 電腦版：月表自己有捲動區，把今天那一列放在區塊上方三分之一處
-      const bx=$('histBody');if(!tdy){bx.scrollTop=0;return}
-      bx.scrollTop=Math.max(0,tdy.parentElement.getBoundingClientRect().top-bx.getBoundingClientRect().top+bx.scrollTop-bx.clientHeight/3);return}
-    if(!tdy){window.scrollTo(0,0);return}
+    const tdy=t.querySelector('td.day.tdy');if(!tdy){window.scrollTo(0,0);return}
     const tr=tdy.parentElement,headH=$('histHead').offsetHeight;
     const top=tr.getBoundingClientRect().top+window.pageYOffset-headH-70;
     window.scrollTo(0,Math.max(0,top));
@@ -2054,7 +2050,7 @@ document.querySelectorAll('#hSeg button').forEach(b=>b.onclick=()=>{hMode=b.data
 function onMonthPick(e){
   const el=e.target,v=el.value;
   histMonth=v||todayStr.slice(0,7);          // 按「重設／清除」→ 回到當前月份（畫面停在原處，不跳到今天那一列）
-  renderHistory(!!v);   // 選了月份：本月會捲到今天那一列；按「重設／清除」則維持原位
+  renderHistory(false);
   if(!v){                                    // 有些手機在清除當下會把欄位保持空白，稍後再補上一次並收起選擇器
     const fix=()=>{el.value=histMonth};
     fix();setTimeout(()=>{fix();try{el.blur()}catch(_){}},0);setTimeout(fix,250);
@@ -2195,7 +2191,7 @@ function switchTab(t){
   try{updateNavDot()}catch(e){}
   ['daily','history','settings'].forEach(x=>$('tab-'+x).classList.toggle('hidden',x!==t));
   window.scrollTo(0,0);
-  if(t==='history')renderHistory(true);   // 開歷史頁時，本月自動捲到今天那一列
+  if(t==='history')renderHistory(false);
   if(t==='settings'){renderItemEditor();renderCfg()}
 }
 document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>switchTab(b.dataset.t));
@@ -2233,6 +2229,7 @@ function renderCfg(){
   if(!getCfg().dbUrl)$('syncBox').open=true;
   const c=getCfg();$('cfgUrl').value=c.dbUrl;$('cfgCode').value=c.code;
   $('cfgUrl').disabled=!!CONFIG.dbUrl;$('cfgCode').disabled=!!CONFIG.code;
+  $('cfgSave').parentNode.classList.toggle('hidden',!!(CONFIG.dbUrl&&CONFIG.code));   // 兩欄都已寫死在檔案裡，按鈕沒有用途
   $('cfgState').textContent=store?(store.kind==='cloud'?'目前：雲端即時同步（'+(connected?'已連線':'離線')+'）':'目前：本機模式（只存在這支手機）'):'';
 }
 $('cfgSave').onclick=()=>{
