@@ -7,7 +7,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="149">
+<meta name="app-version" content="151">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -1020,6 +1020,20 @@ html[data-layout="desktop"] #chips{flex-wrap:wrap;overflow:visible}
 .irow2 input.c.nocat{border-color:var(--warn);background:var(--warn-soft)}
 .irow2 input.c.nocat::placeholder{color:var(--warn);opacity:.8}
 
+/* ---------- BUG 修正 ---------- */
+/* 深色模式：品項後面的單位小字原本寫死深棕橘（淺色底適用），深色底只有 2.7:1，改用較亮的橘色 */
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .nm .muted{color:#f0a35a}}
+:root[data-theme="dark"] .nm .muted{color:#f0a35a}
+/* 品項名稱很長又沒有空格時（例如連續英文），歷史頁單一品項標題在窄螢幕會撐破版面 → 允許任意位置換行 */
+.hi-h,.hi-h b{overflow-wrap:anywhere}
+/* 單一品項上方的「最新／最低／最高／平均」四格：數字很大（5~6 位數）時，在 320~360px 的手機會把畫面撐寬 → 格子可縮、數字可換行 */
+.stats{grid-template-columns:repeat(4,minmax(0,1fr))}
+.stat{min-width:0}
+.stat b{overflow-wrap:anywhere}
+/* 每日紀錄列的備註、名稱若出現沒有空格的長字串（例如連續英文），允許任意位置換行，避免撐寬頁面 */
+.lrow,.lrow *{overflow-wrap:anywhere}
+.lrow>*{min-width:0}
+
 </style>
 </head>
 <body>
@@ -1136,7 +1150,7 @@ html[data-layout="desktop"] #chips{flex-wrap:wrap;overflow:visible}
   <div class="st-side" id="stSide"></div>
   <div class="st-foot">
     <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-    <div class="muted stnote v">網頁版本：v149</div>
+    <div class="muted stnote v">網頁版本：v151</div>
   </div>
   <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
@@ -1250,6 +1264,17 @@ async function makeCloudStore(url,code){
     setItems(json){return base.child('itemsJson').set(json)}};
 }
 
+/* 設定了雲端、但這次開啟時連不上（例如倉庫沒訊號）：顯示上次同步的資料；輸入先存在這支手機的「待同步」清單，
+   下次連上雲端時開機流程會自動補送（原本會改用另一份空白的本機資料，輸入的內容之後不會同步到雲端） */
+function makeOfflineStore(hasCache){
+  const off=()=>Promise.reject(new Error('目前離線，這個動作要連上網路後才能做'));
+  return {kind:'offline',noCache:!hasCache,
+    subscribe(d){
+      try{const pv=JSON.parse(localStorage.getItem('pt_pend_v1')||'{}');for(const k in pv)pendVals[k]=pv[k]}catch(e){}   // 上次還沒送出的修改，先疊在畫面上
+      d(S.days)},
+    async setNames(){}, async setField(){},
+    setDay:off, setItems:off};
+}
 /* ---------- 資料存取 ---------- */
 function dayOf(d){return S.days[d]||(S.days[d]={})}
 function valOf(d,id){const x=S.days[d];return x&&x.values?x.values[id]:undefined}
@@ -1282,14 +1307,19 @@ function saveCache(){clearTimeout(cacheT);cacheT=setTimeout(()=>{try{
   if(!store||store.kind!=='cloud')return;
   const ds=Object.keys(S.days).sort().slice(-400),days={};ds.forEach(d=>days[d]=S.days[d]);
   localStorage.setItem('pt_cache_v1',JSON.stringify({code:getCfg().code,days,items:S.items,nextId:S.nextId}))}catch(e){}},1500)}
+const isItem=x=>!!x&&typeof x==='object'&&x.id!=null&&x.id!=='';   // 品項資料防呆：略過 null／不是物件／沒有編號的項目
+const fixItems=a=>a.filter(isItem).map(x=>{['name','unit','cat'].forEach(k=>{if(x[k]!=null&&typeof x[k]!=='string')x[k]=String(x[k])});return x});   // 並把名稱／單位／分類統一成文字
 function loadCache(){try{const c=JSON.parse(localStorage.getItem('pt_cache_v1'));
-  if(c&&c.code===getCfg().code){S.days=c.days||{};if(Array.isArray(c.items)&&c.items.length){S.items=c.items;S.nextId=c.nextId||S.nextId}return true}}catch(e){}return false}
+  if(c&&c.code===getCfg().code){S.days=c.days&&typeof c.days==='object'?c.days:{};const ci=Array.isArray(c.items)?fixItems(c.items):[];if(ci.length){S.items=ci;S.nextId=c.nextId||S.nextId}return true}}catch(e){}return false}
 function writeField(date,kind,id,v){ // kind: 'v' 數量 / 'm' staff,note
   const path=kind==='v'?'values/'+id:kind==='o'?'ok/'+id:kind==='n'?'inotes/'+id:id;
   const key=date+'|'+(kind==='v'?'v:'+id:kind==='o'?'o:'+id:kind==='n'?'n:'+id:id);
   pendVals[key]=v;persistPend();localEditTs=Date.now();
   clearTimeout(timers[key]);setStatus();
   timers[key]=setTimeout(async()=>{
+    if(store&&store.kind==='offline'){   // 離線：留在待同步清單，不送出；連上雲端後開機會自動補送
+      if(store.noCache){delete pendVals[key];persistPend();toast('這支手機還沒同步過資料，離線時無法儲存。請連上網路後按「重試」')}
+      setStatus();return}
     const sent=pendVals[key];busy++;setStatus();
     try{
       await store.setField(date,path,sent);
@@ -1326,6 +1356,7 @@ function setStatus(){
   let cls='',txt='';
   if(!store){cls='busy';txt='連線中…'}
   else if(store.kind==='local'){cls='busy';txt='本機模式（資料只存在這支手機）'}
+  else if(store.kind==='offline'){cls='off';txt=Object.keys(pendVals).length?'離線（有 '+Object.keys(pendVals).length+' 筆暫存，連上後自動同步）':'離線（顯示上次同步的資料）'}
   else if(!connected){cls='off';txt='離線（恢復後自動同步）'}
   else if(pending){cls='busy';txt='儲存中…'}
   else{cls='';txt='已同步'}
@@ -1866,7 +1897,7 @@ $('btnClear').onclick=async()=>{   // 不再二次確認（誤按可用「復原
   Object.keys(pendVals).filter(k=>k.startsWith(curDate+'|')).forEach(k=>{clearTimeout(timers[k]);delete pendVals[k]});
   const keep={staff:dayOf(curDate).staff||null,note:dayOf(curDate).note||null},kin=dayOf(curDate).inotes&&Object.keys(dayOf(curDate).inotes).length?dayOf(curDate).inotes:null;
   const keepObj=(keep.staff||keep.note||kin)?{staff:keep.staff||'',note:keep.note||'',updatedAt:Date.now()}:null;if(keepObj&&kin)keepObj.inotes=kin;
-  try{await store.setDay(curDate,keepObj)}catch(e){toast('清空失敗')}
+  try{await store.setDay(curDate,keepObj)}catch(e){toast(store&&store.kind==='offline'?'目前離線，無法清空，請連上網路後再試':'清空失敗')}
   S.days[curDate]={staff:keep.staff||'',note:keep.note||''};if(kin)S.days[curDate].inotes=kin;renderItems();renderChips();updateProg();toast('已清空');
 };
 
@@ -2063,7 +2094,7 @@ function saveItems(){
   clearTimeout(itemTimer);
   itemTimer=setTimeout(async()=>{
     const j=JSON.stringify({list:S.items,nextId:S.nextId,catOrder:S.catOrder||[]});lastItemsJson=j;
-    try{await store.setItems(j)}catch(e){toast('品項儲存失敗')}
+    try{await store.setItems(j)}catch(e){toast(store&&store.kind==='offline'?'目前離線，品項設定無法儲存，請連上網路後再試':'品項儲存失敗')}
   },600);
 }
 function updNoCat(){   // 沒填分類的品項（盤點頁會歸在「未分類」）：在設定頁標出來
@@ -2228,6 +2259,7 @@ function renderCfg(){
   $('cfgUrl').disabled=!!CONFIG.dbUrl;$('cfgCode').disabled=!!CONFIG.code;
   $('cfgSave').parentNode.classList.toggle('hidden',!!(CONFIG.dbUrl&&CONFIG.code));   // 兩欄都已寫死在檔案裡，按鈕沒有用途
   $('cfgState').textContent=store?(store.kind==='cloud'?'目前：雲端即時同步（'+(connected?'已連線':'離線')+'）':'目前：本機模式（只存在這支手機）'):'';
+  if(store&&store.kind==='offline')$('cfgState').textContent='目前：離線（顯示上次同步的資料，輸入暫存在這支手機）';
 }
 $('cfgSave').onclick=()=>{
   const dbUrl=$('cfgUrl').value.trim(),code=$('cfgCode').value.trim();
@@ -2338,7 +2370,7 @@ function onItems(json){
   if(json===lastItemsJson)return;
   let list=clone(DEFAULT_ITEMS),nid=S.nextId;
   let co=S.catOrder||[];
-  if(json){try{const o=JSON.parse(json);if(Array.isArray(o.list)){list=o.list;nid=Math.max(nid,o.nextId||0)}if(Array.isArray(o.catOrder))co=o.catOrder}catch(e){}}
+  if(json){try{const o=JSON.parse(json);if(Array.isArray(o.list)){list=fixItems(o.list);nid=Math.max(nid,Number(o.nextId)||0)}if(Array.isArray(o.catOrder))co=o.catOrder}catch(e){}}
   if(JSON.stringify(list)!==JSON.stringify(S.items)||JSON.stringify(co)!==JSON.stringify(S.catOrder||[])){
     S.items=list;S.nextId=nid;S.catOrder=co;saveCache();
     renderChips();renderItems();
@@ -2366,10 +2398,11 @@ function checkBackupNag(){   // 本機模式：資料只存在這支手機，超
 async function boot(){
   tick();updateDateUI();renderChips();renderItems();setStatus();
   const c=getCfg();
-  if(c.dbUrl&&c.code)loadCache();
+  let hadCache=false;if(c.dbUrl&&c.code)hadCache=loadCache();
   if(c.dbUrl&&c.code){
     try{store=await makeCloudStore(c.dbUrl,c.code)}
-    catch(e){store=null;const b=$('banner');b.textContent='無法連上雲端同步（'+e.message+'），已改用本機模式。';b.classList.remove('hidden')}
+    catch(e){store=makeOfflineStore(hadCache);const b=$('banner');
+      b.textContent=hadCache?'目前離線，連不上雲端（'+e.message+'）。先顯示上次同步的資料，輸入的內容會暫存在這支手機，連上網路後按「重試」就會自動同步。':'目前離線，而且這支手機還沒同步過資料，暫時無法盤點。請連上網路後按「重試」。';b.classList.remove('hidden')}
   }
   if(!store){
     store=makeLocalStore();
@@ -2381,6 +2414,7 @@ async function boot(){
     for(const k in pv){const [d,p]=k.split('|');if(p.startsWith('v:'))writeField(d,'v',p.slice(2),pv[k]);else if(p.startsWith('o:'))writeField(d,'o',p.slice(2),pv[k]);else if(p.startsWith('n:'))writeField(d,'n',p.slice(2),pv[k]);else writeField(d,'m',p,pv[k])}}catch(e){}
 }
 boot();
+window.addEventListener('online',()=>{if(store&&store.kind==='offline')toast('網路恢復了，請按上方「重試」重新連線並同步')});
 if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 (function(){const n=$('nav'),f=()=>document.documentElement.style.setProperty('--navh',(n.offsetHeight-parseFloat(getComputedStyle(n).paddingBottom||0))+'px');f();addEventListener('resize',f);setTimeout(f,300)})();
 ['gesturestart','gesturechange','gestureend'].forEach(g=>document.addEventListener(g,e=>{if(!zoomOK)e.preventDefault()}));
