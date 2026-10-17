@@ -3,11 +3,12 @@
 <head>
 <meta charset="utf-8">
 <script>try{var __t=localStorage.getItem("pt_theme");if(__t==="light"||__t==="dark")document.documentElement.setAttribute("data-theme",__t)}catch(e){}</script>
+<script>try{var __s=+sessionStorage.getItem("pt_skip_intro");if(__s&&Date.now()-__s<15000)document.documentElement.classList.add("noIntro")}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover">
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="153">
+<meta name="app-version" content="155">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -1028,10 +1029,14 @@ html[data-layout="desktop"] #chips{flex-wrap:wrap;overflow:visible}
 .lrow,.lrow *{overflow-wrap:anywhere}
 .lrow>*{min-width:0}
 
-/* ---------- 下拉重新整理：青山 logo 動畫（山在上層，太陽先藏在山後面，下拉時升起；放開後太陽在山旁跳動） ---------- */
-#ptr{transform:translateY(calc(-1*(76px + env(safe-area-inset-top,0px))))}
-#ptr .pc{margin-top:calc(8px + env(safe-area-inset-top,0px));width:58px;height:58px;border-radius:50%;background:#fffdf9;border:1px solid rgba(0,0,0,.08);box-shadow:0 4px 14px rgba(0,0,0,.2);display:grid;place-items:center;transform:scale(calc(.6 + .4*var(--p,0)))}
-#ptr .pg{position:relative;width:35px;height:29px}
+/* 下拉重新整理造成的重新載入：開場畫面完全不出現（head 的小腳本會先加上 noIntro） */
+html.noIntro #splash{display:none!important}
+
+/* ---------- 下拉重新整理：青山 logo（去背：只有山和太陽，沒有底色；頁面往下推開，logo 放在露出的空白處）
+   山在上層、太陽先藏在山後面，下拉時升起；放開後太陽在山旁跳動 ---------- */
+#ptr{transform:none}
+#ptr .pc{display:flex;justify-content:center;margin-top:calc(8px + env(safe-area-inset-top,0px));transform:scale(calc(.6 + .4*var(--p,0)))}
+#ptr .pg{position:relative;width:44px;height:36px}
 #ptr .pg img{position:absolute;inset:0;width:100%;height:100%;display:block}
 #ptr .ps{transform-origin:79% 23%;transform:translate(calc(-30%*(1 - var(--p,0))),calc(17%*(1 - var(--p,0)))) scale(calc(.25 + .75*var(--p,0)))}
 #ptr .pm{transform-origin:50% 100%}
@@ -1041,6 +1046,9 @@ html[data-layout="desktop"] #chips{flex-wrap:wrap;overflow:visible}
 @keyframes ptrPop{50%{transform:translateY(-8%) scale(1.2)}}
 @keyframes ptrSun{0%,100%{transform:translateY(0)}40%{transform:translateY(-28%) scale(1.08)}}
 @keyframes ptrMt{0%,100%{transform:scaleY(1)}40%{transform:scaleY(.94)}}
+/* 深色模式：深綠色的山在深色底上太暗，調亮一點（太陽本來就夠亮） */
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) #ptr .pm{filter:brightness(1.7)}}
+:root[data-theme="dark"] #ptr .pm{filter:brightness(1.7)}
 @media (prefers-reduced-motion:reduce){#ptr.go .ps,#ptr.go .pm,#ptr.rdy .ps{animation:none}}
 
 </style>
@@ -1159,7 +1167,7 @@ html[data-layout="desktop"] #chips{flex-wrap:wrap;overflow:visible}
   <div class="st-side" id="stSide"></div>
   <div class="st-foot">
     <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-    <div class="muted stnote v">網頁版本：v153</div>
+    <div class="muted stnote v">網頁版本：v155</div>
   </div>
   <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
@@ -2417,6 +2425,7 @@ async function boot(){
   }
   store.subscribe(onDays,onItems,e=>{toast('同步錯誤：'+(e&&e.message||'請檢查資料庫規則'));const b=$('banner');b.textContent='雲端讀寫被拒絕，請檢查 Firebase 規則是否已設定（見設定說明）。';b.classList.remove('hidden')},onNames);
   setStatus();loadDate(curDate);checkBackupNag();
+  try{const rt=sessionStorage.getItem('pt_return_tab');if(rt){sessionStorage.removeItem('pt_return_tab');if(document.documentElement.classList.contains('noIntro')&&(rt==='history'||rt==='settings'))switchTab(rt)}}catch(e){}   // 下拉重新整理後回到原本那一頁
   try{const pv=JSON.parse(localStorage.getItem('pt_pend_v1')||'{}');   // 上次離線時還沒送出的修改，重新送出
     for(const k in pv){const [d,p]=k.split('|');if(p.startsWith('v:'))writeField(d,'v',p.slice(2),pv[k]);else if(p.startsWith('o:'))writeField(d,'o',p.slice(2),pv[k]);else if(p.startsWith('n:'))writeField(d,'n',p.slice(2),pv[k]);else writeField(d,'m',p,pv[k])}}catch(e){}
 }
@@ -2476,15 +2485,35 @@ if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){window.add
       imM.src=url(m);imS.src=url(s)}catch(e){imM.src=src.src;imS.style.display='none'}};
     src.complete&&src.naturalWidth?build():src.addEventListener('load',build,{once:true})})();
   let sy=0,sx=0,pull=0,on=false,go=false;const TH=80;
-  const pos=k=>'translateY(calc('+k+'px - 76px - env(safe-area-inset-top,0px)))';
-  const hide=()=>{el.style.opacity=0;el.style.transform='';el.classList.remove('rdy')};
+  const wrap=document.querySelector('.wrap');
+  const push=(k,p)=>'translateY(calc('+k.toFixed(1)+'px + env(safe-area-inset-top,0px)*'+p.toFixed(3)+'))';   // 頁面往下推開，logo 放在露出的空白處（沒有底色）
+  const hide=()=>{el.style.opacity=0;el.classList.remove('rdy');wrap.style.transition='transform .22s ease';wrap.style.transform=''};
+  const curTabName=()=>['daily','history','settings'].find(x=>!$('tab-'+x).classList.contains('hidden'))||'daily';
+  const markSkip=()=>{try{sessionStorage.setItem('pt_skip_intro',String(Date.now()));sessionStorage.setItem('pt_return_tab',curTabName())}catch(e){}};
+  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+  async function doRefresh(){   // 只整理「目前這一頁」，不重新載入整個 App（所以不會再跑開場／進場動畫、也不會跳回第一頁）
+    const t0=Date.now();
+    try{
+      // 例外：離線／雲端沒連上 → 需要整頁重新載入才能重連；有新版 → 套用新版。這兩種重新載入也都不跑開場，並回到原本那一頁
+      if(store&&(store.kind==='offline'||(store.kind==='cloud'&&!connected))){markSkip();await sleep(500);location.reload();return}
+      markSkip();
+      const upd=await Promise.race([checkUpdate(true),sleep(2500)]);   // 有新版時 checkUpdate 會自己重新載入
+      if(upd===true)return;
+      try{sessionStorage.removeItem('pt_skip_intro');sessionStorage.removeItem('pt_return_tab')}catch(e){}
+      tick();   // 跨過午夜時順便更新日期
+      const t=curTabName();
+      if(t==='daily')loadDate(curDate);else if(t==='history')renderHistory(false);else{renderItemEditor();renderCfg()}
+    }catch(e){}
+    await sleep(Math.max(0,700-(Date.now()-t0)));   // 至少讓 logo 跳一下再收回
+    go=false;el.classList.remove('go');hide();
+  }
   document.addEventListener('touchstart',e=>{on=!go&&e.touches.length===1&&window.scrollY<=0&&!window.__dragging&&!e.target.closest('input,textarea,.grip,.chips,.nlist,.pal,.tbl,table,.gg,.gdrag');pull=0;if(on){sy=e.touches[0].clientY;sx=e.touches[0].clientX}},{passive:true});
   document.addEventListener('touchmove',e=>{if(!on)return;if(window.__dragging||document.querySelector('.dragging,.gdrag')){on=false;pull=0;hide();return}const dy=e.touches[0].clientY-sy,dx=Math.abs(e.touches[0].clientX-sx);
     if(dy<=0||dx>dy||window.scrollY>0){pull=0;hide();return}
-    pull=dy;el.style.transition='none';el.style.opacity=Math.min(1,dy/50);el.style.transform=pos(Math.min(dy,TH*1.4)*0.8);
-    el.style.setProperty('--p',Math.min(1,dy/TH));el.classList.toggle('rdy',dy>=TH)},{passive:true});
-  document.addEventListener('touchend',()=>{if(!on)return;on=false;el.style.transition='transform .2s,opacity .2s';
-    if(pull>=TH){go=true;el.classList.remove('rdy');el.classList.add('go');el.style.setProperty('--p',1);el.style.opacity=1;el.style.transform='translateY(0)';setTimeout(()=>location.reload(),800)}else hide();pull=0},{passive:true});
+    pull=dy;const p=Math.min(1,dy/TH);el.style.transition='none';wrap.style.transition='none';el.style.opacity=Math.min(1,dy/50);wrap.style.transform=push(Math.min(dy,TH*1.4)*0.6,p);
+    el.style.setProperty('--p',p);el.classList.toggle('rdy',dy>=TH)},{passive:true});
+  document.addEventListener('touchend',()=>{if(!on)return;on=false;el.style.transition='opacity .2s';wrap.style.transition='transform .22s ease';
+    if(pull>=TH){go=true;el.classList.remove('rdy');el.classList.add('go');el.style.setProperty('--p',1);el.style.opacity=1;wrap.style.transform=push(TH*0.6,1);doRefresh()}else hide();pull=0},{passive:true});
 })();
 /* ---------- 自動檢查更新（加入主畫面也會更新） ---------- */
 const APP_VER=document.querySelector('meta[name=app-version]').content;
@@ -2506,7 +2535,7 @@ async function checkUpdate(manual){
       try{if(window.caches){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)))}}catch(e){}
       try{const rs=navigator.serviceWorker&&await navigator.serviceWorker.getRegistrations();rs&&rs.forEach(r=>r.unregister())}catch(e){}
       await fetch(base,{cache:'reload'}).catch(()=>{});
-      setTimeout(()=>location.reload(),500);return;
+      setTimeout(()=>location.reload(),500);return true;
     }
   }catch(e){}
   finally{updChecking=false}
@@ -2579,7 +2608,8 @@ setTimeout(()=>checkUpdate(false),1500);
 </script>
 <script>
 /* 開啟畫面：至少顯示約 1 秒，等頁面載入完再淡出 */
-(function(){var t0=Date.now(),sp=document.getElementById('splash'),tm=0,fired=false,
+(function(){if(document.documentElement.classList.contains('noIntro')){try{sessionStorage.removeItem('pt_skip_intro')}catch(e){}var s0=document.getElementById('splash');if(s0)s0.remove();return}   // 下拉重新整理造成的重新載入：不跑開場、不跑進場
+  var t0=Date.now(),sp=document.getElementById('splash'),tm=0,fired=false,
   rm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches,MIN=rm?300:700;
 function go(){if(fired||!sp)return;fired=true;clearTimeout(tm);
   document.body.classList.add('enter');sp.classList.add('out');
