@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="155">
+<meta name="app-version" content="157">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -1051,6 +1051,9 @@ html.noIntro #splash{display:none!important}
 :root[data-theme="dark"] #ptr .pm{filter:brightness(1.7)}
 @media (prefers-reduced-motion:reduce){#ptr.go .ps,#ptr.go .pm,#ptr.rdy .ps{animation:none}}
 
+
+/* ---------- 歷史頁的分類圓框：整頁共用一套「綠→青→藍」的冷色漸層，跟盤點頁的暖色（橘→粉→紫）區分開 ---------- */
+#hChips .chip{--ring:linear-gradient(45deg,#8bd36b 0%,#1fa88c 55%,#2f7fd1 100%)}
 </style>
 </head>
 <body>
@@ -1167,7 +1170,7 @@ html.noIntro #splash{display:none!important}
   <div class="st-side" id="stSide"></div>
   <div class="st-foot">
     <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-    <div class="muted stnote v">網頁版本：v155</div>
+    <div class="muted stnote v">網頁版本：v157</div>
   </div>
   <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
