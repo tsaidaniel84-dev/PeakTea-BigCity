@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="159">
+<meta name="app-version" content="160">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -1203,7 +1203,6 @@ html.noIntro #splash{display:none!important}
     <div class="swrow2"><span>文字大小</span><div class="seg" id="fsSeg"><button data-k="0.8">小</button><button data-k="1">標準</button><button data-k="1.15">大</button><button data-k="1.3">特大</button></div></div>
     <div class="swrow2"><span>外觀</span><div class="seg" id="themeSeg"><button type="button" data-th="auto">跟隨系統</button><button type="button" data-th="light">淺色</button><button type="button" data-th="dark">深色</button></div></div>
     <div class="swrow2"><span>版面</span><div class="seg" id="lvSeg"><button type="button" data-lv="auto">自動</button><button type="button" data-lv="mobile">手機版</button><button type="button" data-lv="desktop">電腦版</button></div></div>
-    <div class="swrow2"><span>節日裝飾</span><select id="festSel" aria-label="節日裝飾"></select></div>
     <label class="swrow"><span>盤點頁按分類分組</span><input type="checkbox" class="sw" id="swGroup"></label>
   </div>
   <div class="card st-items">
@@ -1227,7 +1226,7 @@ html.noIntro #splash{display:none!important}
   <div class="st-side" id="stSide"></div>
   <div class="st-foot">
     <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-    <div class="muted stnote v">網頁版本：v159</div>
+    <div class="muted stnote v">網頁版本：v160</div>
   </div>
   <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
@@ -2575,7 +2574,7 @@ if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){window.add
   document.addEventListener('touchend',()=>{if(!on)return;on=false;el.style.transition='opacity .2s';wrap.style.transition='transform .22s ease';
     if(pull>=TH){go=true;el.classList.remove('rdy');el.classList.add('go');el.style.setProperty('--p',1);el.style.opacity=1;wrap.style.transform=push(TH*0.6,1);doRefresh()}else hide();pull=0},{passive:true});
 })();
-/* ---------- 節日點綴：依「快到的節日」在 logo 上加小裝飾。每個節日提前 35 天出現，到節日後再留幾天，一次至少一個月 ---------- */
+/* ---------- 節日點綴：依「快到的節日」在 logo 上加小裝飾。自動判斷：節日前 14 天（2 週）至節日當天顯示，過了當天就拿掉 ---------- */
 (function(){
 // 節日點綴圖案：座標系與 logo 圖相同（73×60）；山頂端約在 (35.5, 15)，太陽圓心 (57.8, 14.2) 半徑 13
 // 每個圖案外層用 <g> 負責位置，裡面的元素才套動畫（避免 CSS 動畫蓋掉 transform 屬性）
@@ -2627,13 +2626,13 @@ const FEST_ART = {
 const FEST_NAME = { xmas: '聖誕跨年', cny: '春節', mom: '母親節', zongzi: '端午節', qixi: '七夕', moon: '中秋節', halloween: '萬聖節' };
 // 節日日期計算（Node 與瀏覽器用同一套邏輯；這個檔案之後會原樣嵌進 App）
 const FEST_DEF = [
-  { id: 'xmas', fix: [12, 25], lead: 35, tail: 11 },       // 聖誕＋跨年：11/20 ~ 1/5
-  { id: 'cny', lunar: [1, 1], lead: 35, tail: 16 },        // 春節前 35 天 ~ 元宵後 2 天
-  { id: 'mom', nth: [5, 0, 2], lead: 35, tail: 2 },        // 5 月第 2 個星期日
-  { id: 'zongzi', lunar: [5, 5], lead: 35, tail: 3 },
-  { id: 'qixi', lunar: [7, 7], lead: 35, tail: 3 },
-  { id: 'moon', lunar: [8, 15], lead: 35, tail: 4 },
-  { id: 'halloween', fix: [10, 31], lead: 35, tail: 3 },
+  { id: 'xmas', fix: [12, 25], lead: 14, tail: 0 },
+  { id: 'cny', lunar: [1, 1], lead: 14, tail: 0 },
+  { id: 'mom', nth: [5, 0, 2], lead: 14, tail: 0 },        // 5 月第 2 個星期日
+  { id: 'zongzi', lunar: [5, 5], lead: 14, tail: 0 },
+  { id: 'qixi', lunar: [7, 7], lead: 14, tail: 0 },
+  { id: 'moon', lunar: [8, 15], lead: 14, tail: 0 },
+  { id: 'halloween', fix: [10, 31], lead: 14, tail: 0 },
 ];
 const dayNum = d => Math.round(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 864e5);
 const lunarFmt = (() => { try { return new Intl.DateTimeFormat('en-u-ca-chinese', { month: 'numeric', day: 'numeric' }); } catch (e) { return null; } })();
@@ -2655,26 +2654,23 @@ function festivalFor(now) {   // 目前該顯示哪個節日：在視窗內、�
   const today = dayNum(now); let best = null, bestKey = 1e9;
   for (const y of [now.getFullYear() - 1, now.getFullYear(), now.getFullYear() + 1]) for (const f of FEST_DEF) {
     const fd = festDate(f, y); if (!fd) continue; const diff = dayNum(fd) - today;
-    if (diff > f.lead || diff < -f.tail) continue;
+    if (diff > f.lead || diff < 0) continue;
     const key = diff >= 0 ? diff : 1000 - diff; if (key < bestKey) { bestKey = key; best = f.id; }
   }
   return best;
 }
 
-  const festPick=()=>{const q=new URLSearchParams(location.search).get('fest');return q||getPref('pt_fest','auto')};   // ?fest=xmas 可臨時預覽
-  const festId=()=>{const p=festPick();if(p==='off'||p==='none')return null;if(p!=='auto'&&FEST_ART[p])return p;let r=null;try{r=festivalFor(new Date())}catch(e){}return r};
-  function fillSel(){const sel=$('festSel');if(!sel)return;let auto=null;try{auto=festivalFor(new Date())}catch(e){}
-    const opts=[['auto','自動（'+(auto?'目前：'+FEST_NAME[auto]:'目前沒有節日')+'）'],['off','關閉'],...Object.keys(FEST_ART).map(k=>[k,FEST_NAME[k]+'（手動）'])];
-    sel.innerHTML=opts.map(([v,t])=>'<option value="'+v+'">'+t+'</option>').join('');const p=getPref('pt_fest','auto');sel.value=opts.some(o=>o[0]===p)?p:'auto'}
+  const festId=()=>{let r=null;try{r=festivalFor(new Date())}catch(e){}return r};   // 只自動判斷：節日前 2 週～當日
   function decorate(){   // 把目前節日的小圖疊在三處 logo 上：頁首、開場畫面、下拉重新整理
     const id=festId(),hl=document.querySelector('.bar .logo');
     if(hl&&!(hl.parentNode.classList&&hl.parentNode.classList.contains('lg'))){const w=document.createElement('span');w.className='lg';hl.parentNode.insertBefore(w,hl);w.appendChild(hl)}
     ['.bar .lg','#splash .spl-logo','#ptr .pg'].forEach(sel=>{const host=document.querySelector(sel);if(!host)return;
       host.querySelectorAll(':scope>.deco').forEach(e=>e.remove());if(!id)return;
       const s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('class','deco');s.setAttribute('viewBox','-14 -16 101 92');s.setAttribute('aria-hidden','true');s.innerHTML=FEST_ART[id];host.appendChild(s)});
-    fillSel()}
-  const fs0=$('festSel');if(fs0)fs0.onchange=e=>{setPref('pt_fest',e.target.value);decorate()};
+    }
   decorate();
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden)decorate()});   // 回到前景時重新判斷（過了節日當天就拿掉）
+  setInterval(decorate,3600000);
 })();
 
 /* ---------- 自動檢查更新（加入主畫面也會更新） ---------- */
