@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="162">
+<meta name="app-version" content="164">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -1103,6 +1103,10 @@ html.noIntro #splash{display:none!important}
 .lg.nosun .logo{-webkit-mask-image:radial-gradient(ellipse 19.3% 23.5% at 79.45% 25%,transparent 98.4%,#000 100%);mask-image:radial-gradient(ellipse 19.3% 23.5% at 79.45% 25%,transparent 98.4%,#000 100%)}
 .spl-logo.nosun .spl-s,#ptr .pg.nosun .ps{display:none}
 .deco .hd{transform-box:view-box;transform-origin:72px 31px}
+.fx-spin{animation:fxSpin 8s linear infinite}
+@keyframes fxSpin{to{transform:rotate(360deg)}}
+.fx-prop{animation:fxProp .5s ease-in-out infinite alternate}
+@keyframes fxProp{from{transform:scaleX(1)}to{transform:scaleX(.18)}}
 .spl-logo .deco .hd .fx-pop,#ptr .deco .hd .fx-pop{animation:none}
 .spl-logo .deco .hd{animation:splHd 1.05s cubic-bezier(.2,1.2,.35,1) .45s both}
 @keyframes splHd{0%{opacity:0;transform:translate(-22.3px,9.8px) scale(.25)}18%{opacity:1}100%{opacity:1;transform:none}}
@@ -1238,7 +1242,7 @@ html.noIntro #splash{display:none!important}
   <div class="st-side" id="stSide"></div>
   <div class="st-foot">
     <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-    <div class="muted stnote v">網頁版本：v162</div>
+    <div class="muted stnote v">網頁版本：v164</div>
   </div>
   <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
@@ -2601,8 +2605,13 @@ const bat = (x, y, sc, d) => `<g transform="translate(${x} ${y}) scale(${sc})"><
 
 const burst=(x,y,sc,c,d)=>`<g transform="translate(${x} ${y}) scale(${sc})"><g class="fx-tw" style="animation-delay:${d}s" stroke="${c}" stroke-width="1.2" stroke-linecap="round"><path d="M0-6V-3M0 3V6M-6 0H-3M3 0H6M-4.2-4.2L-2.1-2.1M2.1 2.1L4.2 4.2M4.2-4.2L2.1-2.1M-2.1 2.1L-4.2 4.2"/></g><circle r="1" fill="${c}"/></g>`;
 const conf=(x,y,c,d,r)=>`<g transform="rotate(${r} ${x+1} ${y+.5})"><rect class="fx-tw" style="animation-delay:${d}s" x="${x}" y="${y}" width="2.2" height="1.2" rx=".3" fill="${c}"/></g>`;
+const gear=(x,y,r,c,n,dir,d)=>`<g transform="translate(${x} ${y})"><g class="fx-spin" style="animation-duration:${d}s;animation-direction:${dir}">${Array.from({length:n},(_,i)=>`<rect x="${-r*.2}" y="${-r*1.3}" width="${r*.4}" height="${r*.55}" rx="${r*.08}" fill="${c}" transform="rotate(${i*360/n})"/>`).join('')}<circle r="${r}" fill="${c}"/><circle r="${r*.38}" fill="#dfe6ee"/></g></g>`;
+const balloon=(x,y,c,d)=>`<g class="fx-bob" style="animation-delay:${d}s"><ellipse cx="${x}" cy="${y}" rx="4" ry="4.8" fill="${c}"/><path d="M${x-.9} ${y+4.6}L${x} ${y+5.8}L${x+.9} ${y+4.6}Z" fill="${c}"/><ellipse cx="${x-1.4}" cy="${y-1.8}" rx=".9" ry="1.5" fill="#fff" opacity=".45"/></g>`;
+const drop=(x,y,d)=>`<g transform="translate(${x} ${y})"><path class="fx-tw" style="animation-delay:${d}s" d="M0 0L-1 3" stroke="#6fb0ee" stroke-width="1" stroke-linecap="round"/></g>`;
+const bowl=(x,y,sc)=>`<g transform="translate(${x} ${y}) scale(${sc})"><circle cx="0" cy="-9.6" r="5" fill="#cdeaa6"/><circle cx="-6.4" cy="-4.6" r="5.2" fill="#fff4dc" stroke="#e8d6b0" stroke-width=".6"/><circle cx="6" cy="-4.6" r="5.2" fill="#f9bccd"/><path d="M-13.2-1.6H13.2C13.2 7.6 6.8 12.8 0 12.8C-6.8 12.8-13.2 7.6-13.2-1.6Z" fill="#4a8fd8"/><rect x="-13.8" y="-2.8" width="27.6" height="3" rx="1.5" fill="#fff" stroke="#cfe0f2" stroke-width=".5"/></g>`;
+const willow=(x0,len,d)=>`<g class="fx-sw" style="animation-delay:${d}s"><path d="M${x0} 0C${x0-1.6} ${len*.35} ${x0+1.8} ${len*.7} ${x0+.4} ${len}" stroke="#7bb661" stroke-width=".9" fill="none" stroke-linecap="round"/><ellipse cx="${x0}" cy="${len*.5}" rx=".9" ry="1.7" fill="#8fcf6f"/><ellipse cx="${x0}" cy="${len}" rx=".9" ry="1.7" fill="#8fcf6f"/></g>`;
 const H = 'translate(58 15)';   // 橘色頭（太陽）的圓心；半徑 13
-// 換掉橘色頭的節日（母親、端午、中秋、萬聖、情人、元宵）：新頭放在 class=hd；戴在橘色頭上的（聖誕帽、派對帽、墨鏡）也放在 hd，動畫才會跟著太陽走
+// 換掉橘色頭的節日（母親、端午、中秋、萬聖、情人、元宵、教師）：新頭放在 class=hd；戴在橘色頭上的（帽子、墨鏡、雨傘、圍巾）也放在 hd，動畫才會跟著太陽走
 const FEST_ART = {
   // 聖誕／跨年：聖誕帽戴在橘色頭上＋站在左坡的小雪人＋雪花
   xmas: flake(5,8,1,0)+flake(26,2,.8,1.1)+flake(72,40,.9,.6)+flake(70,52,.7,1.4)+
@@ -2726,8 +2735,61 @@ const FEST_ART = {
   national: burst(9,9,1,'#e0333a',0)+burst(22,-6,.8,'#3f7fd1',.5)+burst(72,38,.8,'#f5b83d',1)+star(46,-9,.7,.3,'#f5b83d')+
     `<g class="fx-pop"><path d="M35.5 15.4V-5.4" stroke="#8a6a3a" stroke-width="1.1" stroke-linecap="round"/><g class="fx-bob"><rect x="36" y="-4.8" width="13" height="8.7" fill="#e0333a"/><rect x="36" y="-4.8" width="6.5" height="4.35" fill="#1f3f96"/>
       <circle cx="39.25" cy="-2.6" r="1.5" fill="#fff"/><circle cx="39.25" cy="-2.6" r="1" fill="#1f3f96"/><circle cx="39.25" cy="-2.6" r=".6" fill="#fff"/></g></g>`,
+  // 和平紀念日：左上方一隻銜著橄欖枝的白鴿（橘色頭保留；紀念日，不放煙火彩紙）
+  peace: `<g class="fx-pop"><g transform="translate(5.5 6.5)"><g class="fx-bob">
+      <path d="M-7 2.4L-13.2 .2L-11.8 3.2L-13.2 5.8Z" fill="#f6f9fc" stroke="#a9b9ca" stroke-width=".5" stroke-linejoin="round"/>
+      <path d="M-7 2C-4-2.4 4-3.2 8-.6C10 .8 11 2.6 9.4 4C6 6.4-3 6.6-7 2Z" fill="#f6f9fc" stroke="#a9b9ca" stroke-width=".5"/>
+      <path d="M-.6 .2C-3-6.6 2-11.4 8.4-11.4C6.4-7 4.6-3.2 3.4 0Z" fill="#f6f9fc" stroke="#a9b9ca" stroke-width=".5" stroke-linejoin="round"/>
+      <path d="M1 -1.4C0 -5 2.6 -8 5.6 -9" stroke="#c6d3e0" stroke-width=".6" fill="none" stroke-linecap="round"/>
+      <circle cx="9.8" cy="-1.2" r="2.7" fill="#f6f9fc" stroke="#a9b9ca" stroke-width=".5"/><path d="M12.2-1.6L14.8-.6L12.2.2Z" fill="#f5a623"/><circle cx="10.6" cy="-1.8" r=".55" fill="#2b2438"/>
+      <path d="M14.6-.4C17.4 .8 19.6 2.6 21.6 6.4" stroke="#7a8f2a" stroke-width=".9" fill="none" stroke-linecap="round"/>
+      <g fill="#8fb04a"><ellipse cx="16.8" cy="1.4" rx="1.7" ry=".75" transform="rotate(-28 16.8 1.4)"/><ellipse cx="17.6" cy="3.2" rx="1.7" ry=".75" transform="rotate(48 17.6 3.2)"/><ellipse cx="19.4" cy="4.2" rx="1.7" ry=".75" transform="rotate(-22 19.4 4.2)"/><ellipse cx="20.2" cy="6.2" rx="1.7" ry=".75" transform="rotate(52 20.2 6.2)"/><ellipse cx="21.8" cy="7.4" rx="1.4" ry=".65" transform="rotate(80 21.8 7.4)"/></g></g></g></g>`+
+    `<g fill="#8fb04a"><g transform="translate(30 3)"><ellipse class="fx-bob" style="animation-delay:.5s" rx="1.6" ry=".7" transform="rotate(30)"/></g><g transform="translate(5 24)"><ellipse class="fx-bob" style="animation-delay:1s" rx="1.6" ry=".7" transform="rotate(-40)"/></g><g transform="translate(72 36)"><ellipse class="fx-bob" style="animation-delay:.2s" rx="1.6" ry=".7" transform="rotate(20)"/></g></g>`,
+
+  // 兒童節：橘色頭戴螺旋槳帽＋氣球（線綁在左邊山坡上）
+  children: `<g stroke="#9aa5ae" stroke-width=".5" fill="none"><path d="M7 14.8Q9 28 13.5 36.2M14 8.8Q13 26 13.5 36.2M20.5 14.8Q18 28 13.5 36.2"/></g>`+
+    balloon(7,9.2,'#e8446a',0)+balloon(14,4,'#f5b83d',.5)+balloon(20.5,9.2,'#3f9bd5',1)+star(47,-6,.7,.3,'#f5b83d')+star(73,32,.7,.9,'#e8446a')+
+    `<g class="fx-pop"><g class="hd"><g transform="${H} translate(.4 .4)"><g transform="rotate(8 0 -8)">
+      <path d="M0-8L-9.6-8A9.6 9.6 0 0 1-4.8-16.3Z" fill="#e8446a"/><path d="M0-8L-4.8-16.3A9.6 9.6 0 0 1 4.8-16.3Z" fill="#f5b83d"/><path d="M0-8L4.8-16.3A9.6 9.6 0 0 1 9.6-8Z" fill="#3f9bd5"/>
+      <rect x="-10.6" y="-9.2" width="21.2" height="3" rx="1.5" fill="#fff" stroke="#dfe6ee" stroke-width=".4"/>
+      <path d="M0-17.2V-20.4" stroke="#6b7b8c" stroke-width="1" stroke-linecap="round"/>
+      <g class="fx-prop"><ellipse cx="-4.6" cy="-20.8" rx="4.6" ry="1" fill="#e8446a"/><ellipse cx="4.6" cy="-20.8" rx="4.6" ry="1" fill="#3f9bd5"/></g><circle cx="0" cy="-20.8" r="1" fill="#6b7b8c"/></g></g></g></g>`,
+
+  // 清明節：橘色頭撐一把小雨傘＋左上垂柳＋細雨（橘色頭保留）
+  qingming: `<g transform="translate(0 0)"><path d="M-3 -.4C5 -4.6 17 -4.2 28 1.4" stroke="#8a6a3a" stroke-width="1.3" fill="none" stroke-linecap="round"/>`+
+    `<g transform="translate(4.4 -2)">${willow(0,14,0)}</g><g transform="translate(9.6 -3.2)">${willow(0,20,.5)}</g><g transform="translate(14.8 -3.6)">${willow(0,15,1)}</g><g transform="translate(20 -2.8)">${willow(0,19,.3)}</g><g transform="translate(25 -.8)">${willow(0,11,.8)}</g></g>`+
+    drop(44,-5,0)+drop(40,4,.5)+drop(74,-2,.9)+drop(75,24,.3)+drop(46,22,.7)+
+    `<g class="fx-pop"><g class="hd"><g transform="${H} translate(0 -.2)"><g transform="rotate(-10 0 -9)">
+      <path d="M-13.4-9A13.4 12.6 0 0 1 13.4-9Q10.05-6.2 6.7-9Q3.35-6.2 0-9Q-3.35-6.2-6.7-9Q-10.05-6.2-13.4-9Z" fill="#4db6a0"/>
+      <path d="M-4.4-9.2C-3.6-14.6-1.6-19.6 0-21.2C1.6-19.6 3.6-14.6 4.4-9.2Q2.2-7 0-9.2Q-2.2-7-4.4-9.2Z" fill="#7fd4c0"/>
+      <path d="M0-21.4V-24" stroke="#4a6a62" stroke-width="1" stroke-linecap="round"/></g></g></g></g>`,
+
+  // 勞動節：橘色頭戴黃色安全帽＋兩顆互相轉動的齒輪
+  labour: gear(13,9,5.4,'#8a98a6',8,'normal',9)+gear(22.4,3.6,3.5,'#e0a91f',6,'reverse',6)+star(47,-6,.7,.3,'#f5b83d')+star(73,32,.7,.9,'#f5b83d')+
+    `<g class="fx-pop"><g class="hd"><g transform="${H} translate(.4 .8)"><g transform="rotate(-9 0 -8)">
+      <path d="M-10.4-7C-10.4-17.6 10.4-17.6 10.4-7Z" fill="#f5c842"/><rect x="-1.9" y="-16.2" width="3.8" height="9.4" rx="1.4" fill="#e0a91f"/>
+      <rect x="-12.8" y="-8" width="25.6" height="3.2" rx="1.6" fill="#f5c842"/><rect x="-12.8" y="-5.6" width="25.6" height=".9" rx=".45" fill="#e0a91f"/></g></g></g></g>`,
+
+  // 教師節：橘色頭換成紅蘋果＋左上角的小黑板（粉筆愛心）
+  teacher: star(47,-6,.7,.3,'#f5b83d')+star(73,32,.7,.9,'#f5b83d')+
+    `<g class="fx-pop" style="animation-delay:.3s"><g transform="translate(2 3) rotate(-4 11 7)"><rect x="0" y="0" width="22" height="14" rx="1.2" fill="#2f5a4a" stroke="#b98250" stroke-width="1.4"/>
+      <path d="M11 10.2C6 6.6 7.2 3.2 9.4 3.6C10.4 3.8 11 4.6 11 5.2C11 4.6 11.6 3.8 12.6 3.6C14.8 3.2 16 6.6 11 10.2Z" fill="#ffb3c7"/>
+      <path d="M3.4 12H8M15 12H19" stroke="#fff" stroke-width=".8" stroke-linecap="round" opacity=".8"/><rect x="0" y="14.4" width="22" height="1.4" rx=".6" fill="#b98250"/></g></g>`+
+    `<g class="fx-pop"><g class="hd"><g transform="${H}"><g class="fx-bob">
+      <path d="M0-9.4C-3-13.4-12-12-12.6-2C-13 6-7 13-3.5 12.2C-1.6 11.8-.8 11.4 0 11.4C.8 11.4 1.6 11.8 3.5 12.2C7 13 13 6 12.6-2C12-12 3-13.4 0-9.4Z" fill="#e0333a"/>
+      <path d="M-8.6-3.6C-8.8-7-6.6-8.6-4.6-8.2" stroke="#ff8a8a" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <path d="M0-9.4C.2-11.4 .8-13 1.8-14.2" stroke="#7a5230" stroke-width="1.3" fill="none" stroke-linecap="round"/><path d="M2-11.4C3.4-14.2 6.6-14.4 7.6-13C6.2-10.6 3.6-10.2 2-11.4Z" fill="#6ab35f"/></g></g></g></g>`,
+
+  // 冬至：橘色頭戴毛帽、圍圍巾＋右下一碗湯圓
+  dongzhi: star(8,9,.8,.6,'#8ec5ff')+star(47,-6,.7,.3,'#8ec5ff')+star(20,2,.6,1,'#8ec5ff')+bowl(68,40,.4)+
+    `<g transform="translate(68 31)"><path class="fx-steam" d="M-1.6 0C-3-2-.2-3.4-1.6-5.4" stroke="#bcc7cf" stroke-width=".9" fill="none" stroke-linecap="round"/><path class="fx-steam" style="animation-delay:.9s" d="M1.8 0C.4-2 3.2-3.4 1.8-5.4" stroke="#bcc7cf" stroke-width=".9" fill="none" stroke-linecap="round"/></g>`+
+    `<g class="fx-pop"><g class="hd"><g transform="${H}">
+      <g transform="rotate(8 0 -8)"><path d="M-10.2-8C-10.2-18.4 10.2-18.4 10.2-8Z" fill="#d93a32"/><path d="M-4-9.6V-14.4M0-9.6V-15.6M4-9.6V-14.4" stroke="#b82d27" stroke-width=".9" stroke-linecap="round"/>
+        <rect x="-11.4" y="-9" width="22.8" height="3.8" rx="1.9" fill="#fff4dc"/><circle cx="0" cy="-17" r="2.6" fill="#fff"/></g>
+      <path d="M-10.8 6.2C-5 10.4 5 10.4 10.8 6.2L10 10.6C4 14.6-4 14.6-10 10.6Z" fill="#2f9d6a"/><path d="M-9.4 8.8C-4 12.6 4 12.6 9.4 8.8" stroke="#fff" stroke-width=".8" fill="none" opacity=".8"/>
+      <path d="M5.4 11.4L9 10.8L10 18.4L6.6 18.8Z" fill="#2f9d6a"/><path d="M6.2 15.2L9.6 14.8" stroke="#fff" stroke-width=".8" opacity=".8"/></g></g></g>`,
 };
-const FEST_NAME = { newyear: '元旦', valentine: '情人節', lantern: '元宵節', father: '父親節', national: '國慶日', xmas: '聖誕節', cny: '春節', mom: '母親節', zongzi: '端午節', qixi: '七夕', moon: '中秋節', halloween: '萬聖節' };
+const FEST_NAME = { peace: '和平紀念日', children: '兒童節', qingming: '清明節', labour: '勞動節', teacher: '教師節', dongzhi: '冬至', newyear: '元旦', valentine: '情人節', lantern: '元宵節', father: '父親節', national: '國慶日', xmas: '聖誕節', cny: '春節', mom: '母親節', zongzi: '端午節', qixi: '七夕', moon: '中秋節', halloween: '萬聖節' };
 // 節日日期計算（Node 與瀏覽器用同一套邏輯；這個檔案之後會原樣嵌進 App）
 const FEST_DEF = [
   { id: 'xmas', fix: [12, 25], lead: 14, tail: 0 },
@@ -2742,6 +2804,12 @@ const FEST_DEF = [
   { id: 'lantern', after: 'cny', days: 14, lead: 14, tail: 0 },   // 元宵＝春節後第 14 天（農曆 1/15）
   { id: 'father', fix: [8, 8], lead: 14, tail: 0 },
   { id: 'national', fix: [10, 10], lead: 14, tail: 0 },
+  { id: 'peace', fix: [2, 28], lead: 14, tail: 0 },
+  { id: 'children', fix: [4, 4], lead: 14, tail: 0 },
+  { id: 'qingming', term: 4, lead: 14, tail: 0 },   // 清明：太陽黃經 15°，國曆 4/4 或 4/5
+  { id: 'labour', fix: [5, 1], lead: 14, tail: 0 },
+  { id: 'teacher', fix: [9, 28], lead: 14, tail: 0 },
+  { id: 'dongzhi', term: 12, lead: 14, tail: 0 },   // 冬至：太陽黃經 270°，國曆 12/21 或 12/22
 ];
 const dayNum = d => Math.round(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 864e5);
 const lunarFmt = (() => { try { return new Intl.DateTimeFormat('en-u-ca-chinese', { month: 'numeric', day: 'numeric' }); } catch (e) { return null; } })();
@@ -2753,24 +2821,28 @@ function lunarDate(y, m, d) {   // 農曆 m 月 d 日 → 這一年的國曆日�
   let r = null; for (let n = 0; n < 366; n++) { const t = new Date(y, 0, 1 + n); if (t.getFullYear() !== y) break; const l = lunarOf(t); if (l && l[0] === m && l[1] === d) { r = t; break; } }
   return (lunarCache[k] = r);
 }
+// 節氣（台灣時間）：2025–2045 年由天文計算；超出範圍時用規律估算（年份除以 4 餘 0、1 → 前一天，餘 2、3 → 後一天）
+const TERM = {qingming:{2025:'04-04',2026:'04-05',2027:'04-05',2028:'04-04',2029:'04-04',2030:'04-05',2031:'04-05',2032:'04-04',2033:'04-04',2034:'04-05',2035:'04-05',2036:'04-04',2037:'04-04',2038:'04-05',2039:'04-05',2040:'04-04',2041:'04-04',2042:'04-04',2043:'04-05',2044:'04-04',2045:'04-04'},dongzhi:{2025:'12-21',2026:'12-22',2027:'12-22',2028:'12-21',2029:'12-21',2030:'12-22',2031:'12-22',2032:'12-21',2033:'12-21',2034:'12-22',2035:'12-22',2036:'12-21',2037:'12-21',2038:'12-22',2039:'12-22',2040:'12-21',2041:'12-21',2042:'12-22',2043:'12-22',2044:'12-21',2045:'12-21'}};
 function festDate(f, y) {
+  if (f.term) { const t = TERM[f.id] && TERM[f.id][y]; if (t) return new Date(y, +t.slice(0, 2) - 1, +t.slice(3)); return new Date(y, f.term - 1, (f.term === 4 ? 4 : 21) + (y % 4 >= 2 ? 1 : 0)); }
   if (f.after) { const b = festDate(FEST_DEF.find(x => x.id === f.after), y); return b ? new Date(b.getFullYear(), b.getMonth(), b.getDate() + f.days) : null; }
   if (f.fix) return new Date(y, f.fix[0] - 1, f.fix[1]);
   if (f.lunar) { const t = LUNAR[f.id] && LUNAR[f.id][y]; return t ? new Date(y, +t.slice(0, 2) - 1, +t.slice(3)) : lunarDate(y, f.lunar[0], f.lunar[1]); }
   const first = new Date(y, f.nth[0] - 1, 1), off = (f.nth[1] - first.getDay() + 7) % 7;   // 第 n 個星期 w
   return new Date(y, f.nth[0] - 1, 1 + off + (f.nth[2] - 1) * 7);
 }
-function festivalFor(now) {   // 目前該顯示哪個節日：在視窗內、還沒到的優先（越近越優先），都過了就選剛過的
-  const today = dayNum(now); let best = null, bestKey = 1e9;
-  for (const y of [now.getFullYear() - 1, now.getFullYear(), now.getFullYear() + 1]) for (const f of FEST_DEF) {
+function festivalFor(now) {   // 目前該顯示哪個節日：在「前 lead 天～當日」視窗內，越近的優先；日期相差 1 天內的節日（兒童節＋清明、七夕＋父親節）每週輪流
+  const today = dayNum(now), c = [];
+  for (const y of [now.getFullYear() - 1, now.getFullYear(), now.getFullYear() + 1]) for (const [i, f] of FEST_DEF.entries()) {
     const fd = festDate(f, y); if (!fd) continue; const diff = dayNum(fd) - today;
-    if (diff > f.lead || diff < 0) continue;
-    const key = diff >= 0 ? diff : 1000 - diff; if (key < bestKey) { bestKey = key; best = f.id; }
+    if (diff > f.lead || diff < 0) continue; c.push({ id: f.id, diff, i });
   }
-  return best;
+  if (!c.length) return null;
+  const m = Math.min(...c.map(x => x.diff)), g = c.filter(x => x.diff - m <= 1).sort((a, b) => a.diff - b.diff || a.i - b.i);
+  return g[Math.floor(m / 7) % g.length].id;
 }
 
-  const NOSUN=new Set(['mom','zongzi','moon','halloween','valentine','lantern']);   // 這幾個節日的新圖案會取代橘色頭
+  const NOSUN=new Set(['mom','zongzi','moon','halloween','valentine','lantern','teacher']);   // 這幾個節日的新圖案會取代橘色頭
   const festId=()=>{let r=null;try{r=festivalFor(new Date())}catch(e){}return r};   // 只自動判斷：節日前 2 週～當日
   function decorate(){   // 把目前節日的小圖疊在三處 logo 上：頁首、開場畫面、下拉重新整理
     const id=festId(),hl=document.querySelector('.bar .logo');
