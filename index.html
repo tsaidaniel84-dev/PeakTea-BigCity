@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="168">
+<meta name="app-version" content="169">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -1268,7 +1268,7 @@ html.noIntro #splash{display:none!important}
   <div class="st-side" id="stSide"></div>
   <div class="st-foot">
     <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-    <div class="muted stnote v">網頁版本：v168</div>
+    <div class="muted stnote v">網頁版本：v169</div>
   </div>
   <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
@@ -1535,10 +1535,6 @@ async function ensureFrom(start,after){   // 確保雲端資料至少載到 star
   remoteQuietUntil=Date.now()+4000;
   await Promise.race([store.setWindow(start),new Promise(r=>setTimeout(r,8000))]);
   if(after)after();
-}
-function recCountText(){
-  const n=Object.keys(S.days).filter(d=>hasData(S.days[d])).length,w=store&&store.winStart?store.winStart():'';
-  return w&&w>'0000-00-00'?'已載入 '+w.slice(5).replace('-','/')+' 之後的 '+n+' 天紀錄（切到較早的月份會自動載入）':'共 '+n+' 天紀錄';
 }
 function loadDate(d){if(d<todayStr)ensureFrom(need(d),()=>{if(curDate===d&&!$('tab-daily').classList.contains('hidden')){renderItems();renderChips();updateProg()}});progDone=null;curDate=d;if(catSel==='未填'&&!dayItems(d).some(i=>!hasVal(valOf(d,i.id))))catSel='全部';   // 換到已全部填完的日子：不要停在空的「未填」
   if(unlockedDate&&unlockedDate!==d)unlockedDate=null;updateDateUI();renderItems();syncMeta(false,true);renderChips();updateProg()}   // 切換日期保留目前捲動位置（不再回到最上面）
@@ -2116,7 +2112,7 @@ function renderHistory(scrollToday){
   document.querySelectorAll('#hSeg button').forEach(b=>b.classList.toggle('on',b.dataset.m===hMode));
   $('hTableWrap').classList.toggle('hidden',hMode!=='table');
   $('hItemWrap').classList.toggle('hidden',hMode!=='item');
-  $('recCount').textContent=recCountText()+(hMode==='table'?' · 紅格＝跟前次差很多、橘格＝跟近期平均差很多'+(isDesk()?'（滑鼠停在格子或人員上可看原因與最後編輯時間）':'（長按格子看原因，長按人員看最後編輯時間）'):'');
+  $('recCount').textContent=(hMode==='table'?'紅格＝跟前次差很多、橘格＝跟近期平均差很多'+(isDesk()?'（滑鼠停在格子或人員上可看原因與最後編輯時間）':'（長按格子看原因，長按人員看最後編輯時間）'):'');
   const its=hFiltered();
   if(hMode==='item'){renderHItem(its);return}
   const [y,m]=histMonth.split('-').map(Number),days=new Date(y,m,0).getDate();
