@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="161">
+<meta name="app-version" content="162">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -1102,6 +1102,7 @@ html.noIntro #splash{display:none!important}
 /* 換掉橘色頭的節日：頁首用遮罩把原本的太陽挖掉，開場畫面／下拉重新整理則把太陽那層藏起來，改由 .hd 的新頭取代 */
 .lg.nosun .logo{-webkit-mask-image:radial-gradient(ellipse 19.3% 23.5% at 79.45% 25%,transparent 98.4%,#000 100%);mask-image:radial-gradient(ellipse 19.3% 23.5% at 79.45% 25%,transparent 98.4%,#000 100%)}
 .spl-logo.nosun .spl-s,#ptr .pg.nosun .ps{display:none}
+.deco .hd{transform-box:view-box;transform-origin:72px 31px}
 .spl-logo .deco .hd .fx-pop,#ptr .deco .hd .fx-pop{animation:none}
 .spl-logo .deco .hd{animation:splHd 1.05s cubic-bezier(.2,1.2,.35,1) .45s both}
 @keyframes splHd{0%{opacity:0;transform:translate(-22.3px,9.8px) scale(.25)}18%{opacity:1}100%{opacity:1;transform:none}}
@@ -1237,7 +1238,7 @@ html.noIntro #splash{display:none!important}
   <div class="st-side" id="stSide"></div>
   <div class="st-foot">
     <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-    <div class="muted stnote v">網頁版本：v161</div>
+    <div class="muted stnote v">網頁版本：v162</div>
   </div>
   <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
@@ -2598,15 +2599,17 @@ const lantern = (x, y, sc, d) => `<g transform="translate(${x} ${y}) scale(${sc}
   <rect x="-2.6" y="10.6" width="5.2" height="1.7" rx=".6" fill="#f2b632"/><path d="M0 12.3V16.5" stroke="#f2b632" stroke-width=".8"/><path d="M-1.5 17L0 14.6 1.5 17Z" fill="#f2b632"/></g></g>`;
 const bat = (x, y, sc, d) => `<g transform="translate(${x} ${y}) scale(${sc})"><g class="fx-flap" style="animation-delay:${d}s"><path d="M0 0C-2-3-6-3.5-9-1C-7.5-1.2-6.5.2-6 1.8C-4.5.6-3.2.9-2.2 2.2C-1.4 1-.6 1 0 2.6C.6 1 1.4 1 2.2 2.2C3.2.9 4.5.6 6 1.8C6.5.2 7.5-1.2 9-1C6-3.5 2-3 0 0Z" style="fill:var(--bat,#2b2438)"/></g></g>`;
 
+const burst=(x,y,sc,c,d)=>`<g transform="translate(${x} ${y}) scale(${sc})"><g class="fx-tw" style="animation-delay:${d}s" stroke="${c}" stroke-width="1.2" stroke-linecap="round"><path d="M0-6V-3M0 3V6M-6 0H-3M3 0H6M-4.2-4.2L-2.1-2.1M2.1 2.1L4.2 4.2M4.2-4.2L2.1-2.1M-2.1 2.1L-4.2 4.2"/></g><circle r="1" fill="${c}"/></g>`;
+const conf=(x,y,c,d,r)=>`<g transform="rotate(${r} ${x+1} ${y+.5})"><rect class="fx-tw" style="animation-delay:${d}s" x="${x}" y="${y}" width="2.2" height="1.2" rx=".3" fill="${c}"/></g>`;
 const H = 'translate(58 15)';   // 橘色頭（太陽）的圓心；半徑 13
-// 母親節／端午／中秋／萬聖節：橘色頭整顆換成該節日的圖（class=hd）；聖誕、七夕、春節保留原本的橘色頭
+// 換掉橘色頭的節日（母親、端午、中秋、萬聖、情人、元宵）：新頭放在 class=hd；戴在橘色頭上的（聖誕帽、派對帽、墨鏡）也放在 hd，動畫才會跟著太陽走
 const FEST_ART = {
   // 聖誕／跨年：聖誕帽戴在橘色頭上＋站在左坡的小雪人＋雪花
   xmas: flake(5,8,1,0)+flake(26,2,.8,1.1)+flake(72,40,.9,.6)+flake(70,52,.7,1.4)+
-    `<g class="fx-pop"><g transform="${H} translate(.5 2.4) scale(.94)"><g transform="rotate(-16 0 -9)">
+    `<g class="fx-pop"><g class="hd"><g transform="${H} translate(.5 2.4) scale(.94)"><g transform="rotate(-16 0 -9)">
       <path d="M-10.6-10.6C-10.4-19.6-3.6-24.6 5.4-23.8C10.6-23.3 14.4-20.6 16-16.4C12.2-18.6 8.2-18 5.8-10.6Z" fill="#d93a32"/>
       <rect x="-12" y="-12.6" width="24" height="6.4" rx="3.2" fill="#fff" stroke="#dfe6ee" stroke-width=".5"/>
-      <circle cx="16.4" cy="-15.6" r="3.5" fill="#fff" stroke="#dfe6ee" stroke-width=".5"/></g></g></g>`+
+      <circle cx="16.4" cy="-15.6" r="3.5" fill="#fff" stroke="#dfe6ee" stroke-width=".5"/></g></g></g></g>`+
     `<g class="fx-pop" style="animation-delay:.35s"><g transform="translate(13.5 36.4)">
       <circle cx="0" cy="-5.2" r="5.2" fill="#fff" stroke="#d3dde8" stroke-width=".6"/>
       <circle cx="0" cy="-13.4" r="3.7" fill="#fff" stroke="#d3dde8" stroke-width=".6"/>
@@ -2684,8 +2687,47 @@ const FEST_ART = {
       <path d="M-.4-12.4C-.2-15 .8-16.4 2.8-17.2" stroke="#3f6b5a" stroke-width="2.4" fill="none" stroke-linecap="round"/>
       <path d="M-6.8-3.4L-3.4-6.2L-1.2-2.4Z M1.2-2.4L3.4-6.2L6.8-3.4Z" fill="#ffe28a"/>
       <path d="M-7 3.2L-4.6 2L-3 4.6L-1.2 2.4L0 5L1.2 2.4L3 4.6L4.6 2L7 3.2C5.6 7.4 2.6 9 0 9C-2.6 9-5.6 7.4-7 3.2Z" fill="#ffe28a"/></g></g></g>`,
+  // 元旦：橘色頭戴上派對帽＋煙火與彩紙
+  newyear: burst(9,8,1,'#ff5a5f',0)+burst(24,-5,.75,'#3f9bd5',.6)+burst(72,38,.7,'#f5b83d',1.1)+star(47,-6,.7,.3,'#f5b83d')+
+    conf(14,24,'#3f9bd5',.2,20)+conf(4,22,'#f5b83d',.7,-30)+conf(70,24,'#ff5a5f',1,40)+conf(66,52,'#3f9bd5',.4,-20)+
+    `<g class="fx-pop"><g class="hd"><g transform="${H} translate(1 -.2)"><g transform="rotate(12 3 -9)">
+      <path d="M-4.4-9.6L3-26.4L10.4-9.6Z" fill="#3f7fd1"/>
+      <g fill="#ffd34d"><circle cx="1.2" cy="-14.4" r=".95"/><circle cx="5.2" cy="-17.6" r=".95"/><circle cx="5.6" cy="-12.2" r=".95"/><circle cx="-.6" cy="-11.4" r=".8"/></g>
+      <ellipse cx="3" cy="-9.6" rx="7.8" ry="1.6" fill="#ffd34d"/><circle cx="3" cy="-27" r="2.5" fill="#ffd34d"/></g></g></g></g>`,
+
+  // 情人節：橘色頭換成愛心＋情書與小愛心
+  valentine: heart(24,6,.8,.4,'#ff8fab')+heart(46,-7,.7,1,'#ffb3c7')+heart(72,36,.7,.7,'#ff8fab')+star(73,3,.7,.3,'#ff9fb5')+
+    `<g class="fx-pop"><g class="hd"><g transform="${H}"><g class="fx-bob">
+      <path d="M0 12C-16 1-15-12-7-12.4C-3-12.6-.5-10 0-7.5C.5-10 3-12.6 7-12.4C15-12 16 1 0 12Z" fill="#e8446a"/>
+      <path d="M-9.4-4.6C-9.6-8.4-7-10-4.6-9.4" stroke="#ff9fb5" stroke-width="1.7" fill="none" stroke-linecap="round"/></g></g></g></g>`+
+    `<g class="fx-pop" style="animation-delay:.4s"><g transform="translate(4 15) rotate(-10 6.5 4.5)"><rect width="13" height="9" rx="1.2" fill="#fff" stroke="#e9b8c6" stroke-width=".6"/>
+      <path d="M.4.8L6.5 5.4L12.6.8" stroke="#e9b8c6" stroke-width=".7" fill="none"/><path d="M6.5 8C4.4 6.2 5.2 4.6 6.5 5.6C7.8 4.6 8.6 6.2 6.5 8Z" fill="#e8446a"/></g></g>`,
+
+  // 元宵：橘色頭換成一碗湯圓＋花燈
+  lantern: lantern(10,2,.85,0)+lantern(23,-3,.6,.6)+star(47,-5,.8,.4)+star(73,34,.7,1,'#f5b83d')+
+    `<g transform="translate(58 -3)"><path class="fx-steam" d="M-2.5 0C-4.5-3-.5-5-2.5-8" stroke="#bcc7cf" stroke-width="1" fill="none" stroke-linecap="round"/><path class="fx-steam" style="animation-delay:.9s" d="M2.5 0C.5-3 4.5-5 2.5-8" stroke="#bcc7cf" stroke-width="1" fill="none" stroke-linecap="round"/></g>`+
+    `<g class="fx-pop"><g class="hd"><g transform="${H} translate(0 .8)">
+      <circle cx="0" cy="-9.6" r="5" fill="#cdeaa6"/><circle cx="-6.4" cy="-4.6" r="5.2" fill="#fff4dc" stroke="#e8d6b0" stroke-width=".6"/><circle cx="6" cy="-4.6" r="5.2" fill="#f9bccd"/>
+      <path d="M-13.2-1.6H13.2C13.2 7.6 6.8 12.8 0 12.8C-6.8 12.8-13.2 7.6-13.2-1.6Z" fill="#4a8fd8"/>
+      <rect x="-13.8" y="-2.8" width="27.6" height="3" rx="1.5" fill="#fff" stroke="#cfe0f2" stroke-width=".5"/>
+      <path d="M-8.6 4.6Q0 8.2 8.6 4.6" stroke="#fff" stroke-width="1.2" fill="none" stroke-linecap="round" opacity=".8"/></g></g></g>`,
+
+  // 父親節：橘色頭戴墨鏡、留鬍子，底下打一條藍領帶
+  father: star(47,-5,.7,.3,'#3f9bd5')+star(73,36,.7,.9,'#3f9bd5')+star(8,9,.8,.6,'#3f9bd5')+heart(22,2,.7,.2,'#3f9bd5')+
+    `<g class="fx-pop"><g class="hd"><g transform="${H}">
+      <rect x="-10.6" y="-4.6" width="9.2" height="6.6" rx="2.6" fill="#2b2438"/><rect x="1.4" y="-4.6" width="9.2" height="6.6" rx="2.6" fill="#2b2438"/>
+      <path d="M-1.6-2.6H1.6M-10.4-3.4L-13-4.4M10.4-3.4L13-4.4" stroke="#2b2438" stroke-width="1.2" stroke-linecap="round"/>
+      <path d="M-8.8-3.2L-6.6-3.2M3.2-3.2L5.4-3.2" stroke="#fff" stroke-width=".9" stroke-linecap="round" opacity=".7"/>
+      <path d="M-6.4 6.2C-4.4 3.8-1.4 4.4 0 5.8C1.4 4.4 4.4 3.8 6.4 6.2C4.4 8.8 1.4 7.8 0 7.2C-1.4 7.8-4.4 8.8-6.4 6.2Z" fill="#4a2e1a"/>
+      <path d="M-3 10Q0 12.2 3 10" stroke="#4a2e1a" stroke-width="1" fill="none" stroke-linecap="round"/></g></g></g>`+
+    `<g class="fx-pop" style="animation-delay:.4s"><g transform="translate(58 27.6)"><path d="M-2.4 0H2.4L1.8 3H-1.8Z" fill="#2f6fba"/><path d="M-1.8 3L-3 9.4L0 11.6L3 9.4L1.8 3Z" fill="#3f7fd1"/><path d="M-1.4 6H1.4" stroke="#fff" stroke-width=".8" opacity=".7"/></g></g>`,
+
+  // 國慶日：山頂插一面國旗＋煙火（橘色頭保留）
+  national: burst(9,9,1,'#e0333a',0)+burst(22,-6,.8,'#3f7fd1',.5)+burst(72,38,.8,'#f5b83d',1)+star(46,-9,.7,.3,'#f5b83d')+
+    `<g class="fx-pop"><path d="M35.5 15.4V-5.4" stroke="#8a6a3a" stroke-width="1.1" stroke-linecap="round"/><g class="fx-bob"><rect x="36" y="-4.8" width="13" height="8.7" fill="#e0333a"/><rect x="36" y="-4.8" width="6.5" height="4.35" fill="#1f3f96"/>
+      <circle cx="39.25" cy="-2.6" r="1.5" fill="#fff"/><circle cx="39.25" cy="-2.6" r="1" fill="#1f3f96"/><circle cx="39.25" cy="-2.6" r=".6" fill="#fff"/></g></g>`,
 };
-const FEST_NAME = { xmas: '聖誕跨年', cny: '春節', mom: '母親節', zongzi: '端午節', qixi: '七夕', moon: '中秋節', halloween: '萬聖節' };
+const FEST_NAME = { newyear: '元旦', valentine: '情人節', lantern: '元宵節', father: '父親節', national: '國慶日', xmas: '聖誕節', cny: '春節', mom: '母親節', zongzi: '端午節', qixi: '七夕', moon: '中秋節', halloween: '萬聖節' };
 // 節日日期計算（Node 與瀏覽器用同一套邏輯；這個檔案之後會原樣嵌進 App）
 const FEST_DEF = [
   { id: 'xmas', fix: [12, 25], lead: 14, tail: 0 },
@@ -2695,6 +2737,11 @@ const FEST_DEF = [
   { id: 'qixi', lunar: [7, 7], lead: 14, tail: 0 },
   { id: 'moon', lunar: [8, 15], lead: 14, tail: 0 },
   { id: 'halloween', fix: [10, 31], lead: 14, tail: 0 },
+  { id: 'newyear', fix: [1, 1], lead: 14, tail: 0 },
+  { id: 'valentine', fix: [2, 14], lead: 14, tail: 0 },
+  { id: 'lantern', after: 'cny', days: 14, lead: 14, tail: 0 },   // 元宵＝春節後第 14 天（農曆 1/15）
+  { id: 'father', fix: [8, 8], lead: 14, tail: 0 },
+  { id: 'national', fix: [10, 10], lead: 14, tail: 0 },
 ];
 const dayNum = d => Math.round(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 864e5);
 const lunarFmt = (() => { try { return new Intl.DateTimeFormat('en-u-ca-chinese', { month: 'numeric', day: 'numeric' }); } catch (e) { return null; } })();
@@ -2707,6 +2754,7 @@ function lunarDate(y, m, d) {   // 農曆 m 月 d 日 → 這一年的國曆日�
   return (lunarCache[k] = r);
 }
 function festDate(f, y) {
+  if (f.after) { const b = festDate(FEST_DEF.find(x => x.id === f.after), y); return b ? new Date(b.getFullYear(), b.getMonth(), b.getDate() + f.days) : null; }
   if (f.fix) return new Date(y, f.fix[0] - 1, f.fix[1]);
   if (f.lunar) { const t = LUNAR[f.id] && LUNAR[f.id][y]; return t ? new Date(y, +t.slice(0, 2) - 1, +t.slice(3)) : lunarDate(y, f.lunar[0], f.lunar[1]); }
   const first = new Date(y, f.nth[0] - 1, 1), off = (f.nth[1] - first.getDay() + 7) % 7;   // 第 n 個星期 w
@@ -2722,7 +2770,7 @@ function festivalFor(now) {   // 目前該顯示哪個節日：在視窗內、�
   return best;
 }
 
-  const NOSUN=new Set(['mom','zongzi','moon','halloween']);   // 這幾個節日的新圖案會取代橘色頭
+  const NOSUN=new Set(['mom','zongzi','moon','halloween','valentine','lantern']);   // 這幾個節日的新圖案會取代橘色頭
   const festId=()=>{let r=null;try{r=festivalFor(new Date())}catch(e){}return r};   // 只自動判斷：節日前 2 週～當日
   function decorate(){   // 把目前節日的小圖疊在三處 logo 上：頁首、開場畫面、下拉重新整理
     const id=festId(),hl=document.querySelector('.bar .logo');
