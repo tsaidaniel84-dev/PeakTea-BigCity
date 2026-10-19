@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="160">
+<meta name="app-version" content="161">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -1099,6 +1099,17 @@ html.noIntro #splash{display:none!important}
 @keyframes fxFlap{from{transform:scaleY(1)}to{transform:scaleY(.55)}}
 .fx-steam{animation:fxSteam 1.8s ease-out infinite}
 @keyframes fxSteam{0%{opacity:0;transform:translateY(2px)}30%{opacity:.9}100%{opacity:0;transform:translateY(-5px)}}
+/* 換掉橘色頭的節日：頁首用遮罩把原本的太陽挖掉，開場畫面／下拉重新整理則把太陽那層藏起來，改由 .hd 的新頭取代 */
+.lg.nosun .logo{-webkit-mask-image:radial-gradient(ellipse 19.3% 23.5% at 79.45% 25%,transparent 98.4%,#000 100%);mask-image:radial-gradient(ellipse 19.3% 23.5% at 79.45% 25%,transparent 98.4%,#000 100%)}
+.spl-logo.nosun .spl-s,#ptr .pg.nosun .ps{display:none}
+.spl-logo .deco .hd .fx-pop,#ptr .deco .hd .fx-pop{animation:none}
+.spl-logo .deco .hd{animation:splHd 1.05s cubic-bezier(.2,1.2,.35,1) .45s both}
+@keyframes splHd{0%{opacity:0;transform:translate(-22.3px,9.8px) scale(.25)}18%{opacity:1}100%{opacity:1;transform:none}}
+#ptr .deco .hd{transform:translate(calc(-22px*(1 - var(--p,0))),calc(10px*(1 - var(--p,0)))) scale(calc(.25 + .75*var(--p,0)))}
+#ptr.rdy .deco .hd{animation:ptrHdPop .35s ease-out}
+#ptr.go .deco .hd{animation:ptrHdSun .6s ease-in-out infinite}
+@keyframes ptrHdPop{50%{transform:translateY(-4.8px) scale(1.2)}}
+@keyframes ptrHdSun{0%,100%{transform:translateY(0)}40%{transform:translateY(-16.8px) scale(1.08)}}
 @media (prefers-reduced-motion:reduce){.deco *{animation:none!important}}
 
 .lg{position:relative;display:flex;flex:none;line-height:0}
@@ -1226,7 +1237,7 @@ html.noIntro #splash{display:none!important}
   <div class="st-side" id="stSide"></div>
   <div class="st-foot">
     <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-    <div class="muted stnote v">網頁版本：v160</div>
+    <div class="muted stnote v">網頁版本：v161</div>
   </div>
   <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
@@ -2576,7 +2587,7 @@ if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){window.add
 })();
 /* ---------- 節日點綴：依「快到的節日」在 logo 上加小裝飾。自動判斷：節日前 14 天（2 週）至節日當天顯示，過了當天就拿掉 ---------- */
 (function(){
-// 節日點綴圖案：座標系與 logo 圖相同（73×60）；山頂端約在 (35.5, 15)，太陽圓心 (57.8, 14.2) 半徑 13
+// 節日點綴圖案：座標系與 logo 圖相同（73×60）；山頂端約在 (35.5, 15)，太陽（橘色頭）圓心 (58, 15) 半徑 13
 // 每個圖案外層用 <g> 負責位置，裡面的元素才套動畫（避免 CSS 動畫蓋掉 transform 屬性）
 const star = (x, y, sc, d, c) => `<g transform="translate(${x} ${y}) scale(${sc})"><path class="fx-tw" style="animation-delay:${d}s" d="M0-3C.5-.8.8-.5 3 0C.8.5.5.8 0 3C-.5.8-.8.5-3 0C-.8-.5-.5-.8 0-3Z" fill="${c || '#f5b83d'}"/></g>`;
 const flake = (x, y, sc, d) => `<g transform="translate(${x} ${y}) scale(${sc})"><g class="fx-tw" style="animation-delay:${d}s" stroke="#6fb0ee" stroke-width="1.1" stroke-linecap="round"><path d="M0-3V3M-2.6-1.5L2.6 1.5M-2.6 1.5L2.6-1.5"/></g></g>`;
@@ -2587,41 +2598,92 @@ const lantern = (x, y, sc, d) => `<g transform="translate(${x} ${y}) scale(${sc}
   <rect x="-2.6" y="10.6" width="5.2" height="1.7" rx=".6" fill="#f2b632"/><path d="M0 12.3V16.5" stroke="#f2b632" stroke-width=".8"/><path d="M-1.5 17L0 14.6 1.5 17Z" fill="#f2b632"/></g></g>`;
 const bat = (x, y, sc, d) => `<g transform="translate(${x} ${y}) scale(${sc})"><g class="fx-flap" style="animation-delay:${d}s"><path d="M0 0C-2-3-6-3.5-9-1C-7.5-1.2-6.5.2-6 1.8C-4.5.6-3.2.9-2.2 2.2C-1.4 1-.6 1 0 2.6C.6 1 1.4 1 2.2 2.2C3.2.9 4.5.6 6 1.8C6.5.2 7.5-1.2 9-1C6-3.5 2-3 0 0Z" style="fill:var(--bat,#2b2438)"/></g></g>`;
 
+const H = 'translate(58 15)';   // 橘色頭（太陽）的圓心；半徑 13
+// 母親節／端午／中秋／萬聖節：橘色頭整顆換成該節日的圖（class=hd）；聖誕、七夕、春節保留原本的橘色頭
 const FEST_ART = {
-  // 聖誕／跨年：聖誕帽戴在山頂、雪花、金色星星
-  xmas: flake(6, 9, 1, 0) + flake(9, 36, .8, 1.1) + flake(74, 46, .9, .6) + star(46, -1, 1, .2) + star(72, 27, .8, .9) +
-    `<g class="fx-pop"><g transform="rotate(-14 35.5 17.5)"><path d="M26.2 17.6C26.6 10.6 32.4 6.2 40.4 4.4C44.6 3.5 48.8 4.8 51 7.8C46.2 7 42.4 9.6 43.6 17.6Z" fill="#d93a32"/><rect x="24.6" y="15.6" width="21.4" height="5.4" rx="2.7" fill="#fff" stroke="#dfe6ee" stroke-width=".5"/><circle cx="51.6" cy="8.2" r="3.4" fill="#fff" stroke="#dfe6ee" stroke-width=".5"/></g></g>`,
+  // 聖誕／跨年：聖誕帽戴在橘色頭上＋站在左坡的小雪人＋雪花
+  xmas: flake(5,8,1,0)+flake(26,2,.8,1.1)+flake(72,40,.9,.6)+flake(70,52,.7,1.4)+
+    `<g class="fx-pop"><g transform="${H} translate(.5 2.4) scale(.94)"><g transform="rotate(-16 0 -9)">
+      <path d="M-10.6-10.6C-10.4-19.6-3.6-24.6 5.4-23.8C10.6-23.3 14.4-20.6 16-16.4C12.2-18.6 8.2-18 5.8-10.6Z" fill="#d93a32"/>
+      <rect x="-12" y="-12.6" width="24" height="6.4" rx="3.2" fill="#fff" stroke="#dfe6ee" stroke-width=".5"/>
+      <circle cx="16.4" cy="-15.6" r="3.5" fill="#fff" stroke="#dfe6ee" stroke-width=".5"/></g></g></g>`+
+    `<g class="fx-pop" style="animation-delay:.35s"><g transform="translate(13.5 36.4)">
+      <circle cx="0" cy="-5.2" r="5.2" fill="#fff" stroke="#d3dde8" stroke-width=".6"/>
+      <circle cx="0" cy="-13.4" r="3.7" fill="#fff" stroke="#d3dde8" stroke-width=".6"/>
+      <path d="M-3.8-10.4C-1.4-9.2 1.4-9.2 3.8-10.4L3.4-8.6C1.2-7.6-1.2-7.6-3.4-8.6Z" fill="#d93a32"/><path d="M2.4-9.6L3.6-6.4 1.4-6.2Z" fill="#d93a32"/>
+      <circle cx="-1.3" cy="-14.2" r=".55" fill="#2b2438"/><circle cx="1.3" cy="-14.2" r=".55" fill="#2b2438"/>
+      <path d="M0-13.1L2.7-12.5L0-12Z" fill="#f28c28"/>
+      <circle cx="0" cy="-5.6" r=".6" fill="#2b2438"/><circle cx="0" cy="-3.4" r=".6" fill="#2b2438"/>
+      <path d="M-3-17.1H3L2.2-20.2H-2.2Z" fill="#2b2438"/><rect x="-4" y="-17.6" width="8" height="1.2" rx=".6" fill="#2b2438"/></g></g>`,
 
-  // 春節：兩盞紅燈籠垂掛、金色星光
-  cny: lantern(9, 3, 1, 0) + lantern(22, -3, .72, .6) + star(47, 0, 1, .2) + star(73, 28, .9, .8) + star(12, 30, .7, 1.3) +
+  cny: lantern(9,3,1,0)+lantern(22,-3,.72,.6)+star(47,0,1,.2)+star(73,28,.9,.8)+star(12,30,.7,1.3)+
     `<g class="fx-pop" style="animation-delay:.25s"><circle cx="73" cy="10" r="4.4" fill="#f2b632"/><circle cx="73" cy="10" r="3" fill="none" stroke="#c98a14" stroke-width=".6"/><rect x="71.6" y="8.6" width="2.8" height="2.8" fill="none" stroke="#c98a14" stroke-width=".5"/></g>`,
 
-  // 母親節：康乃馨與小愛心
-  mom: heart(72, 28, .9, 0, '#ff6f91') + heart(65, 35, .6, .7, '#ff9fb5') + heart(8, 9, .7, 1.1, '#ff9fb5') +
-    `<g class="fx-pop"><g transform="translate(69 46)"><path d="M0 4C-.4 8 0 11 1 14" stroke="#4e9a4a" stroke-width="1.2" fill="none" stroke-linecap="round"/><path d="M.6 10C3 8.4 5 8.6 6 9.8C4 11.4 2 11.4 .6 10Z" fill="#6ab35f"/>
-      <g fill="#f06292"><circle cx="0" cy="-3.6" r="3.1"/><circle cx="3.4" cy="-1.2" r="3.1"/><circle cx="2.2" cy="2.8" r="3.1"/><circle cx="-2.2" cy="2.8" r="3.1"/><circle cx="-3.4" cy="-1.2" r="3.1"/></g><circle cx="0" cy="0" r="2.5" fill="#d81b60"/><circle cx="0" cy="0" r="1" fill="#f8bbd0"/></g></g>`,
+  // 母親節：橘色頭換成康乃馨（花瓣一圈圈疊成荷葉邊，最外圈剛好對齊原本太陽的圓）＋莖與葉＋小愛心
+  mom: (()=>{const ring=(n,r,pr,c,off)=>Array.from({length:n},(_,i)=>{const a=(i/n)*Math.PI*2+off;return `<circle cx="${(Math.cos(a)*r).toFixed(2)}" cy="${(Math.sin(a)*r).toFixed(2)}" r="${pr}" fill="${c}"/>`}).join('');
+    return heart(10,10,.8,0,'#ff8fab')+heart(21,3,.6,.8,'#ffb3c7')+heart(70,36,.6,1.2,'#ff8fab')+
+    `<g class="fx-pop"><g class="hd"><g transform="${H}">`+
+      `<path d="M-.6 11C-1.6 16-1 20.5 1 24.6" stroke="#4e9a4a" stroke-width="1.8" fill="none" stroke-linecap="round"/>`+
+      `<path d="M-1 19C-5.6 17.2-8.4 18.2-9.2 20.6C-5.6 22.2-2.6 21.6-1 19Z" fill="#6ab35f"/><path d="M.2 15.6C3.8 13.2 7 13.6 8.2 15.6C5 17.8 2 17.6 .2 15.6Z" fill="#7ec46f"/>`+
+      ring(11,8.5,4.5,'#ee6f93',.2)+ring(8,5.4,3.7,'#f58aa9',.6)+ring(5,2.6,2.8,'#fbb3c8',.3)+
+      `<circle r="1.5" fill="#e0476f"/></g></g></g>`;})(),
 
-  // 端午：粽子（葉子包、繩子綁）與熱氣
-  zongzi: star(46, -1, .9, .3) + star(8, 8, .7, 1) +
-    `<g class="fx-pop"><g transform="translate(68 44)"><path d="M0-8.5L8.4 5.5Q9 7.5 7 7.5H-7Q-9 7.5-8.4 5.5Z" fill="#7bb661" stroke="#4f8f3a" stroke-width="1" stroke-linejoin="round"/>
-      <path d="M0-8.5L-2.4 7.5M0-8.5L2.8 7.5" stroke="#5c9a45" stroke-width=".7" fill="none"/><path d="M-6.4 2.4H6.6M-7.6 5H7.8" stroke="#c08a4a" stroke-width="1.1" stroke-linecap="round"/><path d="M6.6 2.4L9.6 4.4M7.8 5L10.4 7.6" stroke="#c08a4a" stroke-width="1" stroke-linecap="round"/></g></g>` +
-    `<g transform="translate(68 31)"><path class="fx-steam" d="M-2 0C-4-3 0-5-2-8" stroke="#bcc7cf" stroke-width="1" fill="none" stroke-linecap="round"/><path class="fx-steam" style="animation-delay:.9s" d="M2.5 0C.5-3 4.5-5 2.5-8" stroke="#bcc7cf" stroke-width="1" fill="none" stroke-linecap="round"/></g>`,
+  // 端午：橘色頭換成粽子＋左上角的龍舟
+  zongzi: (()=>{return `<g class="fx-pop"><g class="hd"><g transform="${H} translate(0 .8) scale(.9)">
+      <path d="M0-12.4L12.2 8.6Q13.4 11.4 10.4 11.4H-10.4Q-13.4 11.4-12.2 8.6Z" fill="#7bb661" stroke="#7bb661" stroke-width="1.2" stroke-linejoin="round"/>
+      <path d="M0-12.4L-3.6 11.4H-10.4Q-13.4 11.4-12.2 8.6Z" fill="#6aa552" stroke="#6aa552" stroke-width="1.2" stroke-linejoin="round"/>
+      <path d="M0-12.4L4.6 11.4" stroke="#5c9a45" stroke-width=".9" stroke-linecap="round"/>
+      <path d="M-8.6 3.4H8.8M-10.6 7H10.8" stroke="#d9a441" stroke-width="1.5" stroke-linecap="round"/>
+      <path d="M8.8 3.4L12 5.6M10.8 7L13.4 9.8" stroke="#d9a441" stroke-width="1.2" stroke-linecap="round"/></g></g></g>`+
+    `<g transform="translate(58 -.5)"><path class="fx-steam" d="M-2 0C-4-3 0-5-2-8" stroke="#bcc7cf" stroke-width="1" fill="none" stroke-linecap="round"/><path class="fx-steam" style="animation-delay:.9s" d="M2.5 0C.5-3 4.5-5 2.5-8" stroke="#bcc7cf" stroke-width="1" fill="none" stroke-linecap="round"/></g>`+
+    `<g class="fx-pop" style="animation-delay:.3s"><g class="fx-bob"><g transform="translate(13 15)">
+      <path d="M-14 6.5C-12 9.4-4 10.2 0 10.2C4 10.2 12 9.4 14 6.5Z" fill="#d93a32"/><path d="M-13.2 6.6H13.4" stroke="#f2b632" stroke-width="1.2" stroke-linecap="round"/>
+      <path d="M-13.8 5.8C-16.4 4-16.8 .2-14.2-1.8C-13-2.8-11.2-2.6-10.6-1.2C-12-.6-12.8.8-12.4 2.6L-11.4 5.6Z" fill="#2f9d6a"/><path d="M-14.2-1.8L-15.6-4.2M-12.4-2.4L-12.4-5" stroke="#f2b632" stroke-width="1" stroke-linecap="round"/><circle cx="-13.2" cy="-.2" r=".6" fill="#fff"/>
+      <path d="M13.8 5.8C15.8 3.4 15.6-.4 13.4-2.8" stroke="#2f9d6a" stroke-width="1.6" fill="none" stroke-linecap="round"/>
+      <g fill="#f2b632"><circle cx="-6" cy="1.4" r="1.4"/><circle cx="0" cy="1.4" r="1.4"/><circle cx="6" cy="1.4" r="1.4"/></g><g fill="#fff"><rect x="-7.2" y="3" width="2.4" height="3" rx=".8" fill="#3f7fd1"/><rect x="-1.2" y="3" width="2.4" height="3" rx=".8" fill="#3f7fd1"/><rect x="4.8" y="3" width="2.4" height="3" rx=".8" fill="#3f7fd1"/></g>
+      <path d="M-6 3.6L-3.4 10.4M0 3.6L2.6 10.4M6 3.6L8.6 10.4" stroke="#b98250" stroke-width=".9" stroke-linecap="round"/>
+      <path d="M-15 11.6C-12.6 10.2-10.6 12.8-8.2 11.4S-3.6 10.4-1.4 11.6 3.2 12.8 5.4 11.4 9.6 10.4 11.8 11.6 15.2 12.4 16.4 11.6" stroke="#6fb0ee" stroke-width="1.1" fill="none" stroke-linecap="round"/></g></g></g>`;})(),
 
-  // 七夕：愛心與星河
-  qixi: heart(45, 2, 1.1, 0, '#e53935') + heart(52, -8, .8, .6, '#ff6f91') + heart(40, -4, .6, 1.2, '#ff9fb5') + heart(73, 26, .7, .9, '#ff9fb5') +
-    star(9, 8, .9, .1, '#ffd34d') + star(21, -2, .7, .7, '#ffd34d') + star(8, 30, .6, 1.2, '#ffd34d') + star(73, 44, .8, .4, '#ffd34d'),
+  // 七夕：牛郎、織女站在山的兩端（山＝鵲橋），中間一顆愛心、天上星河
+  qixi: (()=>{const man=`<g class="fx-pop" style="animation-delay:.2s"><g transform="translate(9.2 42) scale(1.18)">
+      <path d="M-3.6-15.2L0-18.6L3.6-15.2Z" fill="#c08a4a"/><ellipse cx="0" cy="-15" rx="4.4" ry="1" fill="#c08a4a"/>
+      <circle cx="0" cy="-12.8" r="2.1" fill="#f6c9a0"/><rect x="-2.7" y="-10.4" width="5.4" height="6.4" rx="1.6" fill="#4a86d8"/>
+      <rect x="-2.3" y="-4.2" width="1.9" height="4.2" rx=".7" fill="#3b4a5a"/><rect x=".4" y="-4.2" width="1.9" height="4.2" rx=".7" fill="#3b4a5a"/>
+      <path d="M2.2-9L5.8-11.6" stroke="#f6c9a0" stroke-width="1.2" stroke-linecap="round"/></g></g>`;
+    const girl=`<g class="fx-pop" style="animation-delay:.4s"><g transform="translate(62.6 43.6) scale(1.18)">
+      <path class="fx-bob" d="M2.4-9.2C6-9 9.2-11.4 11.8-9C9-8.6 6.4-6.4 2.4-7.4Z" fill="#ff9fb5"/>
+      <circle cx="0" cy="-12.6" r="2.1" fill="#f6c9a0"/><path d="M-2.3-13.4C-2.2-16.2 2.2-16.2 2.3-13.4C1-14.4-1-14.4-2.3-13.4Z" fill="#2b2438"/><circle cx="0" cy="-15.6" r="1.1" fill="#2b2438"/>
+      <path d="M-2.3-10.4H2.3L4.4 0H-4.4Z" fill="#e8508a"/><path d="M-2.2-7.2H2.2" stroke="#ffd1e0" stroke-width=".8"/>
+      <path d="M-2-9L-5.8-11.4" stroke="#f6c9a0" stroke-width="1.2" stroke-linecap="round"/></g></g>`;
+    return man+girl+heart(35.5,1.5,1.3,0,'#e53935')+heart(42,-6,.7,.7,'#ff6f91')+heart(29,-5,.6,1.2,'#ff9fb5')+
+      star(6,7,.9,.1,'#ffd34d')+star(17,0,.7,.7,'#ffd34d')+star(50,-3,.6,.3,'#ffd34d')+star(73,32,.7,1.1,'#ffd34d')+star(27,38,.6,.5,'#ffd34d');})(),
 
-  // 中秋：滿月、星光、桂花
-  moon: `<g class="fx-pop"><circle cx="13" cy="10" r="12" fill="#ffe9a8" opacity=".35"/><circle cx="13" cy="10" r="8.2" fill="#ffe08a" stroke="#e8b84a" stroke-width=".7"/><circle cx="10.4" cy="8" r="1.7" fill="#f5cf6a"/><circle cx="15.6" cy="12.6" r="2.2" fill="#f5cf6a"/><circle cx="16" cy="6.4" r="1" fill="#f5cf6a"/></g>` +
-    star(27, -2, .9, .2, '#f5b83d') + star(5, 26, .7, .9, '#f5b83d') + star(73, 28, .8, .5, '#f5b83d') +
-    `<g fill="#f2b632"><circle class="fx-tw" style="animation-delay:.3s" cx="72" cy="44" r="1.2"/><circle class="fx-tw" style="animation-delay:.8s" cx="75" cy="47" r="1"/><circle class="fx-tw" style="animation-delay:1.3s" cx="70" cy="48" r="1.1"/></g>`,
+  // 中秋：橘色頭換成滿月＋山頂上的月兔＋右下的柚子
+  moon: `<g class="fx-pop"><g class="hd"><g transform="${H}"><circle r="17" fill="#ffe9a8" opacity=".24"/><circle r="13.2" fill="#ffe08a"/>
+      <circle cx="-4" cy="-3.6" r="2.4" fill="#f5cf6a"/><circle cx="3.8" cy="3.8" r="3.2" fill="#f5cf6a"/><circle cx="4.8" cy="-6.2" r="1.4" fill="#f5cf6a"/><circle cx="-5.6" cy="5.4" r="1.2" fill="#f5cf6a"/></g></g></g>`+
+    star(46,-5,.8,.2,'#f5b83d')+star(73,32,.7,.9,'#f5b83d')+star(6,10,.8,.5,'#f5b83d')+star(20,2,.6,1.1,'#f5b83d')+
+    `<g class="fx-pop" style="animation-delay:.4s"><g transform="translate(35.2 15.4) rotate(6)">
+      <path d="M-3.6 0C-4 -4.2 -1.6 -6.6 .6 -6.6C3 -6.6 4.4 -4.2 4 0Z" fill="#fff" stroke="#d6dde6" stroke-width=".5"/>
+      <circle cx="-3.8" cy="-2.4" r="1.2" fill="#fff" stroke="#d6dde6" stroke-width=".4"/>
+      <circle cx="1.8" cy="-8.6" r="2.7" fill="#fff" stroke="#d6dde6" stroke-width=".5"/>
+      <ellipse cx="1" cy="-14" rx="1.15" ry="3.5" transform="rotate(-8 1 -14)" fill="#fff" stroke="#d6dde6" stroke-width=".5"/><ellipse cx="1" cy="-14" rx=".5" ry="2.4" transform="rotate(-8 1 -14)" fill="#ffb3c7"/>
+      <ellipse cx="3.6" cy="-13.6" rx="1.15" ry="3.5" transform="rotate(14 3.6 -13.6)" fill="#fff" stroke="#d6dde6" stroke-width=".5"/><ellipse cx="3.6" cy="-13.6" rx=".5" ry="2.4" transform="rotate(14 3.6 -13.6)" fill="#ffb3c7"/>
+      <circle cx="3.2" cy="-9" r=".6" fill="#e5484d"/></g></g>`+
+    `<g class="fx-pop" style="animation-delay:.6s"><g transform="translate(67.8 37.2) scale(.82)">
+      <ellipse cx="0" cy="0" rx="7.2" ry="6.6" fill="#c9dc62"/><ellipse cx="0" cy="-6" rx="2.2" ry="1.5" fill="#b8cf52"/>
+      <path d="M-4 4.6C-1.6 7.2 3 6.8 5.4 3.4C4.8 6.8 1.6 8 -.8 7.8C-2.6 7.4-3.6 6-4 4.6Z" fill="#aac84a"/>
+      <path d="M-5.4-1.4C-5.2-3.6-4-5-2.4-5.8" stroke="#e8f29a" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+      <g fill="#b3ca55"><circle cx="1.8" cy="-1" r=".55"/><circle cx="-1.2" cy="1.8" r=".55"/><circle cx="3.2" cy="2.4" r=".5"/><circle cx="-3" cy="-.2" r=".45"/></g>
+      <path d="M.2-6.6C.2-8 .8-9 1.6-9.6" stroke="#7a8f2a" stroke-width="1" fill="none" stroke-linecap="round"/><path d="M1.2-8.2C3-10 5.8-9.6 6.4-8.2C4.6-7 2.4-7 1.2-8.2Z" fill="#5c9a45"/></g></g>`,
 
-  // 萬聖節：南瓜燈與蝙蝠
-  halloween: bat(11, 7, .95, 0) + bat(25, -4, .7, .35) + star(47, 0, .8, .5, '#b388ff') + star(73, 28, .7, 1, '#ffb74d') +
-    `<g class="fx-pop"><g transform="translate(67 46)"><ellipse cx="0" cy="0" rx="8" ry="6.6" fill="#f28c28"/><path d="M-3.4-6.2C-6.2-3-6.2 3-3.4 6.2M3.4-6.2C6.2-3 6.2 3 3.4 6.2" stroke="#d9701a" stroke-width="1" fill="none"/>
-      <path d="M0-6.4L.5-9.6L3-10.8" stroke="#5a8f2a" stroke-width="1.8" stroke-linecap="round" fill="none"/>
-      <path d="M-4.6-1.2L-2-1.2L-3.3 1.2ZM2-1.2L4.6-1.2L3.3 1.2Z" fill="#ffe28a" stroke="#3b2410" stroke-width=".5" stroke-linejoin="round"/>
-      <path d="M-4.2 2.6L-2.6 4 -1.4 2.9 0 4.2 1.4 2.9 2.6 4 4.2 2.6" fill="#ffe28a" stroke="#3b2410" stroke-width=".6" stroke-linejoin="round" stroke-linecap="round"/></g></g>`,
+  // 萬聖節：橘色頭換成南瓜頭（蝙蝠在左上）
+  halloween: bat(11,7,.95,0)+bat(25,-4,.7,.35)+star(47,-4,.7,.5,'#b388ff')+
+    `<g class="fx-pop"><g class="hd"><g transform="${H}">
+      <ellipse cx="-6.4" cy="0" rx="7.4" ry="11.6" fill="#b84a14"/><ellipse cx="6.4" cy="0" rx="7.4" ry="11.6" fill="#b84a14"/>
+      <ellipse cx="-3.4" cy="0" rx="7.6" ry="12.6" fill="#d9641c"/><ellipse cx="3.4" cy="0" rx="7.6" ry="12.6" fill="#d9641c"/><ellipse cx="0" cy="0" rx="6.6" ry="13" fill="#ee7a24"/>
+      <path d="M-.4-12.4C-.2-15 .8-16.4 2.8-17.2" stroke="#3f6b5a" stroke-width="2.4" fill="none" stroke-linecap="round"/>
+      <path d="M-6.8-3.4L-3.4-6.2L-1.2-2.4Z M1.2-2.4L3.4-6.2L6.8-3.4Z" fill="#ffe28a"/>
+      <path d="M-7 3.2L-4.6 2L-3 4.6L-1.2 2.4L0 5L1.2 2.4L3 4.6L4.6 2L7 3.2C5.6 7.4 2.6 9 0 9C-2.6 9-5.6 7.4-7 3.2Z" fill="#ffe28a"/></g></g></g>`,
 };
 const FEST_NAME = { xmas: '聖誕跨年', cny: '春節', mom: '母親節', zongzi: '端午節', qixi: '七夕', moon: '中秋節', halloween: '萬聖節' };
 // 節日日期計算（Node 與瀏覽器用同一套邏輯；這個檔案之後會原樣嵌進 App）
@@ -2660,12 +2722,13 @@ function festivalFor(now) {   // 目前該顯示哪個節日：在視窗內、�
   return best;
 }
 
+  const NOSUN=new Set(['mom','zongzi','moon','halloween']);   // 這幾個節日的新圖案會取代橘色頭
   const festId=()=>{let r=null;try{r=festivalFor(new Date())}catch(e){}return r};   // 只自動判斷：節日前 2 週～當日
   function decorate(){   // 把目前節日的小圖疊在三處 logo 上：頁首、開場畫面、下拉重新整理
     const id=festId(),hl=document.querySelector('.bar .logo');
     if(hl&&!(hl.parentNode.classList&&hl.parentNode.classList.contains('lg'))){const w=document.createElement('span');w.className='lg';hl.parentNode.insertBefore(w,hl);w.appendChild(hl)}
     ['.bar .lg','#splash .spl-logo','#ptr .pg'].forEach(sel=>{const host=document.querySelector(sel);if(!host)return;
-      host.querySelectorAll(':scope>.deco').forEach(e=>e.remove());if(!id)return;
+      host.querySelectorAll(':scope>.deco').forEach(e=>e.remove());host.classList.toggle('nosun',!!id&&NOSUN.has(id));if(!id)return;
       const s=document.createElementNS('http://www.w3.org/2000/svg','svg');s.setAttribute('class','deco');s.setAttribute('viewBox','-14 -16 101 92');s.setAttribute('aria-hidden','true');s.innerHTML=FEST_ART[id];host.appendChild(s)});
     }
   decorate();
