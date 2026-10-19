@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="169">
+<meta name="app-version" content="170">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -980,9 +980,9 @@ html[data-layout="desktop"] .offrow{margin-bottom:0}
 .chips .chip[data-n="4"] .cl{font-size:calc(10.2px*var(--k,1))}
 .chips .chip[data-n="5"] .cl,.chips .chip[data-n="6"] .cl{font-size:calc(8.5px*var(--k,1))}
 .chips .chip small{margin:0!important;font-size:calc(8.9px*var(--k,1));font-weight:700;color:var(--muted)!important;opacity:1}
-/* 選取：深色實心，保留漸層外框 */
-.chips .chip.on{background:linear-gradient(var(--ink),var(--ink)) padding-box,var(--ring) border-box!important;color:var(--bg)!important}
-.chips .chip.on small{color:var(--bg)!important;opacity:.75}
+/* 選取（v170）：保留各自的漸層外框，中間改填主綠色（跟導覽列、「今天」鈕同一個綠），不再是近黑／米白 */
+.chips .chip.on{background:linear-gradient(var(--accent),var(--accent)) padding-box,var(--ring) border-box!important;color:var(--accent-ink)!important}
+.chips .chip.on small{color:var(--accent-ink)!important;opacity:.85}
 /* 搜尋中：不顯示選取狀態（因為搜尋會跨所有分類） */
 .chips.searching .chip.on{background:linear-gradient(var(--card),var(--card)) padding-box,var(--ring) border-box!important;color:var(--ink)!important}
 .chips.searching .chip.on small{color:var(--muted)!important;opacity:1}
@@ -991,9 +991,15 @@ html[data-layout="desktop"] .offrow{margin-bottom:0}
 /* 需叫貨：紅色外框 */
 .chips .chip.alert{--ring:linear-gradient(45deg,#ff8a5c,#d93a2b)}
 .chips .chip.alert small{color:var(--down)!important}
-.chips .chip.alert.on small{color:var(--bg)!important}
+.chips .chip.alert.on{background:linear-gradient(var(--down),var(--down)) padding-box,var(--ring) border-box!important;color:var(--accent-ink)!important}
+.chips .chip.alert.on small{color:var(--accent-ink)!important}
+.chips.searching .chip.alert.on{background:linear-gradient(var(--card),var(--card)) padding-box,var(--ring) border-box!important;color:var(--ink)!important}
 .chips.searching .chip.alert.on small{color:var(--down)!important}
 .chips .chip.warnchip{--ring:linear-gradient(var(--yel,#e0a800),var(--yel,#e0a800))}
+.chips .chip.warnchip.on{background:linear-gradient(var(--yel),var(--yel)) padding-box,var(--ring) border-box!important;color:#2b2100!important}
+.chips .chip.warnchip.on small{color:#2b2100!important}
+.chips.searching .chip.warnchip.on{background:linear-gradient(var(--card),var(--card)) padding-box,var(--ring) border-box!important;color:var(--ink)!important}
+.chips.searching .chip.warnchip.on small{color:var(--muted)!important}
 html[data-layout="desktop"] .hmain #hChips .chip{padding:0!important}
 /* 寬螢幕：左邊品項清單、右邊顯示／同步設定（右欄固定在畫面上，品項再多也看得到） */
 .st-side{display:none}
@@ -1268,7 +1274,7 @@ html.noIntro #splash{display:none!important}
   <div class="st-side" id="stSide"></div>
   <div class="st-foot">
     <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-    <div class="muted stnote v">網頁版本：v169</div>
+    <div class="muted stnote v">網頁版本：v170</div>
   </div>
   <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
