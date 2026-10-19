@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="167">
+<meta name="app-version" content="168">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -132,6 +132,14 @@ tr.cur td:last-child{box-shadow:inset 0 2px 0 #e0a800,inset 0 -2px 0 #e0a800,ins
 .irow2.dragging{z-index:20;box-shadow:0 8px 22px rgba(0,0,0,.28);border-color:var(--flash);opacity:.97;transition:none;cursor:grabbing}
 .irow2.dragging .grip{background:var(--flash-soft);cursor:grabbing}
 .dragtip{font-size:12px;color:var(--muted);margin:-4px 0 10px}
+/* 品項清單鎖定：預設鎖住（看得到、改不到），按「編輯」才能修改／排序／刪除／新增 */
+.cacts{display:flex;align-items:center;gap:8px;flex:none}
+.editbtn{display:inline-flex;align-items:center;gap:0}
+.editbtn.on{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.editbtn.nudge{animation:nudge .5s}
+#tab-settings.st-locked #itemList,#tab-settings.st-locked #itemListOff{pointer-events:none}
+#tab-settings.st-locked .irow2 .grip,#tab-settings.st-locked .irow2 .acts,#tab-settings.st-locked .offrow button{visibility:hidden}
+#tab-settings.st-locked .addbar,#tab-settings.st-locked #btnAddItem2{display:none}
 .ib{width:42px;height:42px;border-radius:10px;border:1px solid var(--line);background:var(--input)}
 
 /* 底部導覽 */
@@ -1168,6 +1176,8 @@ html.noIntro #splash{display:none!important}
 <symbol id="i-nav-list" viewBox="0 0 24 24"><rect x="8" y="2.5" width="8" height="4" rx="1"/><path d="M16 4.5h2a2 2 0 0 1 2 2V20a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6.5a2 2 0 0 1 2-2h2"/><path d="M8.5 14l2.2 2.2L15.5 11.5"/></symbol>
 <symbol id="i-nav-hist" viewBox="0 0 24 24"><path d="M3.5 12a8.5 8.5 0 1 0 2.7-6.2"/><path d="M3.5 4.2v4.3h4.3"/><path d="M12 7.6V12l3 2"/></symbol>
 <symbol id="i-nav-gear" viewBox="0 0 24 24"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9a2.83 2.83 0 0 0-4-4L4 16z"/><path d="M13.5 6.5l4 4"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
 <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
 <symbol id="i-unlock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-1.9"/></symbol>
 </defs></svg>
@@ -1235,13 +1245,13 @@ html.noIntro #splash{display:none!important}
       <label class="btn">還原備份<input type="file" id="fileRestore" accept=".json,application/json" class="hidden"></label>
     </div>
     <div class="muted reccount" id="expCount"></div>
-    <div class="muted exphint">Excel 會依分類順序整理；備份檔可在換手機或資料遺失時還原。</div>
+    <div class="muted exphint"></div>
   </div>
   <div class="card st-items">
     <div class="ibar">
       <div class="chead">
         <h2><svg class="i" aria-hidden="true"><use href="#i-box"/></svg>品項清單</h2>
-        <button class="btn primary sm dtonly" id="btnAddItem2" type="button"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>新增品項</button>
+        <div class="cacts"><button class="btn sm editbtn" id="btnItemEdit" type="button" aria-pressed="false"></button><button class="btn primary sm dtonly" id="btnAddItem2" type="button"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>新增品項</button></div>
       </div>
       <div class="ihead dtonly" aria-hidden="true"><span></span><span>名稱</span><span>分類</span><span>單位</span><span>最低量</span><span></span></div>
     </div>
@@ -1258,7 +1268,7 @@ html.noIntro #splash{display:none!important}
   <div class="st-side" id="stSide"></div>
   <div class="st-foot">
     <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-    <div class="muted stnote v">網頁版本：v167</div>
+    <div class="muted stnote v">網頁版本：v168</div>
   </div>
   <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
@@ -2237,7 +2247,7 @@ function updNoCat(){   // 沒填分類的品項（盤點頁會歸在「未分類
   const n=S.items.filter(i=>!i.off&&i.name&&!i.cat).length,el=$('nocatNote');
   el.classList.toggle('hidden',!n);if(n)el.textContent='有 '+n+' 個品項還沒填分類，盤點頁會放在「未分類」。點這裡跳到第一個';
 }
-$('nocatNote').onclick=()=>{const c=[...document.querySelectorAll('#itemList input.c')].find(x=>!x.value.trim());if(c){c.scrollIntoView({block:'center',behavior:'smooth'});c.focus()}};
+$('nocatNote').onclick=()=>{if(itemsLocked)setItemsLocked(false);const c=[...document.querySelectorAll('#itemList input.c')].find(x=>!x.value.trim());if(c){c.scrollIntoView({block:'center',behavior:'smooth'});c.focus()}};
 $('nocatNote').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('nocatNote').onclick()}};
 function renderItemEditor(){
   const box=$('itemList');box.innerHTML='';
@@ -2341,9 +2351,36 @@ $('btnAddItem').onclick=()=>{
 };
 $('btnAddItem2').onclick=()=>$('btnAddItem').click();   // 電腦版放在品項清單標題列的同一顆按鈕
 
+/* ---------- 品項清單鎖定（設定頁）----------
+   預設鎖住；按右上角「編輯」才能改名稱／排序／停用／刪除／新增，按「完成」鎖回。
+   離開設定頁、切到背景、或編輯後閒置 3 分鐘，都會自動鎖回。 */
+let itemsLocked=true,itemLockT=0;
+function setItemsLocked(lk){
+  itemsLocked=lk;
+  const tab=$('tab-settings'),b=$('btnItemEdit'),tip=tab.querySelector('.dragtip');
+  tab.classList.toggle('st-locked',lk);
+  ['itemList','itemListOff'].forEach(id=>{const e=$(id);if(!e)return;if(lk)e.setAttribute('inert','');else e.removeAttribute('inert')});
+  b.classList.toggle('on',!lk);b.setAttribute('aria-pressed',String(!lk));
+  b.innerHTML=ICN(lk?'edit':'check')+'<span>'+(lk?'編輯':'完成')+'</span>';
+  if(tip)tip.textContent=lk?'':'';
+  clearTimeout(itemLockT);if(!lk)itemLockT=setTimeout(idleLockItems,180000);
+  if(lk&&document.activeElement&&$('itemList').contains(document.activeElement))document.activeElement.blur();
+}
+function idleLockItems(){if(window.__dragging){itemLockT=setTimeout(idleLockItems,30000);return}setItemsLocked(true)}
+function lockHintItems(){toast('品項清單已鎖定，按右上角「編輯」才能修改');const b=$('btnItemEdit');b.classList.remove('nudge');void b.offsetWidth;b.classList.add('nudge')}
+$('btnItemEdit').onclick=()=>setItemsLocked(!itemsLocked);
+['pointerdown','input','keydown'].forEach(t=>$('tab-settings').addEventListener(t,()=>{if(!itemsLocked){clearTimeout(itemLockT);itemLockT=setTimeout(idleLockItems,180000)}},true));
+$('tab-settings').addEventListener('click',e=>{   // 鎖住時點到清單：提示並讓「編輯」鈕晃一下
+  if(!itemsLocked||e.target.closest('button,summary,a,label,input,select,[role="button"]'))return;
+  const hit=['itemList','itemListOff'].some(id=>{const r=$(id).getBoundingClientRect();return r.height>0&&e.clientX>=r.left&&e.clientX<=r.right&&e.clientY>=r.top&&e.clientY<=r.bottom});
+  if(hit)lockHintItems();
+});
+document.addEventListener('visibilitychange',()=>{if(document.hidden&&!itemsLocked)setItemsLocked(true)});
+setItemsLocked(true);
 /* ---------- 分頁 ---------- */
 let zoomOK=false;
 function switchTab(t){
+  setItemsLocked(true);   // 每次換分頁（包含進入設定頁）品項清單都先鎖住
   zoomOK=(t==='history');
   document.querySelectorAll('#nav button').forEach(b=>{b.classList.toggle('on',b.dataset.t===t);if(b.dataset.t===t)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
   try{updateNavDot()}catch(e){}
