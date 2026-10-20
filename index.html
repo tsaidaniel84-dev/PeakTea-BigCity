@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <script>try{var __t=localStorage.getItem("pt_theme");if(__t==="light"||__t==="dark")document.documentElement.setAttribute("data-theme",__t)}catch(e){}</script>
-<script>try{var __s=+sessionStorage.getItem("pt_skip_intro");if(__s&&Date.now()-__s<15000)document.documentElement.classList.add("noIntro")}catch(e){}</script>
+<script>try{var __s=+sessionStorage.getItem("pt_skip_intro");if(__s&&Date.now()-__s<15000)document.documentElement.classList.add("noIntro")}catch(e){}try{var __d=new Date().toDateString();if(localStorage.getItem("pt_splash")===__d)document.documentElement.classList.add("noIntro");else localStorage.setItem("pt_splash",__d)}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=5, user-scalable=yes, viewport-fit=cover">
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="171">
+<meta name="app-version" content="177">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -1161,6 +1161,31 @@ html.noIntro #splash{display:none!important}
 :root[data-theme="dark"]{--bat:#cbb8ee}
 .swrow2 select{width:auto;min-width:190px;max-width:62%;height:40px;padding:0 10px;border-radius:12px}
 @media (min-width:1280px){html[data-layout="desktop"] .st-display .swrow2 select{min-width:0;width:100%;max-width:none}}
+/* v172 */
+.netbar{margin-top:6px;padding:5px 12px;border-radius:99px;background:var(--warn-soft);color:var(--warn);font-size:13px;font-weight:700;text-align:center;line-height:1.3}
+/* v175 奶油底進度條＋滿格閃兩下 */
+:root{--progTrack:#f0e6cd;--progBd:#dccfae;--progTxt:#35574a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--progTrack:#2a3b33;--progBd:#3a4e44;--progTxt:#ece8da}}
+:root[data-theme="dark"]{--progTrack:#2a3b33;--progBd:#3a4e44;--progTxt:#ece8da}
+.prog{border-color:var(--progBd)}
+.prog .pt{font-size:11px;font-weight:600;color:var(--progTxt);transition:clip-path .45s cubic-bezier(.22,1,.36,1)}
+.prog .ptw{position:absolute;left:0;top:0;bottom:0;width:100vw;z-index:2;display:flex;align-items:center;justify-content:center;font-family:"Futura","Futura-Medium","Jost","Century Gothic","Avenir Next","Trebuchet MS",system-ui,sans-serif;font-size:11px;font-weight:600;letter-spacing:.5em;padding-left:.5em;color:#fff;text-transform:uppercase;line-height:1;white-space:nowrap;pointer-events:none;text-shadow:0 0 3px rgba(0,0,0,.4),0 1px 1px rgba(0,0,0,.35)}
+.prog.cele{animation:progBlink .6s ease-in-out 2}
+.prog.cele .pf{animation:pfBlink .6s ease-in-out 2}
+@keyframes progBlink{0%,100%{box-shadow:0 1.5px 0 var(--line)}40%{box-shadow:0 0 0 4px rgba(193,83,27,.35),0 0 14px rgba(193,83,27,.45)}}
+@keyframes pfBlink{0%,100%{filter:none}40%{filter:brightness(1.3) saturate(1.2)}}
+@media (prefers-reduced-motion:reduce){.prog.cele,.prog.cele .pf{animation:none}}
+.toast.act,.toast.act.show{pointer-events:auto}
+.toast .tact{border:0;border-radius:99px;background:var(--bg);color:var(--ink);font-weight:800;padding:4px 14px;min-height:32px;margin-left:4px}
+.item.carry{border:2px dashed var(--muted)!important;background:var(--accent-soft)}
+.item.carry .qty{font-style:italic;color:var(--muted)}
+.item.carry .nm::after{content:"待確認";margin-left:6px;font-size:12px;font-weight:700;color:var(--warn)}
+#tab-settings .card,.datenav,.metarow,#tab-history .hhdr,#tab-history .seg,#tab-history .hfilt{zoom:var(--kz,1)}
+.carrybar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;padding:3px 4px 3px 12px;border-radius:12px;background:var(--accent-soft);font-size:13px;font-weight:700}
+.carrybar .btn{min-height:32px;flex:none}
+.carrybar{background:rgba(193,83,27,.09);border:1px solid rgba(193,83,27,.28);color:var(--ink)}
+.carrybar .btn.primary{background:var(--sun);border-color:var(--sun);color:var(--accent-ink)}
+.item.carry{border:2px dashed var(--sun)!important;background:rgba(193,83,27,.07)}
 </style>
 </head>
 <body>
@@ -1207,9 +1232,9 @@ html.noIntro #splash{display:none!important}
       <button class="nb" id="nextDay" aria-label="後一天"><svg class="i" aria-hidden="true"><use href="#i-chev-r"/></svg></button>
       <button class="todaybtn hidden" id="btnToday">今天</button>
     </div>
-    <div class="toolrow"><div class="search"><span class="ic"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg></span><input id="q" type="search" placeholder="搜尋品項" aria-label="搜尋品項" autocomplete="off"><button class="x hidden" id="qx" aria-label="清除"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></div><button class="btn sm hidden" id="btnUndo" aria-label="復原"><svg class="i" aria-hidden="true"><use href="#i-undo"/></svg><span class="ulb">復原</span></button><button class="btn sm" id="btnCopyPrev">前次紀錄</button><button class="lockbtn hidden" id="lockBtn2" type="button" aria-label="解鎖編輯"></button><div class="moreWrap"><button class="btn sm" id="btnMore" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="更多"><svg class="i" aria-hidden="true"><use href="#i-more"/></svg></button><div class="menu hidden" id="moreMenu" role="menu"><button class="btn danger" id="btnClear" type="button" role="menuitem">清空</button></div></div></div>
+    <div class="toolrow"><div class="search"><span class="ic"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg></span><input id="q" type="search" placeholder="搜尋品項" aria-label="搜尋品項" autocomplete="off"><button class="x hidden" id="qx" aria-label="清除"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></div><button class="btn sm hidden" id="btnUndo" aria-label="復原"><svg class="i" aria-hidden="true"><use href="#i-undo"/></svg><span class="ulb">復原</span></button><button class="btn sm" id="btnCopyPrev" aria-label="帶入前次數字">帶入前次</button><button class="lockbtn hidden" id="lockBtn2" type="button" aria-label="解鎖編輯"></button><div class="moreWrap"><button class="btn sm" id="btnMore" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="更多"><svg class="i" aria-hidden="true"><use href="#i-more"/></svg></button><div class="menu hidden" id="moreMenu" role="menu"><button class="btn danger" id="btnClear" type="button" role="menuitem">清空</button></div></div></div>
     <div class="chips" id="chips"></div>
-    <div class="prog" id="prog"><div class="pf" id="progBar"></div><span class="pt">PEAK TEA</span></div>
+    <div class="prog" id="prog"><div class="pf" id="progBar"><span class="ptw" aria-hidden="true">PEAK TEA</span></div><span class="pt">PEAK TEA</span></div><div class="netbar hidden" id="netBar" role="status"></div><div class="carrybar hidden" id="carryBar"><span id="carryTxt"></span><button type="button" class="btn sm primary" id="carryOk">全部確認</button></div>
   </div>
   <div class="banner hidden" id="banner" role="status"></div>
 <div class="banner info hidden" id="bkBanner" role="status"></div>
@@ -1281,7 +1306,7 @@ html.noIntro #splash{display:none!important}
   <div class="st-side" id="stSide"></div>
   <div class="st-foot">
     <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-    <div class="muted stnote v">網頁版本：v171</div>
+    <div class="muted stnote v">網頁版本：v177</div>
   </div>
   <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
@@ -1332,7 +1357,8 @@ const $=id=>document.getElementById(id);
 const isDesk=()=>document.documentElement.dataset.layout==='desktop';
 const clone=o=>JSON.parse(JSON.stringify(o));
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function toast(m,ms){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),ms||2400)}
+function toastAct(m,label,fn,ms){const t=$('toast');t.textContent=m;const b=document.createElement('button');b.type='button';b.className='tact';b.textContent=label;b.onclick=()=>{clearTimeout(toast.h);t.classList.remove('show','act');fn()};t.appendChild(b);t.classList.add('show','act');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show','act'),ms||7000)}
+function toast(m,ms){const t=$('toast');t.classList.remove('act');t.textContent=m;t.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>t.classList.remove('show'),ms||2400)}
 const hasVal=v=>(typeof v==='number'&&isFinite(v))||(typeof v==='string'&&v.trim()!==''&&isFinite(Number(v)));
 const BOOT_AT=Date.now();
 const WIN_DAYS=90;   // 雲端只即時載入最近幾天；切到較早的日期／月份、匯出、備份時才往前延伸
@@ -1502,11 +1528,11 @@ function setStatus(){
   if(!store){cls='busy';txt='連線中…'}
   else if(store.kind==='local'){cls='busy';txt='本機模式（資料只存在這支手機）'}
   else if(store.kind==='offline'){cls='off';txt=Object.keys(pendVals).length?'離線（有 '+Object.keys(pendVals).length+' 筆暫存，連上後自動同步）':'離線（顯示上次同步的資料）'}
-  else if(!connected){cls='off';txt='離線（恢復後自動同步）'}
+  else if(!connected){cls='off';txt='離線'+(Object.keys(pendVals).length?'・'+Object.keys(pendVals).length+' 筆待同步':'')+'（恢復後自動同步）'}
   else if(pending){cls='busy';txt='儲存中…'}
   else{cls='';txt='已同步'}
   dot.className='dot'+(cls?' '+cls:'');
-  statusText=txt;
+  statusText=txt;{const nb=$('netBar');if(nb){nb.classList.toggle('hidden',cls!=='off');nb.textContent='⚠ '+txt}}
   if(le)le.textContent=fmtEdit(lastEditTs());
   try{updateNavDot()}catch(e){}
 }
@@ -1521,17 +1547,17 @@ setInterval(tick,15000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick()});
 function shift(n){const d=parse(curDate);d.setDate(d.getDate()+n);loadDate(ymd(d))}
 let unlockedDate=null;
-const isLocked=d=>d<todayStr&&unlockedDate!==d;
+const isLocked=d=>d!==todayStr&&unlockedDate!==d;
 function lockHint(){
-  toast('這是過去的日期，已鎖定。按鎖頭可解鎖');
+  toast((curDate>todayStr?'這是未來的日期':'這是過去的日期')+'，已鎖定。按鎖頭可解鎖');
   ['lockBtn','lockBtn2'].forEach(id=>{const b=$(id);if(b){b.classList.remove('nudge');void b.offsetWidth;b.classList.add('nudge')}})
 }
 function applyLock(){
-  const past=curDate<todayStr,lk=isLocked(curDate);
+  const past=curDate!==todayStr,lk=isLocked(curDate);
   document.body.classList.toggle('locked',lk);
   ['lockBtn','lockBtn2'].forEach(id=>{const lb=$(id);if(!lb)return;lb.classList.toggle('hidden',!past);lb.classList.toggle('open',past&&!lk);
     lb.innerHTML=ICN(lk?'lock':'unlock');
-    lb.setAttribute('aria-label',lk?'這是過去的日期，已鎖定。按一下解鎖編輯':'已解鎖。按一下重新鎖定');lb.title=lk?'解鎖編輯':'重新鎖定'});
+    lb.setAttribute('aria-label',lk?'這不是今天的日期，已鎖定。按一下解鎖編輯':'已解鎖。按一下重新鎖定');lb.title=lk?'解鎖編輯':'重新鎖定'});
   ['staff','palBtn','btnClear','btnCopyPrev','btnUndo'].forEach(id=>{const e=$(id);if(e)e.disabled=lk});
   const dw=$('dateLabel').closest('.dwrap');if(dw)dw.classList.toggle('lkd',lk);
 }
@@ -1615,18 +1641,19 @@ function cats(){
 function renderChips(){
   const box=$('chips');
   const NI=dayItems(curDate);
-  const unfilled=NI.filter(i=>!hasVal(valOf(curDate,i.id)));
+  const unfilled=NI.filter(i=>!hasVal(valOf(curDate,i.id))||isCarry(i.id));
   // 全部填完就隱藏「未填」鈕；正在看「未填」時先保留（不然畫面會突然空掉），切到別的分類後才消失
   const list=[['全部',NI],...(unfilled.length||catSel==='未填'?[['未填',unfilled]]:[]),...cats().map(c=>[c,NI.filter(i=>i.cat===c)])];
-  const hasAnyMin=NI.some(hasMin);
+  const hasAnyMin=NI.some(hasMin);const wn=NI.filter(i=>warnTxt[curDate+'|'+i.id]);if(catSel==='待確認'&&!wn.length)catSel='全部';
   if(hasAnyMin)list.splice(list[1]&&list[1][0]==='未填'?2:1,0,['需叫貨',NI.filter(isLow)]);
   if(catSel==='需叫貨'&&!hasAnyMin)catSel='全部';
-  if(catSel!=='全部'&&catSel!=='未填'&&catSel!=='需叫貨'&&!cats().includes(catSel))catSel='全部';
+  if(wn.length)list.splice(1,0,['待確認',wn]);
+  if(catSel!=='全部'&&catSel!=='未填'&&catSel!=='需叫貨'&&catSel!=='待確認'&&!cats().includes(catSel))catSel='全部';
   box.innerHTML='';box.classList.toggle('searching',!!query);
   list.forEach(([c,its])=>{
-    const b=document.createElement('button');b.className='chip'+(catSel===c?' on':'')+(c==='需叫貨'&&its.length?' alert':'')+(c==='未填'&&its.length?' unf':'');
-    const filled=its.filter(i=>hasVal(valOf(curDate,i.id))).length;
-    b.dataset.n=Math.min([...c].length,6);b.innerHTML='<span class="cl">'+esc(c)+'</span><small>'+((c==='未填'||c==='需叫貨')?its.length:filled+'/'+its.length)+'</small>';
+    const b=document.createElement('button');b.className='chip'+(catSel===c?' on':'')+(c==='需叫貨'&&its.length?' alert':'')+(c==='待確認'?' warnchip':'')+(c==='未填'&&its.length?' unf':'');
+    const filled=its.filter(i=>hasVal(valOf(curDate,i.id))&&!isCarry(i.id)).length;
+    b.dataset.n=Math.min([...c].length,6);b.innerHTML='<span class="cl">'+esc(c)+'</span><small>'+((c==='未填'||c==='需叫貨'||c==='待確認')?its.length:filled+'/'+its.length)+'</small>';
     b.onclick=()=>{catSel=c;renderChips();renderItems(false)};
     box.appendChild(b);
   });
@@ -1635,8 +1662,9 @@ $('q').oninput=e=>{query=e.target.value.trim().toLowerCase();$('qx').classList.t
 $('qx').onclick=()=>{$('q').value='';query='';$('qx').classList.add('hidden');renderChips();renderItems(false)};
 function visible(it){
   if(query)return it.name.toLowerCase().includes(query)||(it.cat||'').toLowerCase().includes(query);   // 搜尋時一律搜全部分類
-  if(catSel==='未填'){if(hasVal(valOf(curDate,it.id)))return false}
+  if(catSel==='未填'){if(hasVal(valOf(curDate,it.id))&&!isCarry(it.id))return false}
   else if(catSel==='需叫貨'){if(!isLow(it))return false}
+  else if(catSel==='待確認'){if(!warnTxt[curDate+'|'+it.id])return false}
   else if(catSel!=='全部'&&(it.cat||'')!==catSel)return false;
   return true;
 }
@@ -1671,15 +1699,12 @@ function anomaly(it,date){
   const r=anomCore(ser,k,date===todayStr?'今天':'當天');return r?r.text:null;
 }
 /* 只提醒一次：數字輸入完（離開欄位或按 ＋／－ 停頓後）若差很多，所有人的畫面都會同步跳出黃色提醒，8 秒後自動消失 */
-const alerted={},warnTimers={},seenAlert={};let alertsInit=false;
-function showWarn(id,text){
-  const c=cards[id];if(!c)return false;
-  const wl=c.el.querySelector('.warnline');
-  const off=()=>{c.el.classList.remove('warn');wl.classList.add('hidden')};
-  c.el.classList.add('warn');wl.classList.remove('hidden');wl.innerHTML=ICN('alert');wl.appendChild(document.createTextNode(' 請再確認：'+text));wl.onclick=off;
-  clearTimeout(warnTimers[id]);warnTimers[id]=setTimeout(off,8000);
-  return true;
-}
+const alerted={},warnTimers={},seenAlert={},warnTxt={},carried={};const isCarry=id=>{const k=curDate+'|'+id;return carried[k]!==undefined&&String(valOf(curDate,id))===carried[k]};let alertsInit=false;
+function paintWarn(id){const c=cards[id];if(!c)return false;const wl=c.el.querySelector('.warnline'),k=curDate+'|'+id,t=warnTxt[k];
+  c.el.classList.toggle('warn',!!t);wl.classList.toggle('hidden',!t);
+  if(t){wl.innerHTML=ICN('alert');wl.appendChild(document.createTextNode(' 請再確認：'+t));const b=document.createElement('button');b.type='button';b.className='okbtn';b.textContent='沒問題';wl.appendChild(b);wl.onclick=()=>{delete warnTxt[k];paintWarn(id);const was=catSel;renderChips();if(catSel!==was)renderItems(false)}}
+  return true}
+function showWarn(id,text){warnTxt[curDate+'|'+id]=text;renderChips();return paintWarn(id)}
 function checkAnomaly(it){
   const key=curDate+'|'+it.id,v=valOf(curDate,it.id);
   if(alerted[key]===v)return;            // 同一個數字不重複提醒
@@ -1700,7 +1725,6 @@ function detectAlerts(){
       if(first||date!==curDate||Date.now()-a.t>300000)continue;   // 剛連上時的舊提醒、其他日期、太久以前的都不跳
       const it=S.items.find(x=>x.id===id);if(!it)continue;
       showWarn(id,a.x);
-      toast(it.name+'：'+a.x);
     }
   }
 }
@@ -1768,12 +1792,12 @@ function renderItemsInner(){
       const prev=valOf(curDate,it.id);
       if((hasVal(prev)?Number(prev):'')===v)return;           // 沒有改變
       const day=dayOf(curDate);day.values=day.values||{};if(hasVal(v))day.values[it.id]=v;else delete day.values[it.id];
-      writeField(curDate,'v',it.id,v);flashEl(inp);
+      delete warnTxt[curDate+'|'+it.id];writeField(curDate,'v',it.id,v);flashEl(inp);
       pushUndo(curDate,[{id:it.id,prev:hasVal(prev)?prev:'',next:v}]);
       refreshCard(it.id);renderChips();updateProg();scheduleDone();
     };
     inp.addEventListener('input',()=>commit(inp.value));
-    inp.addEventListener('focus',()=>inp.select());
+    inp.addEventListener('focus',()=>{inp.select();const ck=curDate+'|'+it.id;if(carried[ck]!==undefined){delete carried[ck];refreshCard(it.id);renderChips();updateProg()}});
     inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();goNext(inp)}});
     const bump=d=>{if(navigator.vibrate)navigator.vibrate(8);
       if(d<0&&(inp.value===''||Number(inp.value)<=0)){inp.value='';commit('');return}
@@ -1830,9 +1854,9 @@ function syncGall(){const b=document.querySelector('#items .gall');if(b&&b._sync
 function updateGroupHeads(auto){
   document.querySelectorAll('#items .grp').forEach(g=>{
     const c=g.dataset.cat,cs=[...g.querySelectorAll('.item')],n=cs.filter(x=>x.classList.contains('filled')).length;
-    g.querySelector('.gt').textContent=c;g.querySelector('.gc').textContent=n+'/'+cs.length;
+    g.querySelector('.gt').textContent=c;g.querySelector('.gc').textContent=(cs.length>0&&n===cs.length?'✓ ':'')+n+'/'+cs.length;
     const done=cs.length>0&&n===cs.length;g.classList.toggle('done',done);
-    if(auto===true&&done&&wasDone[c]===false&&!g.contains(document.activeElement)){const gh=g.querySelector('.gh'),t0=gh.getBoundingClientRect().top,y0=window.scrollY;g.classList.add('closed');
+    if(false&&auto===true&&done&&wasDone[c]===false&&!g.contains(document.activeElement)){const gh=g.querySelector('.gh'),t0=gh.getBoundingClientRect().top,y0=window.scrollY;g.classList.add('closed');
       const maxY=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
       if(y0>maxY+1){g.classList.remove('closed');window.scrollTo(0,y0)}   // 收合後頁面會短到撐不住目前位置（例如最後一組填完）→ 不收合，免得畫面被瀏覽器拉回最上面
       else{collapsed[c]=true;saveCollapsed();syncGall();const t1=gh.getBoundingClientRect().top;if(Math.abs(t1-t0)>1)window.scrollBy(0,t1-t0)}}
@@ -1844,7 +1868,7 @@ function refreshCard(id,force){
   const c=cards[id];if(!c)return;
   const v=valOf(curDate,id),sv=hasVal(v)?String(v):'';
   if(force&&document.activeElement!==c.inp)c.inp.value=sv;
-  c.el.classList.toggle('filled',hasVal(v));
+  c.el.classList.toggle('filled',hasVal(v)&&!isCarry(id));c.el.classList.toggle('carry',isCarry(id));
   const itm=S.items.find(x=>x.id===id);const low=lowVal(itm,v);c.el.classList.toggle('low',low);
   const p=prevRecord(curDate),pv=p&&p.rec.values?p.rec.values[id]:undefined,d=diffOf(id);
   c.el.querySelector('.sub').innerHTML=[hasVal(pv)?'<button type="button" class="pv" data-v="'+esc(pv)+'"><span class="pvl">前次</span> '+esc(pv)+'</button><span class="pd">'+esc(p.date.slice(5).replace('-','/'))+'</span>':'',d.t?'<span class="diff '+d.c+'">'+d.t+'</span>':'',hasMin(itm)?'最低 '+esc(itm.min):'',low?'<span class="lowtag">'+ICN('alert')+' 低於最低量</span>':''].filter(Boolean).join(' · ');
@@ -1853,6 +1877,7 @@ function refreshCard(id,force){
   tx.textContent=nt?'📝 '+nt:'';tx.classList.toggle('hidden',!nt||editing);
   {const nb=c.el.querySelector('.nbtn');nb.classList.toggle('has',!!nt);nb.innerHTML=nt?'📝':ICN('plus')}
   if(editing&&document.activeElement!==ni&&ni.value!==nt)ni.value=nt;
+  paintWarn(id);
 }
 let remoteQuietUntil=0,remoteBuf=[],otherBuf={},remoteT=0,firstDays=true;const warnedConf={};
 const fmtMD=d=>d.slice(5).replace('-','/');
@@ -2039,11 +2064,15 @@ function syncMeta(flash,force){
   paintStaff();
 }
 let progDone=null;
-function updateProg(){
-  const its=dayItems(curDate);const n=its.filter(i=>hasVal(valOf(curDate,i.id))).length;
+function setPW(){const w=$('prog').clientWidth,pw=document.querySelector('#prog .ptw');if(pw&&w)pw.style.width=w+'px'}
+try{new ResizeObserver(setPW).observe($('prog'))}catch(e){}
+function paintCarry(){const bar=$('carryBar');if(!bar)return;const n=dayItems(curDate).filter(i=>isCarry(i.id)).length;bar.classList.toggle('hidden',!n);if(n)$('carryTxt').textContent='帶入的數字還有 '+n+' 項待確認'}
+$('carryOk').onclick=()=>{const its=dayItems(curDate).filter(i=>isCarry(i.id));if(!its.length)return;its.forEach(i=>delete carried[curDate+'|'+i.id]);its.forEach(i=>refreshCard(i.id));renderChips();updateProg();toast('已確認 '+its.length+' 項')};
+function updateProg(){paintCarry();
+  const its=dayItems(curDate);const n=its.filter(i=>hasVal(valOf(curDate,i.id))&&!isCarry(i.id)).length;
   const pc=its.length?n/its.length*100:0,bar=$('progBar');
   bar.style.width=pc+'%';bar.style.setProperty('--p',Math.max(pc,1));
-  {const pt=document.querySelector('#prog .pt');if(pt)pt.textContent=pc>0?'PEAK TEA · '+Math.round(pc)+'%':'PEAK TEA';
+  {const pt=document.querySelector('#prog .pt');if(pt){pt.textContent=pc>0?'PEAK TEA · '+Math.round(pc)+'%':'PEAK TEA';const pw=document.querySelector('#prog .ptw');if(pw)pw.textContent=pt.textContent;pt.style.clipPath='inset(0 0 0 '+pc+'%)';setPW()}
    const all=its.length>0&&n===its.length;
    if(progDone===false&&all){const pg=$('prog');pg.classList.add('cele');setTimeout(()=>pg.classList.remove('cele'),1600); if(navigator.vibrate)navigator.vibrate([20,50,20])}
    progDone=all}
@@ -2053,20 +2082,21 @@ function updateProg(){
 $('staff').addEventListener('input',e=>{staffEditAt=Date.now();dayOf(curDate).staff=e.target.value;writeField(curDate,'m','staff',e.target.value);paintStaff()});
 $('staff').addEventListener('change',()=>{staffEditAt=Date.now();rememberName()});
 $('btnUndo').onclick=doUndo;
-$('btnCopyPrev').onclick=()=>{
+$('btnCopyPrev').onclick=async()=>{
   const p=prevRecord(curDate);if(!p){toast('沒有更早的紀錄可帶入');return}
-  let n=0;const cs=[],ops=[];dayItems(curDate).forEach(it=>{const v=p.rec.values&&p.rec.values[it.id];if(hasVal(v)&&!hasVal(valOf(curDate,it.id))){
-    const day=dayOf(curDate);day.values=day.values||{};day.values[it.id]=v;writeField(curDate,'v',it.id,v);ops.push({id:it.id,prev:'',next:v});n++;const c=it.cat||'未分類';if(!cs.includes(c))cs.push(c)}});
-  if(ops.length)pushUndo(curDate,ops,'帶入前次紀錄');
-  renderItems();renderChips();updateProg();toast(n?'已帶入：'+cs.join('、'):'沒有需要帶入的欄位');
+  const todo=dayItems(curDate).filter(it=>{const v=p.rec.values&&p.rec.values[it.id];return hasVal(v)&&!hasVal(valOf(curDate,it.id))});
+  if(!todo.length){toast('沒有需要帶入的欄位');return}
+  const ops=[],day=dayOf(curDate);day.values=day.values||{};
+  todo.forEach(it=>{const v=p.rec.values[it.id];day.values[it.id]=v;writeField(curDate,'v',it.id,v);ops.push({id:it.id,prev:'',next:v});carried[curDate+'|'+it.id]=String(v)});
+  pushUndo(curDate,ops,'帶入前次紀錄');const e0=undoStack[undoStack.length-1];renderItems();renderChips();updateProg();toastAct('已帶入 '+ops.length+' 項（虛線框＝待確認）','復原',()=>{if(undoStack[undoStack.length-1]===e0)doUndo();else toast('之後又有修改，請用上方「復原」逐步還原')},8000);
 };
-$('btnClear').onclick=async()=>{   // 不再二次確認（誤按可用「復原」）
-  {const vals=(S.days[curDate]&&S.days[curDate].values)||{};const ops=Object.keys(vals).filter(id=>hasVal(vals[id])).map(id=>({id,prev:vals[id],next:''}));if(ops.length)pushUndo(curDate,ops,'清空本日')}
+$('btnClear').onclick=async()=>{let clrE=null;   // 不再二次確認（誤按可用「復原」）
+  {const vals=(S.days[curDate]&&S.days[curDate].values)||{};const ops=Object.keys(vals).filter(id=>hasVal(vals[id])).map(id=>({id,prev:vals[id],next:''}));if(ops.length){pushUndo(curDate,ops,'清空本日');clrE=undoStack[undoStack.length-1]}}
   Object.keys(pendVals).filter(k=>k.startsWith(curDate+'|')).forEach(k=>{clearTimeout(timers[k]);delete pendVals[k]});
   const keep={staff:dayOf(curDate).staff||null,note:dayOf(curDate).note||null,scolor:dayOf(curDate).scolor||null},kin=dayOf(curDate).inotes&&Object.keys(dayOf(curDate).inotes).length?dayOf(curDate).inotes:null;
   const keepObj=(keep.staff||keep.note||keep.scolor||kin)?{staff:keep.staff||'',note:keep.note||'',updatedAt:Date.now()}:null;if(keepObj&&kin)keepObj.inotes=kin;if(keepObj&&keep.scolor)keepObj.scolor=keep.scolor;
   try{await store.setDay(curDate,keepObj)}catch(e){toast(store&&store.kind==='offline'?'目前離線，無法清空，請連上網路後再試':'清空失敗')}
-  S.days[curDate]={staff:keep.staff||'',note:keep.note||''};if(keep.scolor)S.days[curDate].scolor=keep.scolor;if(kin)S.days[curDate].inotes=kin;renderItems();renderChips();updateProg();toast('已清空');
+  S.days[curDate]={staff:keep.staff||'',note:keep.note||''};if(keep.scolor)S.days[curDate].scolor=keep.scolor;if(kin)S.days[curDate].inotes=kin;renderItems();renderChips();updateProg();if(clrE){const e0=clrE;toastAct('已清空本日','復原',()=>{if(undoStack[undoStack.length-1]===e0)doUndo();else toast('之後又有修改，請用上方「復原」逐步還原')},8000)}else toast('已清空');
 };
 
 /* ---------- 歷史 ---------- */
@@ -2258,6 +2288,14 @@ function updNoCat(){   // 沒填分類的品項（盤點頁會歸在「未分類
 }
 $('nocatNote').onclick=()=>{if(itemsLocked)setItemsLocked(false);const c=[...document.querySelectorAll('#itemList input.c')].find(x=>!x.value.trim());if(c){c.scrollIntoView({block:'center',behavior:'smooth'});c.focus()}};
 $('nocatNote').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();$('nocatNote').onclick()}};
+function delItem(it){
+  const k=S.items.findIndex(x=>x.id===it.id);if(k<0)return;
+  let n=0;for(const d in S.days){const v=S.days[d]&&S.days[d].values;if(v&&hasVal(v[it.id]))n++}
+  askDialog({title:'刪除「'+(it.name||'未命名')+'」？',html:'<p>會從品項清單移除；'+(n?'目前載入的紀錄中有 <b>'+n+' 天</b>的數字，刪除後歷史頁就看不到了。':'目前載入的紀錄中沒有這個品項的數字。')+'</p><p class="dlgnote">只是暫時不用的話，建議改按「停用」，歷史數字會保留。</p>',ok:'刪除'}).then(r=>{
+    if(!r.ok)return;
+    S.items.splice(k,1);saveItems();renderItemEditor();renderChips();renderItems();
+    toastAct('已刪除「'+(it.name||'未命名')+'」','復原',()=>{if(S.items.some(x=>x.id===it.id))return;S.items.splice(Math.min(k,S.items.length),0,it);saveItems();renderItemEditor();renderChips();renderItems();toast('已復原品項')},8000)})
+}
 function renderItemEditor(){
   const box=$('itemList');box.innerHTML='';
   $('catList').innerHTML=[...new Set([...DEFAULT_CATS,...S.items.map(i=>i.cat).filter(Boolean)])].map(c=>'<option value="'+esc(c)+'">').join('');
@@ -2273,8 +2311,7 @@ function renderItemEditor(){
     xt.onclick=()=>{const o=r.classList.toggle('ex');xt.setAttribute('aria-expanded',String(o))};
     const upd=()=>{saveItems();renderChips();renderItems();xsum();c.classList.toggle('nocat',!it.cat);updNoCat()};
     n.oninput=()=>{it.name=n.value;upd()};u.oninput=()=>{it.unit=u.value;upd()};c.oninput=()=>{it.cat=c.value.trim();upd()};mn.oninput=()=>{it.min=mn.value===''?'':Number(mn.value);upd()};
-    let arm=0;del.onclick=()=>{if(!arm){arm=1;del.textContent='確認';del.classList.add('arm');setTimeout(()=>{arm=0;del.innerHTML=ICN('x');del.classList.remove('arm')},2500);return}
-      const k=S.items.findIndex(x=>x.id===it.id);if(k>=0)S.items.splice(k,1);saveItems();renderItemEditor();renderChips();renderItems()};
+    del.onclick=()=>delItem(it);
     r.querySelector('.offb').onclick=()=>{it.off=true;saveItems();renderItemEditor();renderChips();renderItems();toast('已停用「'+(it.name||'未命名')+'」，可在下方重新啟用')};
     grip.addEventListener('pointerdown',e=>startDrag(e,r,box));
     box.appendChild(r);
@@ -2287,9 +2324,7 @@ function renderItemEditor(){
     r.innerHTML='<div class="offname"><b></b><small></small></div><button class="btn onb" type="button">啟用</button><button class="ib del" aria-label="刪除">'+ICN('x')+'</button>';
     r.querySelector('b').textContent=it.name||'（未命名）';r.querySelector('small').textContent=it.cat||'';
     r.querySelector('.onb').onclick=()=>{it.off=false;saveItems();renderItemEditor();renderChips();renderItems();toast('已啟用「'+(it.name||'未命名')+'」')};
-    const del=r.querySelector('.del');let arm=0;
-    del.onclick=()=>{if(!arm){arm=1;del.textContent='確認';del.classList.add('arm');setTimeout(()=>{arm=0;del.innerHTML=ICN('x');del.classList.remove('arm')},2500);return}
-      const k=S.items.findIndex(x=>x.id===it.id);if(k>=0)S.items.splice(k,1);saveItems();renderItemEditor();renderChips();renderItems()};
+    const del=r.querySelector('.del');del.onclick=()=>delItem(it);
     ob.appendChild(r);
   });
   updNoCat();
@@ -2428,8 +2463,8 @@ document.addEventListener('keydown',e=>{   // 電腦版快捷鍵：←→ 換日
   if(inQty&&(e.key==='ArrowDown'||e.key==='ArrowUp')){const all=[...document.querySelectorAll('#items input.qty')].filter(i=>!i.closest('.grp.closed')),n=all[all.indexOf(t)+(e.key==='ArrowDown'?1:-1)];if(n){n.focus();n.select();e.preventDefault()}}
 });
 function paintFs(){const k=getPref('pt_fs','1');document.querySelectorAll('#fsSeg button').forEach(b=>b.classList.toggle('on',b.dataset.k===k))}
-document.querySelectorAll('#fsSeg button').forEach(b=>b.onclick=()=>{setPref('pt_fs',b.dataset.k);document.documentElement.style.setProperty('--k',b.dataset.k);paintFs()});
-paintFs();
+document.querySelectorAll('#fsSeg button').forEach(b=>b.onclick=()=>{setPref('pt_fs',b.dataset.k);document.documentElement.style.setProperty('--k',b.dataset.k);document.documentElement.style.setProperty('--kz',Math.min(+b.dataset.k,1.15));paintFs()});
+paintFs();document.documentElement.style.setProperty('--kz',Math.min(+getPref('pt_fs','1')||1,1.15));
 $('swGroup').checked=groupOn;
 $('swGroup').onchange=e=>{groupOn=e.target.checked;setPref('pt_group',groupOn?'1':'0');renderItems()};
 /* ---------- 同步設定 UI ---------- */
@@ -2437,8 +2472,9 @@ function renderCfg(){
   if(!getCfg().dbUrl)$('syncBox').open=true;
   const c=getCfg();$('cfgUrl').value=c.dbUrl;$('cfgCode').value=c.code;
   $('cfgUrl').disabled=!!CONFIG.dbUrl;$('cfgCode').disabled=!!CONFIG.code;
-  $('cfgSave').parentNode.classList.toggle('hidden',!!(CONFIG.dbUrl&&CONFIG.code));   // 兩欄都已寫死在檔案裡，按鈕沒有用途
-  $('cfgState').textContent=store?(store.kind==='cloud'?'目前：雲端即時同步（'+(connected?'已連線':'離線')+'）':'目前：本機模式（只存在這支手機）'):'';
+  $('cfgSave').parentNode.classList.toggle('hidden',!!(CONFIG.dbUrl&&CONFIG.code));
+  {const fx=!!(CONFIG.dbUrl&&CONFIG.code);['cfgUrl','cfgCode'].forEach(id=>$(id).closest('.field').classList.toggle('hidden',fx))}   // 兩欄都已寫死在檔案裡，按鈕沒有用途
+  $('cfgState').textContent=store?(store.kind==='cloud'?(CONFIG.storeName?CONFIG.storeName+'・':'')+'雲端即時同步（'+(connected?'已連線':'離線')+'）':'目前：本機模式（只存在這支手機）'):'';
   if(store&&store.kind==='offline')$('cfgState').textContent='目前：離線（顯示上次同步的資料，輸入暫存在這支手機）';
 }
 $('cfgSave').onclick=()=>{
@@ -2700,7 +2736,7 @@ window.addEventListener('online',()=>{if(store&&store.kind==='offline')toast('�
 if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){window.addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}))}
 (function(){const n=$('nav'),f=()=>document.documentElement.style.setProperty('--navh',(n.offsetHeight-parseFloat(getComputedStyle(n).paddingBottom||0))+'px');f();addEventListener('resize',f);setTimeout(f,300)})();
 // iOS Safari：盤點頁擋掉兩指縮放避免誤觸（要放大請用「設定→文字大小」），歷史頁允許。想一律允許縮放就刪掉下面這行
-['gesturestart','gesturechange','gestureend'].forEach(g=>document.addEventListener(g,e=>{if(!zoomOK)e.preventDefault()}));
+['gesturestart','gesturechange','gestureend'].forEach(g=>document.addEventListener(g,e=>{if(0)e.preventDefault()}));
 /* ---------- 頂部收合／左右滑動換日／鍵盤「下一個」 ---------- */
 (function(){
   const top=document.querySelector('#tab-daily .top');let ly=window.scrollY,lock=0;
@@ -3164,7 +3200,7 @@ setTimeout(()=>checkUpdate(false),1500);
 /* 開啟畫面：至少顯示約 1 秒，等頁面載入完再淡出 */
 (function(){if(document.documentElement.classList.contains('noIntro')){try{sessionStorage.removeItem('pt_skip_intro')}catch(e){}var s0=document.getElementById('splash');if(s0)s0.remove();return}   // 下拉重新整理造成的重新載入：不跑開場、不跑進場
   var t0=Date.now(),sp=document.getElementById('splash'),tm=0,fired=false,
-  rm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches,MIN=rm?300:1700;
+  rm=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches,MIN=rm?300:900;
 function go(){if(fired||!sp)return;fired=true;clearTimeout(tm);
   document.body.classList.add('enter');sp.classList.add('out');
   setTimeout(function(){sp.remove()},850);setTimeout(function(){document.body.classList.remove('enter')},1000)}
