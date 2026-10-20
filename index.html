@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="170">
+<meta name="app-version" content="171">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -139,7 +139,14 @@ tr.cur td:last-child{box-shadow:inset 0 2px 0 #e0a800,inset 0 -2px 0 #e0a800,ins
 .editbtn.nudge{animation:nudge .5s}
 #tab-settings.st-locked #itemList,#tab-settings.st-locked #itemListOff{pointer-events:none}
 #tab-settings.st-locked .irow2 .grip,#tab-settings.st-locked .irow2 .acts,#tab-settings.st-locked .offrow button{visibility:hidden}
-#tab-settings.st-locked .addbar,#tab-settings.st-locked #btnAddItem2{display:none}
+/* v171：鎖住時「新增品項」不再消失，改成反灰（點了會提示要先按「編輯」）；手機版「編輯」搬到底部、跟「新增品項」並排 */
+.addbar .addin{display:flex;gap:8px;width:100%;max-width:696px}
+.addbar .addin .btn{width:auto;max-width:none}
+.addbar .addin .editbtn{flex:none;min-width:104px;justify-content:center;gap:6px}
+.addbar .addin #btnAddItem{flex:1;min-width:0}
+.addbar .editbtn.on,.cacts .editbtn.on{background:var(--card)!important;border-color:var(--accent)!important;color:var(--accent)!important}
+.btn.primary[aria-disabled="true"]{background:var(--line)!important;border-color:var(--line)!important;color:var(--muted)!important;box-shadow:none!important}
+html:not([data-layout="desktop"]) .chead .cacts{display:none}
 .ib{width:42px;height:42px;border-radius:10px;border:1px solid var(--line);background:var(--input)}
 
 /* 底部導覽 */
@@ -1270,11 +1277,11 @@ html.noIntro #splash{display:none!important}
       <div id="itemListOff"></div>
     </details>
   </div>
-  <div class="addbar"><button class="btn primary" id="btnAddItem"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>新增品項</button></div>
+  <div class="addbar"><div class="addin"><button class="btn editbtn" id="btnItemEdit2" type="button" aria-pressed="false"></button><button class="btn primary" id="btnAddItem" aria-disabled="true"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg>新增品項</button></div></div>
   <div class="st-side" id="stSide"></div>
   <div class="st-foot">
     <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-    <div class="muted stnote v">網頁版本：v170</div>
+    <div class="muted stnote v">網頁版本：v171</div>
   </div>
   <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
@@ -2346,6 +2353,7 @@ function startDrag(e,row,box){
   raf=requestAnimationFrame(loop);
 }
 $('btnAddItem').onclick=()=>{
+  if(itemsLocked){lockHintItems();return}   // 鎖住時（反灰）：提示並讓「編輯」鈕晃一下
   S.nextId=(S.nextId||100)+1;
   S.items.push({id:'n'+S.nextId+Date.now().toString(36),name:'',unit:'',cat:catSel&&!['全部','未填'].includes(catSel)?catSel:''});
   saveItems();renderItemEditor();renderChips();
@@ -2354,23 +2362,24 @@ $('btnAddItem').onclick=()=>{
 $('btnAddItem2').onclick=()=>$('btnAddItem').click();   // 電腦版放在品項清單標題列的同一顆按鈕
 
 /* ---------- 品項清單鎖定（設定頁）----------
-   預設鎖住；按右上角「編輯」才能改名稱／排序／停用／刪除／新增，按「完成」鎖回。
+   預設鎖住；按「編輯」才能改名稱／排序／停用／刪除／新增，按「完成」鎖回。
    離開設定頁、切到背景、或編輯後閒置 3 分鐘，都會自動鎖回。 */
 let itemsLocked=true,itemLockT=0;
 function setItemsLocked(lk){
   itemsLocked=lk;
-  const tab=$('tab-settings'),b=$('btnItemEdit'),tip=tab.querySelector('.dragtip');
+  const tab=$('tab-settings'),tip=tab.querySelector('.dragtip');
   tab.classList.toggle('st-locked',lk);
   ['itemList','itemListOff'].forEach(id=>{const e=$(id);if(!e)return;if(lk)e.setAttribute('inert','');else e.removeAttribute('inert')});
-  b.classList.toggle('on',!lk);b.setAttribute('aria-pressed',String(!lk));
-  b.innerHTML=ICN(lk?'edit':'check')+'<span>'+(lk?'編輯':'完成')+'</span>';
+  document.querySelectorAll('.editbtn').forEach(b=>{b.classList.toggle('on',!lk);b.setAttribute('aria-pressed',String(!lk));
+    b.innerHTML=ICN(lk?'edit':'check')+'<span>'+(lk?'編輯':'完成')+'</span>'});
+  document.querySelectorAll('#btnAddItem,#btnAddItem2').forEach(b=>b.setAttribute('aria-disabled',String(lk)));
   if(tip)tip.textContent=lk?'':'';
   clearTimeout(itemLockT);if(!lk)itemLockT=setTimeout(idleLockItems,180000);
   if(lk&&document.activeElement&&$('itemList').contains(document.activeElement))document.activeElement.blur();
 }
 function idleLockItems(){if(window.__dragging){itemLockT=setTimeout(idleLockItems,30000);return}setItemsLocked(true)}
-function lockHintItems(){toast('品項清單已鎖定，按右上角「編輯」才能修改');const b=$('btnItemEdit');b.classList.remove('nudge');void b.offsetWidth;b.classList.add('nudge')}
-$('btnItemEdit').onclick=()=>setItemsLocked(!itemsLocked);
+function lockHintItems(){toast('品項清單已鎖定，按「編輯」才能修改');document.querySelectorAll('.editbtn').forEach(b=>{if(!b.offsetParent)return;b.classList.remove('nudge');void b.offsetWidth;b.classList.add('nudge')})}
+document.querySelectorAll('.editbtn').forEach(b=>b.onclick=()=>setItemsLocked(!itemsLocked));
 ['pointerdown','input','keydown'].forEach(t=>$('tab-settings').addEventListener(t,()=>{if(!itemsLocked){clearTimeout(itemLockT);itemLockT=setTimeout(idleLockItems,180000)}},true));
 $('tab-settings').addEventListener('click',e=>{   // 鎖住時點到清單：提示並讓「編輯」鈕晃一下
   if(!itemsLocked||e.target.closest('button,summary,a,label,input,select,[role="button"]'))return;
