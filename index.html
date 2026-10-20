@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="179">
+<meta name="app-version" content="180">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -1212,6 +1212,15 @@ html.noIntro #splash{display:none!important}
 .chips .chip.unf.on small{color:var(--unfInk)!important}
 .chips.searching .chip.unf.on{background:linear-gradient(var(--card),var(--card)) padding-box,var(--ring) border-box!important;color:var(--ink)!important}
 .chips.searching .chip.unf.on small{color:var(--unf)!important}
+/* v180 深色模式：底色／卡片／邊線改成暖炭灰，綠色只留給按鈕、選中狀態和已填 */
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#151412;--card:#1e1d1a;--line:#312f2a;--muted:#a9a79b;--input:#191816;--accent-soft:#26302b;
+  --teal-soft:#242320;--teal-line:#38362f;--flash-soft:#22302a;--glass:rgba(21,20,18,.86);--navglass:rgba(30,29,26,.88);
+  --chipRing:#4a4840;--progTrack:#2d2b27;--progBd:#3f3d37;}}
+:root[data-theme="dark"]{
+  --bg:#151412;--card:#1e1d1a;--line:#312f2a;--muted:#a9a79b;--input:#191816;--accent-soft:#26302b;
+  --teal-soft:#242320;--teal-line:#38362f;--flash-soft:#22302a;--glass:rgba(21,20,18,.86);--navglass:rgba(30,29,26,.88);
+  --chipRing:#4a4840;--progTrack:#2d2b27;--progBd:#3f3d37;}
 </style>
 </head>
 <body>
@@ -1332,7 +1341,7 @@ html.noIntro #splash{display:none!important}
   <div class="st-side" id="stSide"></div>
   <div class="st-foot">
     <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-    <div class="muted stnote v">網頁版本：v179</div>
+    <div class="muted stnote v">網頁版本：v180</div>
   </div>
   <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
