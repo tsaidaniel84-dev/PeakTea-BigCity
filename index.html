@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#3f6b5a">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="177">
+<meta name="app-version" content="179">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -1186,6 +1186,32 @@ html.noIntro #splash{display:none!important}
 .carrybar{background:rgba(193,83,27,.09);border:1px solid rgba(193,83,27,.28);color:var(--ink)}
 .carrybar .btn.primary{background:var(--sun);border-color:var(--sun);color:var(--accent-ink)}
 .item.carry{border:2px dashed var(--sun)!important;background:rgba(193,83,27,.07)}
+/* v178 減色版：綠＝主色、橘＝進度、紅＝需叫貨、黃＝請再確認；其餘一律中性 */
+:root{--chipRing:#c3d1c7}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--chipRing:#3d5448}}
+:root[data-theme="dark"]{--chipRing:#3d5448}
+.chips .chip,.chips .chip.unf{--ring:linear-gradient(var(--chipRing),var(--chipRing));border-width:1.5px!important}
+.chips .chip.on{--ring:linear-gradient(var(--accent),var(--accent))}
+.chips.searching .chip.on{--ring:linear-gradient(var(--chipRing),var(--chipRing))}
+.chips .chip.alert{--ring:linear-gradient(var(--down),var(--down))}
+.chips .chip.warnchip{--ring:linear-gradient(var(--yel),var(--yel))}
+.chips .chip.alert,.chips .chip.warnchip{border-width:2px!important}
+#hChips .chip{--ring:linear-gradient(var(--chipRing),var(--chipRing))}
+#hChips .chip.on{--ring:linear-gradient(var(--accent),var(--accent))}
+.carrybar{background:var(--input);border:1px solid var(--line);color:var(--ink)}
+.carrybar .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.item.carry{border:2px dashed var(--muted)!important;background:var(--input)}
+.item.carry .nm::after{color:var(--muted)}
+/* v179 盤點頁「未填」分類鈕：藍色區隔 */
+:root{--unf:#2f7fd1;--unfInk:#fff}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--unf:#6fb0ff;--unfInk:#0b1b2e}}
+:root[data-theme="dark"]{--unf:#6fb0ff;--unfInk:#0b1b2e}
+.chips .chip.unf{--ring:linear-gradient(var(--unf),var(--unf));border-width:2px!important}
+.chips .chip.unf small{color:var(--unf)!important;font-weight:800}
+.chips .chip.unf.on{background:linear-gradient(var(--unf),var(--unf)) padding-box,var(--ring) border-box!important;color:var(--unfInk)!important}
+.chips .chip.unf.on small{color:var(--unfInk)!important}
+.chips.searching .chip.unf.on{background:linear-gradient(var(--card),var(--card)) padding-box,var(--ring) border-box!important;color:var(--ink)!important}
+.chips.searching .chip.unf.on small{color:var(--unf)!important}
 </style>
 </head>
 <body>
@@ -1306,7 +1332,7 @@ html.noIntro #splash{display:none!important}
   <div class="st-side" id="stSide"></div>
   <div class="st-foot">
     <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-    <div class="muted stnote v">網頁版本：v177</div>
+    <div class="muted stnote v">網頁版本：v179</div>
   </div>
   <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
