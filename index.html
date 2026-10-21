@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#41695b">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="181">
+<meta name="app-version" content="182">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -1177,15 +1177,7 @@ html.noIntro #splash{display:none!important}
 @media (prefers-reduced-motion:reduce){.prog.cele,.prog.cele .pf{animation:none}}
 .toast.act,.toast.act.show{pointer-events:auto}
 .toast .tact{border:0;border-radius:99px;background:var(--bg);color:var(--ink);font-weight:800;padding:4px 14px;min-height:32px;margin-left:4px}
-.item.carry{border:2px dashed var(--muted)!important;background:var(--accent-soft)}
-.item.carry .qty{font-style:italic;color:var(--muted)}
-.item.carry .nm::after{content:"待確認";margin-left:6px;font-size:12px;font-weight:700;color:var(--warn)}
 #tab-settings .card,.datenav,.metarow,#tab-history .hhdr,#tab-history .seg,#tab-history .hfilt{zoom:var(--kz,1)}
-.carrybar{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-top:6px;padding:3px 4px 3px 12px;border-radius:12px;background:var(--accent-soft);font-size:13px;font-weight:700}
-.carrybar .btn{min-height:32px;flex:none}
-.carrybar{background:rgba(193,83,27,.09);border:1px solid rgba(193,83,27,.28);color:var(--ink)}
-.carrybar .btn.primary{background:var(--sun);border-color:var(--sun);color:var(--accent-ink)}
-.item.carry{border:2px dashed var(--sun)!important;background:rgba(193,83,27,.07)}
 /* v178 減色版：綠＝主色、橘＝進度、紅＝需叫貨、黃＝請再確認；其餘一律中性 */
 :root{--chipRing:#c3d1c7}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--chipRing:#3d5448}}
@@ -1198,10 +1190,6 @@ html.noIntro #splash{display:none!important}
 .chips .chip.alert,.chips .chip.warnchip{border-width:2px!important}
 #hChips .chip{--ring:linear-gradient(var(--chipRing),var(--chipRing))}
 #hChips .chip.on{--ring:linear-gradient(var(--accent),var(--accent))}
-.carrybar{background:var(--input);border:1px solid var(--line);color:var(--ink)}
-.carrybar .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
-.item.carry{border:2px dashed var(--muted)!important;background:var(--input)}
-.item.carry .nm::after{color:var(--muted)}
 /* v179 盤點頁「未填」分類鈕：藍色區隔 */
 :root{--unf:#2f7fd1;--unfInk:#fff}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--unf:#6fb0ff;--unfInk:#0b1b2e}}
@@ -1288,7 +1276,7 @@ html.introShort #splash.out{animation-duration:.25s!important}
     </div>
     <div class="toolrow"><div class="search"><span class="ic"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg></span><input id="q" type="search" placeholder="搜尋品項" aria-label="搜尋品項" autocomplete="off"><button class="x hidden" id="qx" aria-label="清除"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></div><button class="btn sm hidden" id="btnUndo" aria-label="復原"><svg class="i" aria-hidden="true"><use href="#i-undo"/></svg><span class="ulb">復原</span></button><button class="btn sm" id="btnCopyPrev" aria-label="帶入前次數字">帶入前次</button><button class="lockbtn hidden" id="lockBtn2" type="button" aria-label="解鎖編輯"></button><div class="moreWrap"><button class="btn sm" id="btnMore" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="更多"><svg class="i" aria-hidden="true"><use href="#i-more"/></svg></button><div class="menu hidden" id="moreMenu" role="menu"><button class="btn danger" id="btnClear" type="button" role="menuitem">清空</button></div></div></div>
     <div class="chips" id="chips"></div>
-    <div class="prog" id="prog"><div class="pf" id="progBar"><span class="ptw" aria-hidden="true">PEAK TEA</span></div><span class="pt">PEAK TEA</span></div><div class="netbar hidden" id="netBar" role="status"></div><div class="carrybar hidden" id="carryBar"><span id="carryTxt"></span><button type="button" class="btn sm primary" id="carryOk">全部確認</button></div>
+    <div class="prog" id="prog"><div class="pf" id="progBar"><span class="ptw" aria-hidden="true">PEAK TEA</span></div><span class="pt">PEAK TEA</span></div><div class="netbar hidden" id="netBar" role="status"></div>
   </div>
   <div class="banner hidden" id="banner" role="status"></div>
 <div class="banner info hidden" id="bkBanner" role="status"></div>
@@ -1360,7 +1348,7 @@ html.introShort #splash.out{animation-duration:.25s!important}
   <div class="st-side" id="stSide"></div>
   <div class="st-foot">
     <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-    <div class="muted stnote v">網頁版本：v181</div>
+    <div class="muted stnote v">網頁版本：v182</div>
   </div>
   <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
@@ -1695,7 +1683,7 @@ function cats(){
 function renderChips(){
   const box=$('chips');
   const NI=dayItems(curDate);
-  const unfilled=NI.filter(i=>!hasVal(valOf(curDate,i.id))||isCarry(i.id));
+  const unfilled=NI.filter(i=>!hasVal(valOf(curDate,i.id)));
   // 全部填完就隱藏「未填」鈕；正在看「未填」時先保留（不然畫面會突然空掉），切到別的分類後才消失
   const list=[['全部',NI],...(unfilled.length||catSel==='未填'?[['未填',unfilled]]:[]),...cats().map(c=>[c,NI.filter(i=>i.cat===c)])];
   const hasAnyMin=NI.some(hasMin);const wn=NI.filter(i=>warnTxt[curDate+'|'+i.id]);if(catSel==='待確認'&&!wn.length)catSel='全部';
@@ -1706,7 +1694,7 @@ function renderChips(){
   box.innerHTML='';box.classList.toggle('searching',!!query);
   list.forEach(([c,its])=>{
     const b=document.createElement('button');b.className='chip'+(catSel===c?' on':'')+(c==='需叫貨'&&its.length?' alert':'')+(c==='待確認'?' warnchip':'')+(c==='未填'&&its.length?' unf':'');
-    const filled=its.filter(i=>hasVal(valOf(curDate,i.id))&&!isCarry(i.id)).length;
+    const filled=its.filter(i=>hasVal(valOf(curDate,i.id))).length;
     b.dataset.n=Math.min([...c].length,6);b.innerHTML='<span class="cl">'+esc(c)+'</span><small>'+((c==='未填'||c==='需叫貨'||c==='待確認')?its.length:filled+'/'+its.length)+'</small>';
     b.onclick=()=>{catSel=c;renderChips();renderItems(false)};
     box.appendChild(b);
@@ -1716,7 +1704,7 @@ $('q').oninput=e=>{query=e.target.value.trim().toLowerCase();$('qx').classList.t
 $('qx').onclick=()=>{$('q').value='';query='';$('qx').classList.add('hidden');renderChips();renderItems(false)};
 function visible(it){
   if(query)return it.name.toLowerCase().includes(query)||(it.cat||'').toLowerCase().includes(query);   // 搜尋時一律搜全部分類
-  if(catSel==='未填'){if(hasVal(valOf(curDate,it.id))&&!isCarry(it.id))return false}
+  if(catSel==='未填'){if(hasVal(valOf(curDate,it.id)))return false}
   else if(catSel==='需叫貨'){if(!isLow(it))return false}
   else if(catSel==='待確認'){if(!warnTxt[curDate+'|'+it.id])return false}
   else if(catSel!=='全部'&&(it.cat||'')!==catSel)return false;
@@ -1753,7 +1741,7 @@ function anomaly(it,date){
   const r=anomCore(ser,k,date===todayStr?'今天':'當天');return r?r.text:null;
 }
 /* 只提醒一次：數字輸入完（離開欄位或按 ＋／－ 停頓後）若差很多，所有人的畫面都會同步跳出黃色提醒，8 秒後自動消失 */
-const alerted={},warnTimers={},seenAlert={},warnTxt={},carried={};const isCarry=id=>{const k=curDate+'|'+id;return carried[k]!==undefined&&String(valOf(curDate,id))===carried[k]};let alertsInit=false;
+const alerted={},warnTimers={},seenAlert={},warnTxt={};let alertsInit=false;
 function paintWarn(id){const c=cards[id];if(!c)return false;const wl=c.el.querySelector('.warnline'),k=curDate+'|'+id,t=warnTxt[k];
   c.el.classList.toggle('warn',!!t);wl.classList.toggle('hidden',!t);
   if(t){wl.innerHTML=ICN('alert');wl.appendChild(document.createTextNode(' 請再確認：'+t));const b=document.createElement('button');b.type='button';b.className='okbtn';b.textContent='沒問題';wl.appendChild(b);wl.onclick=()=>{delete warnTxt[k];paintWarn(id);const was=catSel;renderChips();if(catSel!==was)renderItems(false)}}
@@ -1851,7 +1839,7 @@ function renderItemsInner(){
       refreshCard(it.id);renderChips();updateProg();scheduleDone();
     };
     inp.addEventListener('input',()=>commit(inp.value));
-    inp.addEventListener('focus',()=>{inp.select();const ck=curDate+'|'+it.id;if(carried[ck]!==undefined){delete carried[ck];refreshCard(it.id);renderChips();updateProg()}});
+    inp.addEventListener('focus',()=>{inp.select()});
     inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();goNext(inp)}});
     const bump=d=>{if(navigator.vibrate)navigator.vibrate(8);
       if(d<0&&(inp.value===''||Number(inp.value)<=0)){inp.value='';commit('');return}
@@ -1922,7 +1910,7 @@ function refreshCard(id,force){
   const c=cards[id];if(!c)return;
   const v=valOf(curDate,id),sv=hasVal(v)?String(v):'';
   if(force&&document.activeElement!==c.inp)c.inp.value=sv;
-  c.el.classList.toggle('filled',hasVal(v)&&!isCarry(id));c.el.classList.toggle('carry',isCarry(id));
+  c.el.classList.toggle('filled',hasVal(v));
   const itm=S.items.find(x=>x.id===id);const low=lowVal(itm,v);c.el.classList.toggle('low',low);
   const p=prevRecord(curDate),pv=p&&p.rec.values?p.rec.values[id]:undefined,d=diffOf(id);
   c.el.querySelector('.sub').innerHTML=[hasVal(pv)?'<button type="button" class="pv" data-v="'+esc(pv)+'"><span class="pvl">前次</span> '+esc(pv)+'</button><span class="pd">'+esc(p.date.slice(5).replace('-','/'))+'</span>':'',d.t?'<span class="diff '+d.c+'">'+d.t+'</span>':'',hasMin(itm)?'最低 '+esc(itm.min):'',low?'<span class="lowtag">'+ICN('alert')+' 低於最低量</span>':''].filter(Boolean).join(' · ');
@@ -2120,10 +2108,8 @@ function syncMeta(flash,force){
 let progDone=null;
 function setPW(){const w=$('prog').clientWidth,pw=document.querySelector('#prog .ptw');if(pw&&w)pw.style.width=w+'px'}
 try{new ResizeObserver(setPW).observe($('prog'))}catch(e){}
-function paintCarry(){const bar=$('carryBar');if(!bar)return;const n=dayItems(curDate).filter(i=>isCarry(i.id)).length;bar.classList.toggle('hidden',!n);if(n)$('carryTxt').textContent='帶入的數字還有 '+n+' 項待確認'}
-$('carryOk').onclick=()=>{const its=dayItems(curDate).filter(i=>isCarry(i.id));if(!its.length)return;its.forEach(i=>delete carried[curDate+'|'+i.id]);its.forEach(i=>refreshCard(i.id));renderChips();updateProg();toast('已確認 '+its.length+' 項')};
-function updateProg(){paintCarry();
-  const its=dayItems(curDate);const n=its.filter(i=>hasVal(valOf(curDate,i.id))&&!isCarry(i.id)).length;
+function updateProg(){
+  const its=dayItems(curDate);const n=its.filter(i=>hasVal(valOf(curDate,i.id))).length;
   const pc=its.length?n/its.length*100:0,bar=$('progBar');
   bar.style.width=pc+'%';bar.style.setProperty('--p',Math.max(pc,1));
   {const pt=document.querySelector('#prog .pt');if(pt){pt.textContent=pc>0?'PEAK TEA · '+Math.round(pc)+'%':'PEAK TEA';const pw=document.querySelector('#prog .ptw');if(pw)pw.textContent=pt.textContent;pt.style.clipPath='inset(0 0 0 '+pc+'%)';setPW()}
@@ -2141,8 +2127,8 @@ $('btnCopyPrev').onclick=async()=>{
   const todo=dayItems(curDate).filter(it=>{const v=p.rec.values&&p.rec.values[it.id];return hasVal(v)&&!hasVal(valOf(curDate,it.id))});
   if(!todo.length){toast('沒有需要帶入的欄位');return}
   const ops=[],day=dayOf(curDate);day.values=day.values||{};
-  todo.forEach(it=>{const v=p.rec.values[it.id];day.values[it.id]=v;writeField(curDate,'v',it.id,v);ops.push({id:it.id,prev:'',next:v});carried[curDate+'|'+it.id]=String(v)});
-  pushUndo(curDate,ops,'帶入前次紀錄');const e0=undoStack[undoStack.length-1];renderItems();renderChips();updateProg();toastAct('已帶入 '+ops.length+' 項（虛線框＝待確認）','復原',()=>{if(undoStack[undoStack.length-1]===e0)doUndo();else toast('之後又有修改，請用上方「復原」逐步還原')},8000);
+  todo.forEach(it=>{const v=p.rec.values[it.id];day.values[it.id]=v;writeField(curDate,'v',it.id,v);ops.push({id:it.id,prev:'',next:v})});
+  pushUndo(curDate,ops,'帶入前次紀錄');const e0=undoStack[undoStack.length-1];renderItems();renderChips();updateProg();toastAct('已帶入 '+ops.length+' 項','復原',()=>{if(undoStack[undoStack.length-1]===e0)doUndo();else toast('之後又有修改，請用上方「復原」逐步還原')},8000);
 };
 $('btnClear').onclick=async()=>{let clrE=null;   // 不再二次確認（誤按可用「復原」）
   {const vals=(S.days[curDate]&&S.days[curDate].values)||{};const ops=Object.keys(vals).filter(id=>hasVal(vals[id])).map(id=>({id,prev:vals[id],next:''}));if(ops.length){pushUndo(curDate,ops,'清空本日');clrE=undoStack[undoStack.length-1]}}
