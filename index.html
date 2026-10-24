@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#41695b">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="184">
+<meta name="app-version" content="182">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -1228,81 +1228,6 @@ html.introShort #splash.out{animation-duration:.25s!important}
   --progTrack:#efe4ce;--progBd:#d8c9a8;--progTxt:#2f4f43;--chipRing:#cfc8b8;
   --td-soft:#e6dcc6;--td-line:#cdbd9c;--pc-g:#41695b;
 }
-
-/* ===== v183 聊天頁 ===== */
-:root{--cl:34%}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--cl:74%}}
-:root[data-theme="dark"]{--cl:74%}
-#tab-chat{padding-bottom:calc(var(--cbh,60px) + 12px)}
-#tab-chat:not(.hidden){animation:tabin .2s ease-out}
-.ctop{position:sticky;top:0;z-index:10;background:var(--bg);padding:calc(10px + env(safe-area-inset-top,0px)) 12px 8px;border-bottom:1px solid var(--line)}
-.ctop .crow{display:flex;align-items:center;gap:10px}
-.ctop h1{flex:1;margin:0;font-size:18px;font-weight:800;color:var(--accent);line-height:1.2}
-.cstat{display:flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--muted);white-space:nowrap}
-.cdot{width:8px;height:8px;border-radius:50%;background:#2fa36b;flex:none;transition:background .2s}
-.cdot.busy{background:#e0a030}.cdot.off{background:#d6453d}
-.cname{display:flex;align-items:center;gap:8px;margin-top:8px;font-size:13px;font-weight:700;color:var(--muted)}
-.cname input{flex:1;max-width:240px;height:36px;font-size:15px;padding:0 12px;border-radius:10px}
-.cname input.need{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
-#chatBanner{margin-top:10px}
-#chatList{display:flex;flex-direction:column;padding:6px 12px 0}
-.cday{align-self:center;margin:14px 0 4px;padding:3px 12px;border-radius:99px;background:var(--accent-soft);color:var(--muted);font-size:12px;font-weight:700}
-.cm{display:flex;flex-direction:column;max-width:82%;margin-top:10px}
-.cm.cont{margin-top:3px}
-.cm.me{align-self:flex-end;align-items:flex-end}
-.cm.them{align-self:flex-start;align-items:flex-start}
-.cn{margin:0 6px 3px;font-size:12px;font-weight:800}
-.cb{padding:8px 13px;border-radius:18px;background:var(--card);border:1px solid var(--line);font-size:16px;line-height:1.4;text-align:left;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word;cursor:pointer;-webkit-user-select:text;user-select:text}
-.cm.them .cb{border-bottom-left-radius:6px}
-.cm.me .cb{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);border-bottom-right-radius:6px}
-.cb a{color:inherit;text-decoration:underline}
-.cm.sel .cb{outline:2px solid var(--accent);outline-offset:2px}
-.cm.pend .cb{opacity:.55}
-.ct{margin:3px 6px 0;font-size:11px;color:var(--muted);font-variant-numeric:tabular-nums}
-.cact{display:flex;gap:6px;margin-top:5px}
-.cact .btn{min-height:32px;padding:0 12px;font-size:13px;border-radius:10px}
-.cempty{padding:44px 10px;text-align:center;color:var(--muted)}
-.cmore{align-self:center;margin:6px 0 2px}
-#chatBar{position:fixed;left:0;right:0;bottom:calc(var(--navh,64px) + env(safe-area-inset-bottom,0px));z-index:21;padding:8px 12px;background:var(--glass,var(--bg));-webkit-backdrop-filter:saturate(1.3) blur(14px);backdrop-filter:saturate(1.3) blur(14px);border-top:1px solid var(--line)}
-.cbar-in{display:flex;align-items:flex-end;gap:8px;width:100%;max-width:720px;margin:0 auto}
-#chatInput{flex:1;min-width:0;min-height:44px;max-height:120px;resize:none;display:block;font:inherit;font-size:16px;line-height:1.35;color:var(--ink);background:var(--input);border:1px solid var(--line);border-radius:22px;padding:10px 16px}
-#chatInput:focus{outline:2px solid var(--accent);outline-offset:-1px}
-#chatInput:disabled,#chatSend:disabled{opacity:.5}
-.csend{flex:none;width:44px;height:44px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-ink);display:flex;align-items:center;justify-content:center}
-.csend .i{width:22px;height:22px}
-#chatNew{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(var(--navh,64px) + var(--cbh,60px) + 16px + env(safe-area-inset-bottom,0px));z-index:22;border:0;border-radius:99px;padding:8px 16px;background:var(--ink);color:var(--bg);font-size:14px;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.25)}
-.nav button .nbadge{position:absolute;top:-5px;right:2px;box-sizing:border-box;min-width:20px;height:20px;padding:0 5px;border-radius:10px;border:2px solid var(--card);background:var(--sun);color:#fff;font-size:11px;font-weight:800;line-height:16px;text-align:center}
-.nav button .nbadge:empty{display:none}
-body.inchat .toast{bottom:calc(var(--navh,64px) + var(--cbh,60px) + 24px + env(safe-area-inset-bottom,0px))}
-html:not([data-layout="desktop"]) body.ckb #chatBar{bottom:var(--ckb,0px);padding-bottom:8px}
-html:not([data-layout="desktop"]) body.ckb .nav,html:not([data-layout="desktop"]) body.ckb #chatNew{display:none}
-html[data-layout="desktop"] #tab-chat{max-width:800px;padding-bottom:calc(var(--cbh,60px) + 20px)}
-html[data-layout="desktop"] .cm{max-width:70%}
-html[data-layout="desktop"] #chatBar{left:188px;right:0;bottom:0;padding:12px 28px 12px 32px;background:var(--bg)}
-html[data-layout="desktop"] .cbar-in{margin:0;max-width:760px}
-html[data-layout="desktop"] #chatNew{left:calc(50% + 94px);bottom:calc(var(--cbh,60px) + 16px)}
-html[data-layout="desktop"] body.inchat .toast{bottom:calc(var(--cbh,60px) + 24px)}
-
-/* ===== v184 裝置登記 ===== */
-.gate{position:fixed;inset:0;z-index:1000;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:24px;overflow:auto}
-.gate-box{width:100%;max-width:380px;background:var(--card);border:1px solid var(--line);border-radius:20px;padding:24px 20px}
-.gate h2{margin:0 0 6px;font-size:20px;color:var(--accent)}
-.gate p{margin:0 0 6px;color:var(--muted);font-size:14px;line-height:1.5}
-.gate label{display:block;margin:12px 0 4px;font-size:13px;font-weight:700;color:var(--muted)}
-.gate input{width:100%;height:46px;font-size:16px;border-radius:12px;padding:0 14px}
-.gate .btn{width:100%;height:48px;margin-top:16px}
-.gate .gerr{min-height:20px;margin-top:10px;color:#d6453d;font-size:14px;font-weight:600}
-#devBody details>summary::after{content:"▾";transform:none}
-#devBody details[open]>summary::after{content:"▴";transform:none}
-#devBody .dnote{margin:6px 0;font-size:13px;line-height:1.5;color:var(--muted)}
-#devBody .dstat{font-weight:700;line-height:1.5}
-#devBody .drow{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
-#devBody .dn{flex:1;min-width:0}
-#devBody .dn b{display:block;overflow-wrap:anywhere}
-#devBody .dn small{color:var(--muted)}
-#devBody .dline{display:flex;align-items:center;gap:8px;margin:8px 0}
-#devBody .dline input{flex:1;min-width:0}
-#devBody textarea{width:100%;min-height:150px;margin-top:8px;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;color:var(--ink);background:var(--input);border:1px solid var(--line);border-radius:10px;padding:8px}
 </style>
 </head>
 <body>
@@ -1335,9 +1260,6 @@ html[data-layout="desktop"] body.inchat .toast{bottom:calc(var(--cbh,60px) + 24p
 <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
 <symbol id="i-lock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></symbol>
 <symbol id="i-unlock" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 0 1 7.5-1.9"/></symbol>
-<symbol id="i-nav-chat" viewBox="0 0 24 24"><path d="M21 11.5a8.5 8.5 0 0 1-12.6 7.4L3 20.5l1.7-5A8.5 8.5 0 1 1 21 11.5z"/><path d="M8.5 10.5h7M8.5 14h4.5"/></symbol>
-<symbol id="i-send" viewBox="0 0 24 24"><path d="M21.5 2.5L10.5 13.5"/><path d="M21.5 2.5l-7 19-4-8-8-4 19-7z"/></symbol>
-<symbol id="i-phone" viewBox="0 0 24 24"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></symbol>
 </defs></svg>
 </div>
 <div class="wrap">
@@ -1426,7 +1348,7 @@ html[data-layout="desktop"] body.inchat .toast{bottom:calc(var(--cbh,60px) + 24p
   <div class="st-side" id="stSide"></div>
   <div class="st-foot">
     <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-    <div class="muted stnote v">網頁版本：v184</div>
+    <div class="muted stnote v">網頁版本：v182</div>
   </div>
   <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
@@ -1437,91 +1359,6 @@ html[data-layout="desktop"] body.inchat .toast{bottom:calc(var(--cbh,60px) + 24p
     <div class="muted" style="margin-top:8px" id="cfgState"></div>
     </div>
   </details>
-  <details class="card sync st-sync" id="devBox">
-    <summary><span><svg class="i" aria-hidden="true"><use href="#i-phone"/></svg>裝置登記（限制店內手機）</span></summary>
-    <div class="body" id="devBody">
-      <div class="dstat" id="devStat">尚未讀取</div>
-      <div id="devEnableRow" class="hidden">
-        <label class="field"><span>這支手機的名字</span><input id="devMyName" maxlength="20" placeholder="例如 店長的手機" autocomplete="off"></label>
-        <label class="field"><span>店內通行碼（4～12 字）</span><input id="devCode" maxlength="12" placeholder="只告訴店內同事" autocomplete="off" autocapitalize="off"></label>
-        <div class="row"><button class="btn primary" id="devEnable" type="button">啟用並登記這支手機</button></div>
-      </div>
-      <div id="devManage" class="hidden">
-        <div class="dline"><span>通行碼</span><b id="devCodeShow">••••••</b><button class="btn sm" id="devCodeToggle" type="button">顯示</button></div>
-        <div class="dline"><input id="devNewCode" maxlength="12" placeholder="新的通行碼" autocomplete="off" autocapitalize="off"><button class="btn sm" id="devSetCode" type="button">更改</button></div>
-        <div class="dnote">已登記的手機不受影響；更改後，新的手機要輸入新通行碼才能登記。</div>
-        <div id="devList"></div>
-        <div class="row" style="margin-top:10px"><button class="btn danger sm" id="devClose" type="button">關閉裝置登記</button></div>
-      </div>
-      <div class="dnote">⚠ 這個功能要搭配下面的「Firebase 規則」才擋得住外人；沒貼規則時，只有「用網頁的一般人」會被擋，懂技術的人還是進得來。</div>
-      <div class="row"><button class="btn sm" id="devCheck" type="button">檢查規則有沒有生效</button></div>
-      <div class="dnote" id="devCheckOut"></div>
-      <details style="margin-top:8px"><summary class="dnote" style="cursor:pointer">Firebase 規則（貼到 Realtime Database → 規則 → 發佈）</summary>
-        <textarea id="devRules" readonly spellcheck="false">{
-  "rules": {
-    "stores": {
-      "$code": {
-        "days": {
-          ".read": "auth != null &amp;&amp; root.child('stores/'+$code+'/devices/'+auth.uid).exists()",
-          ".write": "auth != null &amp;&amp; root.child('stores/'+$code+'/devices/'+auth.uid).exists()"
-        },
-        "itemsJson": {
-          ".read": "auth != null &amp;&amp; root.child('stores/'+$code+'/devices/'+auth.uid).exists()",
-          ".write": "auth != null &amp;&amp; root.child('stores/'+$code+'/devices/'+auth.uid).exists()"
-        },
-        "namesHide": {
-          ".read": "auth != null &amp;&amp; root.child('stores/'+$code+'/devices/'+auth.uid).exists()",
-          ".write": "auth != null &amp;&amp; root.child('stores/'+$code+'/devices/'+auth.uid).exists()"
-        },
-        "chat": {
-          ".read": "auth != null &amp;&amp; root.child('stores/'+$code+'/devices/'+auth.uid).exists()",
-          ".write": "auth != null &amp;&amp; root.child('stores/'+$code+'/devices/'+auth.uid).exists()"
-        },
-        "access": {
-          ".read": "auth != null &amp;&amp; root.child('stores/'+$code+'/devices/'+auth.uid).exists()",
-          ".write": "auth != null &amp;&amp; root.child('stores/'+$code+'/devices/'+auth.uid).exists()"
-        },
-        "devices": {
-          ".read": "auth != null &amp;&amp; root.child('stores/'+$code+'/devices/'+auth.uid).exists()",
-          "$uid": {
-            ".read": "auth != null &amp;&amp; auth.uid === $uid",
-            ".write": "auth != null &amp;&amp; (root.child('stores/'+$code+'/devices/'+auth.uid).exists() || (auth.uid === $uid &amp;&amp; !data.exists() &amp;&amp; newData.child('code').isString() &amp;&amp; newData.child('code').val() === root.child('stores/'+$code+'/access/code').val()))",
-            ".validate": "newData.hasChildren(['name','ts'])",
-            "name": {
-              ".validate": "newData.isString() &amp;&amp; newData.val().length &gt; 0 &amp;&amp; newData.val().length &lt;= 20"
-            },
-            "ts": {
-              ".validate": "newData.isNumber()"
-            },
-            "seen": {
-              ".validate": "newData.isNumber()"
-            },
-            "code": {
-              ".validate": "newData.isString() &amp;&amp; newData.val().length &lt;= 40"
-            },
-            "$other": {
-              ".validate": false
-            }
-          }
-        }
-      }
-    }
-  }
-}</textarea>
-        <div class="row"><button class="btn sm" id="devCopyRules" type="button">複製規則</button></div>
-      </details>
-    </div>
-  </details>
-</section>
-
-<!-- ================= 聊天頁 ================= -->
-<section id="tab-chat" class="hidden">
-  <div class="ctop">
-    <div class="crow"><h1>店內聊天</h1><div class="cstat"><i class="cdot busy" id="chatDot"></i><span id="chatStatTxt">連線中…</span></div></div>
-    <label class="cname"><span>我的名字</span><input id="chatName" maxlength="12" placeholder="輸入名字，大家才知道是誰" autocomplete="off" aria-label="我的名字"></label>
-  </div>
-  <div class="banner hidden" id="chatBanner" role="status"></div>
-  <div id="chatList" aria-live="polite"></div>
 </section>
 
 </div>
@@ -1529,23 +1366,8 @@ html[data-layout="desktop"] body.inchat .toast{bottom:calc(var(--cbh,60px) + 24p
 <nav class="nav" id="nav" aria-label="主要分頁">
   <button data-t="daily" class="on" aria-current="page"><span class="nic2"><svg class="i" aria-hidden="true"><use href="#i-nav-list"/></svg></span>盤點</button>
   <button data-t="history"><span class="nic2"><svg class="i" aria-hidden="true"><use href="#i-nav-hist"/></svg></span>歷史</button>
-  <button data-t="chat"><span class="nic2"><svg class="i" aria-hidden="true"><use href="#i-nav-chat"/></svg><span class="nbadge" id="chatBadge" aria-live="polite"></span></span>聊天</button>
   <button data-t="settings"><span class="nic2"><svg class="i" aria-hidden="true"><use href="#i-nav-gear"/></svg></span>設定</button>
 </nav>
-<div class="gate hidden" id="gate" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
-  <div class="gate-box">
-    <h2 id="gateTitle">這支手機還沒登記</h2>
-    <p>這個 App 只給店內的手機使用。請輸入店長給你的通行碼，登記一次之後就不用再輸入。</p>
-    <label for="gateName">這支手機的名字</label>
-    <input id="gateName" maxlength="20" placeholder="例如 阿美的手機" autocomplete="off">
-    <label for="gateCode">店內通行碼</label>
-    <input id="gateCode" maxlength="12" placeholder="向店長詢問" autocomplete="off" autocapitalize="off">
-    <div class="gerr" id="gateErr" role="alert"></div>
-    <button class="btn primary" id="gateGo" type="button">登記這支手機</button>
-  </div>
-</div>
-<button class="hidden" id="chatNew" type="button">↓ 有新訊息</button>
-<div class="hidden" id="chatBar"><div class="cbar-in"><textarea id="chatInput" rows="1" maxlength="500" placeholder="輸入訊息…" aria-label="訊息" enterkeyhint="send"></textarea><button class="csend" id="chatSend" type="button" aria-label="送出"><svg class="i" aria-hidden="true"><use href="#i-send"/></svg></button></div></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <datalist id="catList"></datalist>
 
@@ -1625,41 +1447,8 @@ async function makeCloudStore(url,code){
   await loadScript('https://www.gstatic.com/firebasejs/'+V+'/firebase-app-compat.js');
   await loadScript('https://www.gstatic.com/firebasejs/'+V+'/firebase-database-compat.js');
   const app=firebase.initializeApp({databaseURL:url});
-  let uid=null,authErr=null;   // 匿名登入：每支手機一個固定的 ID（存在這個瀏覽器裡，清除資料後會換新的）
-  try{
-    await loadScript('https://www.gstatic.com/firebasejs/'+V+'/firebase-auth-compat.js');
-    const au=firebase.auth(app);
-    let u=au.currentUser||await new Promise(res=>{const off=au.onAuthStateChanged(x=>{off();res(x)})});
-    if(!u)u=(await au.signInAnonymously()).user;
-    uid=u&&u.uid||null;
-  }catch(e){authErr=e}
   const db=firebase.database(app);
   const base=db.ref('stores/'+cleanCode(code));
-  const SV=firebase.database.ServerValue.TIMESTAMP,denied=e=>/permission/i.test(((e&&e.code)||'')+((e&&e.message)||''));
-  const dev={uid,authErr,
-    async state(){   // 'ok' 已登記／'gated' 有啟用登記但這支還沒登記／'off' 沒啟用／'noauth' 登入不了
-      if(!uid)return 'noauth';
-      try{if((await base.child('devices/'+uid).once('value')).exists())return 'ok'}catch(e){if(!denied(e))throw e;return 'gated'}
-      try{return (await base.child('access/code').once('value')).exists()?'gated':'off'}catch(e){if(!denied(e))throw e;return 'gated'}
-    },
-    async register(name,code){
-      if(!uid)throw new Error('這支手機尚未登入');
-      code=String(code).trim();
-      try{const s=await base.child('access/code').once('value');if(s.exists()&&String(s.val())!==code){const x=new Error('bad');x.code='BADCODE';throw x}}   // 規則還沒設定時先自己比對；規則已生效時讀不到，改由寫入時的規則判斷
-      catch(e){if(e&&e.code==='BADCODE')throw e}
-      try{await base.child('devices/'+uid).set({name:String(name).slice(0,20),ts:SV,code})}
-      catch(e){if(denied(e)){const x=new Error('bad');x.code='BADCODE';throw x}throw e}
-      try{await base.child('devices/'+uid).update({code:null,seen:SV})}catch(e){}   // 通行碼只用來登記，登記完就從這支手機的紀錄裡拿掉
-    },
-    touch(){base.child('devices/'+uid+'/seen').set(SV).catch(()=>{})},
-    async info(){
-      const [c,l]=await Promise.all([base.child('access/code').once('value'),base.child('devices').once('value')]);
-      return {code:c.exists()?String(c.val()):null,
-        list:Object.entries(l.val()||{}).filter(([k,v])=>v&&typeof v==='object').map(([id,v])=>({id,name:String(v.name||'未命名').slice(0,20),ts:+v.ts||0,seen:+v.seen||0})).sort((a,b)=>(b.seen||b.ts)-(a.seen||a.ts))};
-    },
-    setCode:code=>base.child('access/code').set(String(code)),
-    clearCode:()=>base.child('access/code').remove(),
-    remove:id=>base.child('devices/'+id).remove()};
   db.ref('.info/connected').on('value',s=>{connected=!!s.val();setStatus()});
   let winStart=ymd(new Date(Date.now()-WIN_DAYS*864e5)),dQ=null,dFn=null,dCb=null,dErr=null;
   const attach=done=>{   // 換一個起點重新訂閱 days（舊的先取消），第一次收到資料時通知 done
@@ -1669,7 +1458,7 @@ async function makeCloudStore(url,code){
     dFn=s=>{dCb(s.val()||{});if(first){const f=first;first=null;f()}};
     dQ.on('value',dFn,dErr);
   };
-  return {kind:'cloud',dev,chatRef:base.child('chat/messages'),
+  return {kind:'cloud',
     winStart:()=>winStart,
     setWindow(start){if(start>=winStart)return Promise.resolve();winStart=start;return new Promise(res=>attach(res))},
     subscribe(d,i,err,n){
@@ -1788,14 +1577,13 @@ function setStatus(){
   statusText=txt;{const nb=$('netBar');if(nb){nb.classList.toggle('hidden',cls!=='off');nb.textContent='⚠ '+txt}}
   if(le)le.textContent=fmtEdit(lastEditTs());
   try{updateNavDot()}catch(e){}
-  try{chatStatus()}catch(e){}
 }
 $('syncBox2').onclick=()=>toast(statusText);
 
 /* ---------- 日期／自動更新 ---------- */
 function tick(){
   const t=ymd(new Date());
-  if(t!==todayStr){const was=(curDate===todayStr);todayStr=t;if(was){loadDate(t);toast('日期已自動更新為 '+t)}else updateDateUI();try{autoStaffTried=false;maybeAutoStaff()}catch(e){}}
+  if(t!==todayStr){const was=(curDate===todayStr);todayStr=t;if(was){loadDate(t);toast('日期已自動更新為 '+t)}else updateDateUI()}
 }
 setInterval(tick,15000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)tick()});
@@ -2229,7 +2017,6 @@ function saveNames(){
 const saveHiddenNames=saveNames;
 function rememberName(){   // 名字輸入完就記住（連同顏色），不用等隔天
   const n=$('staff').value.trim();if(!n)return;
-  try{if(curDate===todayStr)meSet(n,true)}catch(_){}
   const c=staffColorOf(curDate)||'';
   let e=nameBook.find(x=>x.n===n),ch=false;
   if(!e){nameBook.push({n,c,t:Date.now()});ch=true}else if((e.c||'')!==c){e.c=c;e.t=Date.now();ch=true}
@@ -2683,11 +2470,10 @@ function switchTab(t){
   zoomOK=(t==='history');
   document.querySelectorAll('#nav button').forEach(b=>{b.classList.toggle('on',b.dataset.t===t);if(b.dataset.t===t)b.setAttribute('aria-current','page');else b.removeAttribute('aria-current')});
   try{updateNavDot()}catch(e){}
-  ['daily','history','settings','chat'].forEach(x=>$('tab-'+x).classList.toggle('hidden',x!==t));
+  ['daily','history','settings'].forEach(x=>$('tab-'+x).classList.toggle('hidden',x!==t));
   window.scrollTo(0,0);
   if(t==='history')renderHistory(false);
   if(t==='settings'){renderItemEditor();renderCfg();updateExpCount()}
-  try{chatTab(t)}catch(e){console.error(e)}
 }
 document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>switchTab(b.dataset.t));
 
@@ -2931,7 +2717,7 @@ $('fileRestore').onchange=e=>{
 
 /* ---------- 資料更新回呼 ---------- */
 function onDays(d){
-  const old=S.days;S.days=cleanDays(d);applyPending();detectOtherDates(old);saveCache();detectAlerts();try{maybeAutoStaff()}catch(e){console.error(e)}
+  const old=S.days;S.days=cleanDays(d);applyPending();detectOtherDates(old);saveCache();detectAlerts();
   if(!$('tab-daily').classList.contains('hidden'))syncFromRemote();
   if(!$('tab-history').classList.contains('hidden'))renderHistory();
   if(!$('tab-settings').classList.contains('hidden'))updateExpCount();
@@ -2966,288 +2752,7 @@ function checkBackupNag(){   // 本機模式：資料只存在這支手機，超
   a.appendChild(b);a.appendChild(x);bn.appendChild(s);bn.appendChild(a);
 }
 /* ---------- 啟動 ---------- */
-/* ---------- v183 聊天室（即時同步；訊息放在 stores/<店家代碼>/chat/messages） ---------- */
-var CH=null;   // 聊天狀態：連上雲端後才建立；本機／離線模式時 CH.off=true
-const CHAT_MAX=500,CHAT_PAGE=100,CHAT_GAP=180000;
-function chatLS(k,v){try{if(v===undefined)return localStorage.getItem(k);localStorage.setItem(k,v)}catch(e){}return null}
-/* 這支手機最後輸入的名字：盤點頁人員欄、聊天頁名字欄共用；pt_me_inv＝最後一次是在「盤點頁」輸入的名字 */
-function meGet(){return (chatLS('pt_me')||chatLS('pt_chat_name')||'').trim()}
-function meSet(n,fromInv){n=String(n||'').trim();if(!n)return;chatLS('pt_me',n);if(fromInv)chatLS('pt_me_inv',n)}
-var autoStaffTried=false;
-/* 進入 App 時，今天的盤點人員還是空的，就帶入這支手機上次在盤點頁輸入的名字。
-   只在雲端資料載入完成後判斷一次，已經有人填了就不蓋掉；同一天帶入過一次，之後被刪掉就不再自動帶入。 */
-function maybeAutoStaff(){
-  if(autoStaffTried||!store||store.kind==='offline')return;
-  autoStaffTried=true;
-  const me=meGet();if(!me||me!==(chatLS('pt_me_inv')||'').trim())return;   // 只帶入「這支手機在盤點頁輸入過」的名字，只聊天不盤點的人不會被登記成盤點人員
-  if(chatLS('pt_staff_auto')===todayStr)return;
-  chatLS('pt_staff_auto',todayStr);
-  const d=S.days[todayStr];
-  if(pendVals[todayStr+'|staff']!==undefined||(d&&typeof d.staff==='string'&&d.staff.trim()))return;   // 今天已經有人填了
-  dayOf(todayStr).staff=me;writeField(todayStr,'m','staff',me);
-  if(curDate===todayStr){$('staff').value=me;staffEditAt=Date.now();paintStaff();rememberName()}
-}
-function chatCid(){let c=chatLS('pt_chat_cid');if(!c){c=Math.random().toString(36).slice(2,10)+Date.now().toString(36);chatLS('pt_chat_cid',c)}return c}
-function chatHue(n){let h=0;for(let i=0;i<n.length;i++)h=(h*31+n.charCodeAt(i))%360;return h}
-const chatInChat=()=>!$('tab-chat').classList.contains('hidden');
-const chatAtBottom=()=>window.innerHeight+window.scrollY>=document.documentElement.scrollHeight-140;
-function chatToBottom(){const go=()=>window.scrollTo(0,document.documentElement.scrollHeight);go();requestAnimationFrame(go);setTimeout(go,150)}
-/* 雲端來的訊息一律先過濾：只收文字、限制長度（資料庫被亂寫也不會夾帶 HTML；畫面一律用 textContent 顯示） */
-function chatClean(k,v){
-  if(!v||typeof v!=='object'||typeof v.t!=='string'||!v.t.trim())return null;
-  return {k,t:v.t.slice(0,CHAT_MAX),n:(typeof v.n==='string'&&v.n.trim()?v.n.trim():'匿名').slice(0,12),c:typeof v.c==='string'?v.c.slice(0,40):'',ts:(typeof v.ts==='number'&&isFinite(v.ts))?v.ts:Date.now()}
-}
-function chatInit(){
-  if(CH||!store)return;
-  if(store.kind!=='cloud'||!store.chatRef){CH={off:true};chatPaint();return}
-  CH={ref:store.chatRef,msgs:[],limit:CHAT_PAGE,ready:false,pend:new Set(),sel:null,cid:chatCid(),seen:+chatLS('pt_chat_seen')||0,q:null,newPing:false};
-  chatAttach();chatPaint();
-}
-function chatErr(){
-  const b=$('chatBanner');if(!CH)return;CH.err=true;
-  b.textContent='聊天室讀寫被拒絕：請到 Firebase 的 Realtime Database「規則」，確認允許讀寫 stores/'+cleanCode(getCfg().code)+'/chat。';
-  b.classList.remove('hidden');chatStatus();
-}
-function chatAttach(){
-  const c=CH;
-  if(c.q){c.q.off('child_added',c.fa);c.q.off('child_changed',c.fa);c.q.off('child_removed',c.fr)}
-  c.ready=false;
-  c.fa=s=>{
-    const m=chatClean(s.key,s.val());if(!m)return;
-    const i=c.msgs.findIndex(x=>x.k===m.k);
-    if(i>=0)c.msgs[i]=m;
-    else{let j=c.msgs.length;while(j>0&&c.msgs[j-1].k>m.k)j--;c.msgs.splice(j,0,m);if(c.ready&&m.c!==c.cid)c.newPing=true}
-    if(c.ready)chatUnreadUpdate();   // 紅點立即更新，不等畫面重畫的計時器
-    chatDirty()};
-  c.fr=s=>{const i=c.msgs.findIndex(x=>x.k===s.key);if(i>=0){c.msgs.splice(i,1);if(c.sel===s.key)c.sel=null;chatDirty()}};
-  const q=c.ref.orderByKey().limitToLast(c.limit);c.q=q;
-  q.on('child_added',c.fa,chatErr);q.on('child_changed',c.fa,chatErr);q.on('child_removed',c.fr,chatErr);
-  q.once('value',()=>{   // 第一批舊訊息載完：第一次使用時，既有訊息都當作已讀，不跳未讀數字
-    c.ready=true;
-    if(chatLS('pt_chat_seen')===null){c.seen=c.msgs.reduce((a,m)=>Math.max(a,m.ts),0);chatLS('pt_chat_seen',String(c.seen))}
-    chatStatus();chatDirty()},chatErr);
-}
-let _chatT=0;
-function chatDirty(){if(_chatT)return;_chatT=setTimeout(()=>{_chatT=0;chatRender()},40)}
-function chatUnreadUpdate(){
-  const c=CH,b=$('chatBadge');if(!c||c.off||!c.ready||!b)return;
-  const vis=chatInChat()&&!document.hidden;
-  if(vis){const mx=c.msgs.reduce((a,m)=>Math.max(a,m.ts),0);if(mx>c.seen){c.seen=mx;chatLS('pt_chat_seen',String(mx))}}
-  const n=vis?0:c.msgs.filter(m=>m.c!==c.cid&&m.ts>c.seen).length;
-  b.textContent=n?(n>99?'99+':String(n)):'';
-}
-function chatStatus(){
-  const d=$('chatDot'),t=$('chatStatTxt');if(!d||!t)return;
-  let cls='',txt='已連線';
-  if(!CH||CH.off){cls='off';txt=(store&&store.kind==='local')?'本機模式':'離線'}
-  else if(CH.err){cls='off';txt='無法讀寫'}
-  else if(!connected){cls='off';txt='離線（恢復後自動送出）'}
-  else if(!CH.ready){cls='busy';txt='載入中…'}
-  d.className='cdot'+(cls?' '+cls:'');t.textContent=txt;
-}
-function chatPaint(){
-  const off=!CH||CH.off,b=$('chatBanner');
-  $('chatInput').disabled=off;$('chatSend').disabled=off;
-  if(off){
-    b.textContent=(store&&store.kind==='local')?'聊天室需要雲端同步才能使用。目前是「本機模式」（資料只存在這支手機），請先到「設定」填入 Firebase 網址與店家代碼。':'目前連不上雲端，聊天室暫時無法使用。恢復網路後，請下拉重新整理或按「重試」。';
-    b.classList.remove('hidden');$('chatList').textContent='';
-  }else if(!CH.err)b.classList.add('hidden');
-  chatStatus();
-}
-function chatLinkify(t){
-  const f=document.createDocumentFragment(),re=/https?:\/\/[A-Za-z0-9\-._~:\/?#\[\]@!$&'()*+,;=%]+/g;let i=0,m;
-  while((m=re.exec(t))){
-    if(m.index>i)f.appendChild(document.createTextNode(t.slice(i,m.index)));
-    let u=m[0],tail='';const mt=u.match(/[.,;:!?)]+$/);if(mt){tail=mt[0];u=u.slice(0,-tail.length)}
-    const a=document.createElement('a');a.href=u;a.textContent=u;a.target='_blank';a.rel='noopener noreferrer';f.appendChild(a);
-    if(tail)f.appendChild(document.createTextNode(tail));
-    i=m.index+m[0].length}
-  if(i<t.length)f.appendChild(document.createTextNode(t.slice(i)));
-  return f;
-}
-function chatCopy(t){
-  const ok=()=>toast('已複製'),bad=()=>toast('無法複製，請長按文字手動複製');
-  if(navigator.clipboard&&window.isSecureContext){navigator.clipboard.writeText(t).then(ok,bad);return}
-  try{const x=document.createElement('textarea');x.value=t;x.style.cssText='position:fixed;opacity:0';document.body.appendChild(x);x.select();const r=document.execCommand('copy');x.remove();r?ok():bad()}catch(e){bad()}
-}
-function chatDayLabel(d){
-  const k=ymd(d),y=new Date();y.setDate(y.getDate()-1);
-  if(k===ymd(new Date()))return '今天';if(k===ymd(y))return '昨天';
-  return (d.getMonth()+1)+'/'+d.getDate()+' 週'+WD[d.getDay()];
-}
-function chatRender(){
-  const c=CH;if(!c||c.off)return;
-  chatUnreadUpdate();
-  if(!chatInChat())return;
-  const box=$('chatList');
-  if(!c.ready){if(!box.firstChild){const d=document.createElement('div');d.className='cempty';d.textContent='載入訊息中…';box.appendChild(d)}return}
-  const stick=c.forceBottom||c.openJump||chatAtBottom();
-  const frag=document.createDocumentFragment();
-  if(c.msgs.length>=c.limit){
-    const mb=document.createElement('button');mb.type='button';mb.className='btn sm cmore';mb.textContent='載入更早的訊息';
-    mb.onclick=()=>{c.anchorH=document.documentElement.scrollHeight;c.anchorY=window.scrollY;c.limit+=CHAT_PAGE;chatAttach();chatStatus()};
-    frag.appendChild(mb)}
-  if(!c.msgs.length){const d=document.createElement('div');d.className='cempty';d.textContent='還沒有訊息，說聲哈囉吧 👋';frag.appendChild(d)}
-  let lastDay='';
-  c.msgs.forEach((m,i)=>{
-    const d=new Date(m.ts),dk=ymd(d),prev=c.msgs[i-1],next=c.msgs[i+1];
-    if(dk!==lastDay){const s=document.createElement('div');s.className='cday';s.textContent=chatDayLabel(d);frag.appendChild(s);lastDay=dk}
-    const mine=m.c===c.cid,pend=c.pend.has(m.k);
-    const same=(a,b)=>a&&b&&a.c===b.c&&a.n===b.n&&ymd(new Date(a.ts))===ymd(new Date(b.ts))&&Math.abs(b.ts-a.ts)<CHAT_GAP;
-    const cont=same(prev,m),last=!same(m,next);
-    const el=document.createElement('div');el.className='cm '+(mine?'me':'them')+(cont?' cont':'')+(pend?' pend':'')+(c.sel===m.k?' sel':'');
-    if(!mine&&!cont){const n=document.createElement('div');n.className='cn';n.textContent=m.n;n.style.color='hsl('+chatHue(m.n)+',55%,var(--cl))';el.appendChild(n)}
-    const b=document.createElement('div');b.className='cb';b.appendChild(chatLinkify(m.t));
-    b.onclick=ev=>{if(ev.target.closest('a'))return;const s=window.getSelection&&String(window.getSelection());if(s)return;c.sel=c.sel===m.k?null:m.k;chatRender()};
-    el.appendChild(b);
-    if(last||pend){const t=document.createElement('div');t.className='ct';t.textContent=pad(d.getHours())+':'+pad(d.getMinutes())+(pend?'・傳送中…':'');el.appendChild(t)}
-    if(c.sel===m.k){
-      const a=document.createElement('div');a.className='cact';
-      const cp=document.createElement('button');cp.type='button';cp.className='btn';cp.textContent='複製';cp.onclick=()=>{chatCopy(m.t);c.sel=null;chatRender()};a.appendChild(cp);
-      if(mine&&!pend){
-        const rm=document.createElement('button');rm.type='button';rm.className='btn danger';rm.textContent='收回';let armed=false;
-        rm.onclick=()=>{
-          if(!armed){armed=true;rm.textContent='確定收回？';setTimeout(()=>{if(rm.isConnected){armed=false;rm.textContent='收回'}},3000);return}
-          c.ref.child(m.k).remove().catch(e=>toast('收回失敗：'+(e&&e.message||'請檢查網路')))};
-        a.appendChild(rm)}
-      el.appendChild(a)}
-    frag.appendChild(el);
-  });
-  box.textContent='';box.appendChild(frag);
-  if(c.anchorH){window.scrollTo(0,c.anchorY+document.documentElement.scrollHeight-c.anchorH);c.anchorH=0}
-  else if(stick){c.forceBottom=false;c.openJump=false;c.newPing=false;chatToBottom();$('chatNew').classList.add('hidden')}
-  else if(c.newPing)$('chatNew').classList.remove('hidden');
-}
-function chatName(){return $('chatName').value.trim().slice(0,12)}
-function chatSend(){
-  const c=CH;if(!c||c.off||!c.ref)return;
-  const inp=$('chatInput'),text=inp.value.trim();if(!text)return;
-  const name=chatName();
-  if(!name){toast('先輸入「我的名字」，大家才知道是誰說的');$('chatName').classList.add('need');$('chatName').focus();return}
-  meSet(name);
-  const r=c.ref.push(),key=r.key;
-  c.pend.add(key);c.forceBottom=true;
-  r.set({t:text.slice(0,CHAT_MAX),n:name,c:c.cid,ts:firebase.database.ServerValue.TIMESTAMP})
-    .then(()=>{c.pend.delete(key);chatDirty()})
-    .catch(e=>{c.pend.delete(key);toast('訊息沒送出：'+(e&&e.message||'請檢查網路與 Firebase 規則'),4500);chatDirty()});   // 失敗時 Firebase 會自動把這則從畫面收掉
-  inp.value='';chatFit();chatDirty();
-}
-function chatFit(){
-  const t=$('chatInput');t.style.height='auto';t.style.height=Math.min(t.scrollHeight,120)+'px';
-  const b=$('chatBar');if(!b.classList.contains('hidden'))document.documentElement.style.setProperty('--cbh',b.offsetHeight+'px');
-}
-function chatTab(t){   // switchTab 結尾呼叫：顯示／隱藏輸入列，進入聊天頁時載入並捲到最新
-  const on=t==='chat';
-  $('chatBar').classList.toggle('hidden',!on);
-  document.body.classList.toggle('inchat',on);
-  if(!on){$('chatNew').classList.add('hidden');document.body.classList.remove('ckb');chatDirty();return}
-  if(!CH)chatInit();
-  const nm=$('chatName'),me=meGet();if(me)nm.value=me.slice(0,12);   // 每次進聊天頁都帶入這支手機最後輸入的名字
-  nm.classList.toggle('need',!nm.value.trim());
-  chatPaint();chatFit();
-  if(CH&&!CH.off){CH.openJump=true;chatRender()}
-  if(!nm.value.trim()){if(CH&&!CH.off)nm.focus()}else if(isDesk())$('chatInput').focus();
-}
-$('chatInput').addEventListener('keydown',e=>{   // 電腦版 Enter 送出、Shift+Enter 換行；中文輸入選字中（isComposing／229）不送出；手機 Enter 一律換行
-  if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing&&e.keyCode!==229&&isDesk()){e.preventDefault();chatSend()}});
-$('chatInput').addEventListener('input',chatFit);
-$('chatInput').addEventListener('focus',()=>setTimeout(()=>{if(chatInChat())chatToBottom()},350));
-$('chatSend').addEventListener('pointerdown',e=>e.preventDefault());   // 按送出不讓輸入框失焦，手機鍵盤不會收起來
-$('chatSend').addEventListener('click',chatSend);
-$('chatName').addEventListener('input',()=>$('chatName').classList.toggle('need',!chatName()));
-$('chatName').addEventListener('change',()=>{const n=chatName();if(n)meSet(n)});
-$('chatNew').onclick=()=>{if(CH)CH.forceBottom=true;chatToBottom();$('chatNew').classList.add('hidden')};
-window.addEventListener('scroll',()=>{if(chatInChat()&&chatAtBottom())$('chatNew').classList.add('hidden')},{passive:true});
-document.addEventListener('visibilitychange',()=>{if(!document.hidden)chatDirty()});
-if(window.visualViewport){   // 手機鍵盤彈出時，輸入列貼在鍵盤上方
-  const vv=window.visualViewport,f=()=>{const kb=Math.max(0,Math.round(window.innerHeight-vv.height-vv.offsetTop));
-    document.documentElement.style.setProperty('--ckb',kb+'px');document.body.classList.toggle('ckb',kb>90&&chatInChat())};
-  vv.addEventListener('resize',f);vv.addEventListener('scroll',f)}
-
-/* ---------- v184 裝置登記：只有輸入過店內通行碼的手機才能用（搭配 Firebase 匿名登入＋規則） ---------- */
-function devFmt(ts){if(!ts)return '—';const d=new Date(ts);return (d.getMonth()+1)+'/'+d.getDate()+' '+pad(d.getHours())+':'+pad(d.getMinutes())}
-async function devGate(){   // 開機時呼叫：這支手機沒登記就顯示登記畫面，回傳 true＝先不要往下載入資料
-  const dv=store&&store.dev;if(!dv)return false;
-  const st=await dv.state();
-  if(st==='ok'){dv.touch();return false}
-  if(st==='gated'){gateShow();return true}
-  return false;   // 'off'＝沒有啟用登記；'noauth'＝這支手機登入不了，維持原本行為
-}
-function gateShow(){
-  $('gate').classList.remove('hidden');
-  const me=meGet();if(me&&!$('gateName').value)$('gateName').value=me.slice(0,12)+'的手機';
-}
-async function gateTry(){
-  const dv=store&&store.dev,name=$('gateName').value.trim().slice(0,20),code=$('gateCode').value.trim(),err=$('gateErr'),btn=$('gateGo');
-  err.textContent='';
-  if(!dv)return;
-  if(!name){err.textContent='請輸入這支手機的名字（例如「阿美的手機」）';$('gateName').focus();return}
-  if(!code){err.textContent='請輸入通行碼';$('gateCode').focus();return}
-  btn.disabled=true;btn.textContent='登記中…';
-  try{await dv.register(name,code);location.reload()}
-  catch(e){err.textContent=(e&&e.code==='BADCODE')?'通行碼不對，請向店長確認':'登記失敗：'+(e&&e.message||'請檢查網路');btn.disabled=false;btn.textContent='登記這支手機'}
-}
-function devArm(btn,idle,armed,fn){   // 兩段式確認：第一次按變成確認字樣，3 秒內再按一次才執行
-  let on=false,tm=0;btn.textContent=idle;
-  btn.onclick=()=>{if(!on){on=true;btn.textContent=armed;tm=setTimeout(()=>{on=false;btn.textContent=idle},3000);return}clearTimeout(tm);on=false;btn.textContent=idle;fn()};
-}
-let _devShow=false;
-async function devRender(){
-  const dv=store&&store.dev,st=$('devStat'),en=$('devEnableRow'),mg=$('devManage');
-  en.classList.add('hidden');mg.classList.add('hidden');
-  if(!store||store.kind!=='cloud'){st.textContent='需要連上雲端同步才能使用（目前是本機或離線模式）。';return}
-  if(!dv||!dv.uid){st.textContent='⚠ 這支手機登入不了（'+((dv&&dv.authErr&&(dv.authErr.code||dv.authErr.message))||'尚未載入')+'）。請到 Firebase 主控台 → Authentication → 登入方式，啟用「匿名」，再重新整理。';return}
-  st.textContent='讀取中…';
-  let inf;try{inf=await dv.info()}catch(e){st.textContent='讀取失敗：'+(e&&e.message||'請檢查網路');return}
-  if(inf.code===null){
-    st.textContent='尚未啟用：目前只要拿到網址和店家代碼的人都能連進來。';
-    en.classList.remove('hidden');const me=meGet();if(me&&!$('devMyName').value)$('devMyName').value=me.slice(0,12)+'的手機';return}
-  st.textContent='已啟用：'+inf.list.length+' 支手機已登記。';mg.classList.remove('hidden');
-  $('devCodeShow').textContent=_devShow?inf.code:'••••••';$('devCodeToggle').textContent=_devShow?'隱藏':'顯示';
-  const box=$('devList');box.textContent='';
-  inf.list.forEach(x=>{
-    const row=document.createElement('div');row.className='drow';
-    const n=document.createElement('div');n.className='dn';
-    const b=document.createElement('b');b.textContent=x.name+(x.id===dv.uid?'（這支手機）':'');
-    const sm=document.createElement('small');sm.textContent='登記 '+devFmt(x.ts)+'　最近開啟 '+devFmt(x.seen);
-    n.appendChild(b);n.appendChild(sm);row.appendChild(n);
-    const rm=document.createElement('button');rm.type='button';rm.className='btn danger sm';
-    devArm(rm,'移除','確定移除？',async()=>{try{await dv.remove(x.id);toast('已移除「'+x.name+'」');devRender()}catch(e){toast('移除失敗：'+(e&&e.message||'請檢查網路'))}});
-    row.appendChild(rm);box.appendChild(row)});
-}
-async function devEnable(){
-  const dv=store&&store.dev,name=$('devMyName').value.trim().slice(0,20),code=$('devCode').value.trim();
-  if(!dv||!dv.uid)return;
-  if(!name){toast('請輸入這支手機的名字');$('devMyName').focus();return}
-  if(code.length<4||code.length>12){toast('通行碼請設 4～12 個字');$('devCode').focus();return}
-  try{await dv.setCode(code);await dv.register(name,code);$('devCode').value='';toast('已啟用，這支手機已登記');devRender()}
-  catch(e){toast('啟用失敗：'+(e&&e.message||'請檢查網路與 Firebase 規則'),4500)}
-}
-async function devCheckRules(){
-  const c=getCfg(),out=$('devCheckOut');out.textContent='檢查中…';
-  try{
-    const r=await fetch(c.dbUrl.replace(/\/+$/,'')+'/stores/'+encodeURIComponent(cleanCode(c.code))+'/days.json?shallow=true',{cache:'no-store'});
-    out.textContent=(r.status===401||r.status===403)?'✓ 規則已生效：沒登記的外人讀不到資料。':r.ok?'⚠ 規則還沒擋住：沒登記的外人也讀得到資料。請把上面的規則貼到 Firebase 並發佈。':'無法判斷（HTTP '+r.status+'）';
-  }catch(e){out.textContent='無法檢查：'+(e&&e.message||'請檢查網路')}
-}
-$('gateGo').addEventListener('click',gateTry);
-$('gateCode').addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing&&e.keyCode!==229)gateTry()});
-$('devBox').addEventListener('toggle',()=>{if($('devBox').open)devRender()});
-$('devEnable').addEventListener('click',devEnable);
-$('devCodeToggle').addEventListener('click',()=>{_devShow=!_devShow;devRender()});
-$('devSetCode').addEventListener('click',async()=>{
-  const dv=store&&store.dev,code=$('devNewCode').value.trim();if(!dv)return;
-  if(code.length<4||code.length>12){toast('通行碼請設 4～12 個字');return}
-  try{await dv.setCode(code);$('devNewCode').value='';toast('通行碼已更改');devRender()}catch(e){toast('更改失敗：'+(e&&e.message||'請檢查網路'))}});
-{const cb=$('devClose'),dv0=()=>store&&store.dev;
- devArm(cb,'關閉裝置登記','確定關閉？',async()=>{try{await dv0().clearCode();toast('已關閉裝置登記');devRender()}catch(e){toast('關閉失敗：'+(e&&e.message||'請檢查網路'))}})}
-$('devCheck').addEventListener('click',devCheckRules);
-$('devCopyRules').addEventListener('click',()=>{const t=$('devRules').value;
-  if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(t).then(()=>toast('已複製規則'),()=>toast('無法複製，請長按文字手動複製'));
-  else{$('devRules').select();try{document.execCommand('copy');toast('已複製規則')}catch(e){toast('無法複製，請長按文字手動複製')}}});
-
 async function boot(){
-  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(e){}   // 請瀏覽器別在空間不足時清掉這支手機的登記與資料
   tick();updateDateUI();renderChips();renderItems();setStatus();
   const c=getCfg();
   let hadCache=false;if(c.dbUrl&&c.code)hadCache=loadCache();
@@ -3260,10 +2765,9 @@ async function boot(){
     store=makeLocalStore();
     if(!c.dbUrl){const b=$('banner');b.textContent='目前是「本機模式」：資料只存在這支手機。要讓大家即時同步，請到「設定」填入 Firebase 資料庫網址與店家代碼。';b.classList.remove('hidden')}
   }
-  try{if(store.kind==='cloud'&&await devGate())return}catch(e){console.error(e)}   // 有啟用裝置登記、但這支手機還沒登記：停在登記畫面，不載入任何資料
-  store.subscribe(onDays,onItems,e=>{toast('同步錯誤：'+(e&&e.message||'請檢查資料庫規則'));const b=$('banner');b.textContent='雲端讀寫被拒絕：可能是 Firebase 規則還沒設定好，或這支手機的登記已被移除（請關掉 App 重開，重新登記）。';b.classList.remove('hidden')},onNames);
-  setStatus();loadDate(curDate);checkBackupNag();try{chatInit()}catch(e){console.error(e)}
-  try{const rt=sessionStorage.getItem('pt_return_tab');if(rt){sessionStorage.removeItem('pt_return_tab');if(document.documentElement.classList.contains('noIntro')&&(rt==='history'||rt==='settings'||rt==='chat'))switchTab(rt)}}catch(e){}   // 下拉重新整理後回到原本那一頁
+  store.subscribe(onDays,onItems,e=>{toast('同步錯誤：'+(e&&e.message||'請檢查資料庫規則'));const b=$('banner');b.textContent='雲端讀寫被拒絕，請檢查 Firebase 規則是否已設定（見設定說明）。';b.classList.remove('hidden')},onNames);
+  setStatus();loadDate(curDate);checkBackupNag();
+  try{const rt=sessionStorage.getItem('pt_return_tab');if(rt){sessionStorage.removeItem('pt_return_tab');if(document.documentElement.classList.contains('noIntro')&&(rt==='history'||rt==='settings'))switchTab(rt)}}catch(e){}   // 下拉重新整理後回到原本那一頁
   try{const pv=JSON.parse(localStorage.getItem('pt_pend_v1')||'{}');   // 上次離線時還沒送出的修改，重新送出
     for(const k in pv){const [d,p]=k.split('|');if(p.startsWith('v:'))writeField(d,'v',p.slice(2),pv[k]);else if(p.startsWith('o:'))writeField(d,'o',p.slice(2),pv[k]);else if(p.startsWith('n:'))writeField(d,'n',p.slice(2),pv[k]);else writeField(d,'m',p,pv[k])}}catch(e){}
 }
@@ -3327,7 +2831,7 @@ if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){window.add
   const wrap=document.querySelector('.wrap');
   const push=(k,p)=>'translateY(calc('+k.toFixed(1)+'px + env(safe-area-inset-top,0px)*'+p.toFixed(3)+'))';   // 頁面往下推開，logo 放在露出的空白處（沒有底色）
   const hide=()=>{el.style.opacity=0;el.classList.remove('rdy');wrap.style.transition='transform .22s ease';wrap.style.transform=''};
-  const curTabName=()=>['daily','history','settings','chat'].find(x=>!$('tab-'+x).classList.contains('hidden'))||'daily';
+  const curTabName=()=>['daily','history','settings'].find(x=>!$('tab-'+x).classList.contains('hidden'))||'daily';
   const markSkip=()=>{try{sessionStorage.setItem('pt_skip_intro',String(Date.now()));sessionStorage.setItem('pt_return_tab',curTabName())}catch(e){}};
   const sleep=ms=>new Promise(r=>setTimeout(r,ms));
   async function doRefresh(){   // 只整理「目前這一頁」，不重新載入整個 App（所以不會再跑開場／進場動畫、也不會跳回第一頁）
@@ -3341,7 +2845,7 @@ if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){window.add
       try{sessionStorage.removeItem('pt_skip_intro');sessionStorage.removeItem('pt_return_tab')}catch(e){}
       tick();   // 跨過午夜時順便更新日期
       const t=curTabName();
-      if(t==='daily')loadDate(curDate);else if(t==='history')renderHistory(false);else if(t==='chat'){chatDirty()}else{renderItemEditor();renderCfg()}
+      if(t==='daily')loadDate(curDate);else if(t==='history')renderHistory(false);else{renderItemEditor();renderCfg()}
     }catch(e){}
     await sleep(Math.max(0,700-(Date.now()-t0)));   // 至少讓 logo 跳一下再收回
     go=false;el.classList.remove('go');hide();
