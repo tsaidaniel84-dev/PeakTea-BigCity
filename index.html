@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#41695b">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="188">
+<meta name="app-version" content="189">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -1361,7 +1361,7 @@ html.introShort #splash.out{animation-duration:.25s!important}
   <div class="st-side" id="stSide"></div>
   <div class="st-foot">
     <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-    <div class="muted stnote v">網頁版本：v188</div>
+    <div class="muted stnote v">網頁版本：v189</div>
   </div>
   <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
@@ -1702,6 +1702,13 @@ function goToItem(date,itemId){
 $('prevDay').onclick=()=>shift(-1);$('nextDay').onclick=()=>shift(1);
 $('btnToday').onclick=()=>loadDate(todayStr);
 $('datePick').onchange=e=>{if(e.target.value)loadDate(e.target.value)};
+/* v189 電腦版：日期欄是疊在日期列上的透明輸入框。手機點下去會直接跳出月曆，電腦瀏覽器點下去只會選到「年／月／日」其中一格、
+   不會開月曆（月曆小圖示又被藏起來了）→ 用滑鼠（或按 Enter／空白鍵）時主動打開月曆。觸控裝置維持原本的行為，免得月曆開兩次。 */
+(function(){const dp=$('datePick');if(!dp)return;
+  const open=()=>{try{if(window.matchMedia&&matchMedia('(hover:hover) and (pointer:fine)').matches&&dp.showPicker)dp.showPicker()}catch(_){}};
+  dp.addEventListener('click',open);
+  dp.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}});
+})();
 
 /* ---------- 停用品項 ---------- */
 // 停用的品項：今天與之後不顯示；過去的日期若當天有數字，仍會顯示，歷史資料完整保留
