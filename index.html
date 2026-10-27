@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#41695b">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="187">
+<meta name="app-version" content="188">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -1361,7 +1361,7 @@ html.introShort #splash.out{animation-duration:.25s!important}
   <div class="st-side" id="stSide"></div>
   <div class="st-foot">
     <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-    <div class="muted stnote v">網頁版本：v187</div>
+    <div class="muted stnote v">網頁版本：v188</div>
   </div>
   <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
@@ -1656,8 +1656,8 @@ function setClosed(d,why){   // why 為空字串＝取消休息日
 function openClosedDialog(d){
   const cur=closedWhy(d),dt=parse(d);
   const w=document.createElement('div');w.className='dlg clsdlg';w.setAttribute('role','dialog');w.setAttribute('aria-modal','true');
-  w.innerHTML='<div class="dlgbox"><h3>'+(dt.getMonth()+1)+'月'+dt.getDate()+'日　</h3>'    
-    +'<input class="clsin" maxlength="8" placeholder="休息原因" aria-label="休息原因" autocomplete="off" value="'+esc(cur)+'"></div>'
+  w.innerHTML='<div class="dlgbox"><h3>'+(dt.getMonth()+1)+'月'+dt.getDate()+'日</h3>'
+    +'<div class="dlgbody"><input class="clsin" maxlength="8" placeholder="休息原因" aria-label="休息原因" autocomplete="off" value="'+esc(cur)+'"></div>'
     +'<div class="dlgbtn">'+(cur?'<button type="button" class="btn" data-a="no">關閉</button><button type="button" class="btn danger" data-a="del">取消休息日</button>':'<button type="button" class="btn" data-a="no">取消</button>')
     +'<button type="button" class="btn primary" data-a="ok">'+(cur?'儲存':'設為休息日')+'</button></div></div>';
   const inp=w.querySelector('.clsin');
