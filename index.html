@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#41695b">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="182">
+<meta name="app-version" content="187">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -1228,6 +1228,18 @@ html.introShort #splash.out{animation-duration:.25s!important}
   --progTrack:#efe4ce;--progBd:#d8c9a8;--progTxt:#2f4f43;--chipRing:#cfc8b8;
   --td-soft:#e6dcc6;--td-line:#cdbd9c;--pc-g:#41695b;
 }
+/* v185 公休日：歷史表整列反灰（用不透明色，左側固定欄捲動時才不會透出下面的格子） */
+:root{--clsbg:#e2dfd4;--clsfg:#98988c}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--clsbg:#2a2e2a;--clsfg:#7d857d}}
+:root[data-theme="dark"]{--clsbg:#2a2e2a;--clsfg:#7d857d}
+#histTable tr.closed td:not(.tdy){background:var(--clsbg)!important;color:var(--clsfg)!important;font-weight:400!important;box-shadow:none!important}
+#histTable tr.closed td .sp{opacity:.55}
+.htab .clsTag{display:inline-block;max-width:72px;overflow:hidden;text-overflow:ellipsis;vertical-align:middle;font-size:12px;font-weight:700;color:var(--clsfg);letter-spacing:.5px}
+#closedBanner .cbt{flex:1;min-width:0;overflow-wrap:anywhere}
+.dlg.clsdlg{align-items:flex-start;padding-top:calc(10vh + env(safe-area-inset-top,0px))}
+.clsin{width:100%;height:46px;font-size:16px;padding:0 12px;margin:0 0 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);box-sizing:border-box}
+.clsin:focus{outline:0;border-color:var(--accent)}
+.dlgbtn .btn.danger{color:var(--down)}
 </style>
 </head>
 <body>
@@ -1274,12 +1286,13 @@ html.introShort #splash.out{animation-duration:.25s!important}
       <button class="nb" id="nextDay" aria-label="後一天"><svg class="i" aria-hidden="true"><use href="#i-chev-r"/></svg></button>
       <button class="todaybtn hidden" id="btnToday">今天</button>
     </div>
-    <div class="toolrow"><div class="search"><span class="ic"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg></span><input id="q" type="search" placeholder="搜尋品項" aria-label="搜尋品項" autocomplete="off"><button class="x hidden" id="qx" aria-label="清除"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></div><button class="btn sm hidden" id="btnUndo" aria-label="復原"><svg class="i" aria-hidden="true"><use href="#i-undo"/></svg><span class="ulb">復原</span></button><button class="btn sm" id="btnCopyPrev" aria-label="帶入前次數字">帶入前次</button><button class="lockbtn hidden" id="lockBtn2" type="button" aria-label="解鎖編輯"></button><div class="moreWrap"><button class="btn sm" id="btnMore" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="更多"><svg class="i" aria-hidden="true"><use href="#i-more"/></svg></button><div class="menu hidden" id="moreMenu" role="menu"><button class="btn danger" id="btnClear" type="button" role="menuitem">清空</button></div></div></div>
+    <div class="toolrow"><div class="search"><span class="ic"><svg class="i" aria-hidden="true"><use href="#i-search"/></svg></span><input id="q" type="search" placeholder="搜尋品項" aria-label="搜尋品項" autocomplete="off"><button class="x hidden" id="qx" aria-label="清除"><svg class="i" aria-hidden="true"><use href="#i-x"/></svg></button></div><button class="btn sm hidden" id="btnUndo" aria-label="復原"><svg class="i" aria-hidden="true"><use href="#i-undo"/></svg><span class="ulb">復原</span></button><button class="btn sm" id="btnCopyPrev" aria-label="帶入前次數字">帶入前次</button><button class="lockbtn hidden" id="lockBtn2" type="button" aria-label="解鎖編輯"></button><div class="moreWrap"><button class="btn sm" id="btnMore" type="button" aria-haspopup="menu" aria-expanded="false" aria-label="更多"><svg class="i" aria-hidden="true"><use href="#i-more"/></svg></button><div class="menu hidden" id="moreMenu" role="menu"><button class="btn" id="btnClosed" type="button" role="menuitem">設為公休日</button><button class="btn danger" id="btnClear" type="button" role="menuitem">清空</button></div></div></div>
     <div class="chips" id="chips"></div>
     <div class="prog" id="prog"><div class="pf" id="progBar"><span class="ptw" aria-hidden="true">PEAK TEA</span></div><span class="pt">PEAK TEA</span></div><div class="netbar hidden" id="netBar" role="status"></div>
   </div>
   <div class="banner hidden" id="banner" role="status"></div>
 <div class="banner info hidden" id="bkBanner" role="status"></div>
+<div class="banner info hidden" id="closedBanner" role="status"></div>
   <div class="list">
     <div class="meta metarow"><span class="mi"><img class="avatar" src="data:image/jpeg;base64,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" alt="">盤點人員</span><input id="staff" placeholder="輸入姓名" aria-label="盤點人員姓名" autocomplete="off"><button class="palbtn" id="palBtn" type="button" aria-label="姓名顏色"><svg class="i" aria-hidden="true"><use href="#i-palette"/></svg></button><button class="lockbtn hidden" id="lockBtn" type="button" aria-label="解鎖編輯"></button><div class="pal hidden" id="staffPal"></div><div class="nlist hidden" id="nameList"></div></div>
     <div id="items"></div>
@@ -1348,7 +1361,7 @@ html.introShort #splash.out{animation-duration:.25s!important}
   <div class="st-side" id="stSide"></div>
   <div class="st-foot">
     <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-    <div class="muted stnote v">網頁版本：v182</div>
+    <div class="muted stnote v">網頁版本：v187</div>
   </div>
   <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
@@ -1557,7 +1570,7 @@ function updateNavDot(){
   const b=document.querySelector('#nav button[data-t="daily"]');if(!b)return;
   const cur=document.querySelector('#nav button.on'),tab=cur?cur.dataset.t:'daily';
   const its=itemsForDates([todayStr]),d=S.days[todayStr],vals=(d&&d.values)||{};
-  const left=its.filter(i=>!hasVal(vals[i.id])).length,show=tab!=='daily'&&its.length>0&&left>0;
+  const left=its.filter(i=>!hasVal(vals[i.id])).length,show=tab!=='daily'&&its.length>0&&left>0&&!isClosed(todayStr);
   b.classList.toggle('dot',show);
   if(show)b.setAttribute('aria-label','盤點（今天還有 '+left+' 項未盤點）');else b.removeAttribute('aria-label');
 }
@@ -1608,8 +1621,58 @@ function updateDateUI(){
   $('dateLabel').innerHTML=(d.getMonth()+1)+'月'+d.getDate()+'日<span class="dwk">（週'+WD[d.getDay()]+'）</span>'+(curDate===todayStr?'<span class="dtd"> · 今天</span>':'');
   $('datePick').value=curDate;
   $('btnToday').classList.toggle('hidden',curDate===todayStr);
-  applyLock();
+  applyLock();renderClosed();
 }
+/* ---------- v187 休息日（原因自己輸入，例如公休、颱風假、整修…） ----------
+   記在當天的紀錄上（days/日期/closed = 原因文字），跟盤點數字一樣即時同步；
+   歷史頁那天整列反灰、顯示原因。舊版 v185 存的是 1，一律當作「公休」。
+   不受「過去日期鎖定」限制（只是標記，不會改到任何數字），按「復原」可還原。 */
+function closedWhy(d){const r=S.days[d];if(!r||!r.closed)return '';const v=String(r.closed).trim();return v==='1'?'公休':v.slice(0,20)}
+function isClosed(d){return !!closedWhy(d)}
+function renderClosed(){
+  const why=closedWhy(curDate),bn=$('closedBanner'),mb=$('btnClosed');
+  if(mb)mb.textContent=why?'修改休息原因':'設為休息日';
+  if(!bn)return;
+  bn.classList.toggle('hidden',!why);if(!why)return;
+  bn.innerHTML='';
+  const s=document.createElement('span');s.className='cbt';s.textContent='這天休息：'+why;
+  const a=document.createElement('span');a.className='bact';
+  const e=document.createElement('button');e.type='button';e.className='bbtn';e.textContent='修改';e.onclick=()=>openClosedDialog(curDate);
+  const c=document.createElement('button');c.type='button';c.className='bbtn';c.textContent='取消休息';c.onclick=()=>setClosed(curDate,'');
+  a.appendChild(e);a.appendChild(c);bn.appendChild(s);bn.appendChild(a);
+}
+function setClosed(d,why){   // why 為空字串＝取消休息日
+  if(!store){toast('還在連線中，請稍後再試');return}
+  why=String(why||'').trim().slice(0,8);
+  const prev=closedWhy(d),day=dayOf(d);
+  if(why===prev)return;
+  if(why)day.closed=why;else delete day.closed;
+  writeField(d,'m','closed',why);
+  renderClosed();try{updateNavDot()}catch(e){}
+  if(!$('tab-history').classList.contains('hidden'))renderHistory(false);
+  const dt=parse(d),dl=(dt.getMonth()+1)+'/'+dt.getDate();
+  toastAct(why?(prev?'已改成「'+why+'」：':'已設為休息日（'+why+'）：')+dl:'已取消休息日：'+dl,'復原',()=>setClosed(d,prev),6000);
+}
+function openClosedDialog(d){
+  const cur=closedWhy(d),dt=parse(d);
+  const w=document.createElement('div');w.className='dlg clsdlg';w.setAttribute('role','dialog');w.setAttribute('aria-modal','true');
+  w.innerHTML='<div class="dlgbox"><h3>'+(dt.getMonth()+1)+'月'+dt.getDate()+'日　</h3>'    
+    +'<input class="clsin" maxlength="8" placeholder="休息原因" aria-label="休息原因" autocomplete="off" value="'+esc(cur)+'"></div>'
+    +'<div class="dlgbtn">'+(cur?'<button type="button" class="btn" data-a="no">關閉</button><button type="button" class="btn danger" data-a="del">取消休息日</button>':'<button type="button" class="btn" data-a="no">取消</button>')
+    +'<button type="button" class="btn primary" data-a="ok">'+(cur?'儲存':'設為休息日')+'</button></div></div>';
+  const inp=w.querySelector('.clsin');
+  const close=()=>{document.removeEventListener('keydown',kd);w.remove()};
+  const kd=e=>{if(e.key==='Escape')close()};document.addEventListener('keydown',kd);
+  const save=()=>{const v=inp.value.trim();if(!v){toast('請輸入休息原因');inp.focus();return}close();setClosed(d,v)};
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();save()}});
+  w.addEventListener('click',e=>{
+    const a=e.target.closest('[data-a]');
+    if(a){if(a.dataset.a==='ok')save();else if(a.dataset.a==='del'){close();setClosed(d,'')}else close()}
+    else if(e.target===w)close();
+  });
+  document.body.appendChild(w);inp.focus();inp.select();   // 視窗放在畫面上半部（見 .clsdlg），手機鍵盤跳出來才不會蓋住
+}
+$('btnClosed').onclick=()=>openClosedDialog(curDate);
 function need(ds){return ymd(new Date(parse(ds).getTime()-40*864e5))}   // 往前多抓 40 天，「前次」和異常判斷才有得比
 async function ensureFrom(start,after){   // 確保雲端資料至少載到 start；本機／離線模式沒有範圍限制
   if(!store||!store.setWindow||store.winStart()<=start)return;
@@ -2133,10 +2196,10 @@ $('btnCopyPrev').onclick=async()=>{
 $('btnClear').onclick=async()=>{let clrE=null;   // 不再二次確認（誤按可用「復原」）
   {const vals=(S.days[curDate]&&S.days[curDate].values)||{};const ops=Object.keys(vals).filter(id=>hasVal(vals[id])).map(id=>({id,prev:vals[id],next:''}));if(ops.length){pushUndo(curDate,ops,'清空本日');clrE=undoStack[undoStack.length-1]}}
   Object.keys(pendVals).filter(k=>k.startsWith(curDate+'|')).forEach(k=>{clearTimeout(timers[k]);delete pendVals[k]});
-  const keep={staff:dayOf(curDate).staff||null,note:dayOf(curDate).note||null,scolor:dayOf(curDate).scolor||null},kin=dayOf(curDate).inotes&&Object.keys(dayOf(curDate).inotes).length?dayOf(curDate).inotes:null;
-  const keepObj=(keep.staff||keep.note||keep.scolor||kin)?{staff:keep.staff||'',note:keep.note||'',updatedAt:Date.now()}:null;if(keepObj&&kin)keepObj.inotes=kin;if(keepObj&&keep.scolor)keepObj.scolor=keep.scolor;
+  const keep={staff:dayOf(curDate).staff||null,note:dayOf(curDate).note||null,scolor:dayOf(curDate).scolor||null,closed:dayOf(curDate).closed||null},kin=dayOf(curDate).inotes&&Object.keys(dayOf(curDate).inotes).length?dayOf(curDate).inotes:null;
+  const keepObj=(keep.staff||keep.note||keep.scolor||keep.closed||kin)?{staff:keep.staff||'',note:keep.note||'',updatedAt:Date.now()}:null;if(keepObj&&kin)keepObj.inotes=kin;if(keepObj&&keep.scolor)keepObj.scolor=keep.scolor;if(keepObj&&keep.closed)keepObj.closed=keep.closed;
   try{await store.setDay(curDate,keepObj)}catch(e){toast(store&&store.kind==='offline'?'目前離線，無法清空，請連上網路後再試':'清空失敗')}
-  S.days[curDate]={staff:keep.staff||'',note:keep.note||''};if(keep.scolor)S.days[curDate].scolor=keep.scolor;if(kin)S.days[curDate].inotes=kin;renderItems();renderChips();updateProg();if(clrE){const e0=clrE;toastAct('已清空本日','復原',()=>{if(undoStack[undoStack.length-1]===e0)doUndo();else toast('之後又有修改，請用上方「復原」逐步還原')},8000)}else toast('已清空');
+  S.days[curDate]={staff:keep.staff||'',note:keep.note||''};if(keep.scolor)S.days[curDate].scolor=keep.scolor;if(keep.closed)S.days[curDate].closed=keep.closed;if(kin)S.days[curDate].inotes=kin;renderItems();renderChips();updateProg();if(clrE){const e0=clrE;toastAct('已清空本日','復原',()=>{if(undoStack[undoStack.length-1]===e0)doUndo();else toast('之後又有修改，請用上方「復原」逐步還原')},8000)}else toast('已清空');
 };
 
 /* ---------- 歷史 ---------- */
@@ -2195,7 +2258,7 @@ function renderHistory(scrollToday){
   document.querySelectorAll('#hSeg button').forEach(b=>b.classList.toggle('on',b.dataset.m===hMode));
   $('hTableWrap').classList.toggle('hidden',hMode!=='table');
   $('hItemWrap').classList.toggle('hidden',hMode!=='item');
-  $('recCount').textContent=(hMode==='table'?'紅格＝跟前次差很多、橘格＝跟近期平均差很多'+(isDesk()?'（滑鼠停在格子或人員上可看原因與最後編輯時間）':'（長按格子看原因，長按人員看最後編輯時間）'):'');
+  $('recCount').textContent=(hMode==='table'?'紅格＝跟前次差很多、橘格＝跟近期平均差很多'+(monthDates(histMonth).some(d=>isClosed(d))?'、灰列＝休息日':'')+(isDesk()?'（滑鼠停在格子或人員上可看原因與最後編輯時間）':'（長按格子看原因，長按人員看最後編輯時間）'):'');
   const its=hFiltered();
   if(hMode==='item'){renderHItem(its);return}
   const [y,m]=histMonth.split('-').map(Number),days=new Date(y,m,0).getDate();
@@ -2209,7 +2272,7 @@ function renderHistory(scrollToday){
   for(let d=1;d<=days;d++){
     const ds=y+'-'+pad(m)+'-'+pad(d),r=S.days[ds];
     if(hStaff&&!(r&&r.staff===hStaff))continue;   // 人員篩選：只留這個人盤點的日子
-    h+='<tr class="'+(hasData(r)?'has':'')+(ds===curDate?' cur':'')+'"><td class="day'+(ds===todayStr?' tdy':'')+'" data-d="'+ds+'">'+d+'</td><td>'+WD[new Date(y,m-1,d).getDay()]+'</td><td class="stf"'+(r&&(r.staff||typeof r.updatedAt==='number')?(()=>{const lt=typeof r.updatedAt==='number'?'最後編輯 '+fmtEditFull(r.updatedAt):'最後編輯時間未記錄';return' title="'+esc((+ds.slice(5,7))+'/'+(+ds.slice(8))+(r.staff?' '+r.staff:'')+'；'+lt)+'" data-tip="'+esc((+ds.slice(5,7))+'/'+(+ds.slice(8))+(r.staff?' '+r.staff:'')+'\n'+lt)+'"'})():'')+'>'+(r&&r.staff?'<span class="sp" style="--c:var(--pc-'+histTone(ds,r.staff)+')">'+esc(r.staff)+'</span>':'')+'</td>'+
+    h+='<tr class="'+(hasData(r)?'has':'')+(ds===curDate?' cur':'')+(r&&r.closed?' closed':'')+'"><td class="day'+(ds===todayStr?' tdy':'')+'" data-d="'+ds+'">'+d+'</td><td>'+WD[new Date(y,m-1,d).getDay()]+'</td><td class="stf"'+(r&&(r.staff||typeof r.updatedAt==='number')?(()=>{const lt=typeof r.updatedAt==='number'?'最後編輯 '+fmtEditFull(r.updatedAt):'最後編輯時間未記錄';return' title="'+esc((+ds.slice(5,7))+'/'+(+ds.slice(8))+(r.staff?' '+r.staff:'')+(r.closed?'（休息：'+closedWhy(ds)+'）':'')+'；'+lt)+'" data-tip="'+esc((+ds.slice(5,7))+'/'+(+ds.slice(8))+(r.staff?' '+r.staff:'')+(r.closed?'（休息：'+closedWhy(ds)+'）':'')+'\n'+lt)+'"'})():'')+'>'+(r&&r.staff?'<span class="sp" style="--c:var(--pc-'+histTone(ds,r.staff)+')">'+esc(r.staff)+'</span>':(r&&r.closed?'<span class="clsTag">'+esc(closedWhy(ds))+'</span>':''))+'</td>'+
       its.map(i=>{const v=r&&r.values?r.values[i.id]:'';const nt=r&&r.inotes&&r.inotes[i.id]?r.inotes[i.id]:'';const an=(r&&r.values)?anomOf(i.id,ds):null;const cl=((lowVal(i,v)?'lowc ':'')+(nt?'hasn ':'')+(an?'anom'+an.lvl:'')).trim();const tip=[an?an.text:'',lowVal(i,v)?'低於最低量（最低 '+i.min+'）':'',nt?'備註：'+nt:''].filter(Boolean);return'<td'+(cl?' class="'+cl+'"':'')+(tip.length?' title="'+esc(tip.join('；'))+'" data-tip="'+esc(ds.slice(5).replace('-','/')+' '+i.name+'\n'+tip.join('\n'))+'"':'')+'>'+(hasVal(v)?esc(v):'')+'</td>'}).join('')+'</tr>';
   }
   t.innerHTML=h+'</tbody>';
@@ -2717,7 +2780,7 @@ $('fileRestore').onchange=e=>{
 
 /* ---------- 資料更新回呼 ---------- */
 function onDays(d){
-  const old=S.days;S.days=cleanDays(d);applyPending();detectOtherDates(old);saveCache();detectAlerts();
+  const old=S.days;S.days=cleanDays(d);applyPending();detectOtherDates(old);saveCache();detectAlerts();renderClosed();
   if(!$('tab-daily').classList.contains('hidden'))syncFromRemote();
   if(!$('tab-history').classList.contains('hidden'))renderHistory();
   if(!$('tab-settings').classList.contains('hidden'))updateExpCount();
