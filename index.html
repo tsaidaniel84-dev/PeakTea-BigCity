@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#41695b">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="189">
+<meta name="app-version" content="192">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -1361,7 +1361,7 @@ html.introShort #splash.out{animation-duration:.25s!important}
   <div class="st-side" id="stSide"></div>
   <div class="st-foot">
     <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-    <div class="muted stnote v">網頁版本：v189</div>
+    <div class="muted stnote v">網頁版本：v192</div>
   </div>
   <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
@@ -1812,16 +1812,38 @@ function anomaly(it,date){
 }
 /* 只提醒一次：數字輸入完（離開欄位或按 ＋／－ 停頓後）若差很多，所有人的畫面都會同步跳出黃色提醒，8 秒後自動消失 */
 const alerted={},warnTimers={},seenAlert={},warnTxt={};let alertsInit=false;
+const editBase={},warnBase={};   // v190 取消鈕用：editBase＝這一輪輸入「之前」的數字；warnBase＝跳出提醒的那次輸入之前的數字（只有自己輸入的才有，別人同步來的提醒沒有）
 function paintWarn(id){const c=cards[id];if(!c)return false;const wl=c.el.querySelector('.warnline'),k=curDate+'|'+id,t=warnTxt[k];
   c.el.classList.toggle('warn',!!t);wl.classList.toggle('hidden',!t);
-  if(t){wl.innerHTML=ICN('alert');wl.appendChild(document.createTextNode(' 請再確認：'+t));const b=document.createElement('button');b.type='button';b.className='okbtn';b.textContent='沒問題';wl.appendChild(b);wl.onclick=()=>{delete warnTxt[k];paintWarn(id);const was=catSel;renderChips();if(catSel!==was)renderItems(false)}}
+  if(t){wl.innerHTML=ICN('alert');wl.appendChild(document.createTextNode(' 請再確認：'+t));
+    const b=document.createElement('button');b.type='button';b.className='okbtn';b.textContent='確認';wl.appendChild(b);
+    if(warnBase[k]!==undefined&&c.commit){const x=document.createElement('button');x.type='button';x.className='okbtn cxbtn';x.textContent='取消';wl.appendChild(x)}
+    wl.onclick=e=>{
+      if(e.target.closest&&e.target.closest('.cxbtn')){cancelWarn(id);return}
+      delete warnTxt[k];delete warnBase[k];paintWarn(id);const was=catSel;renderChips();if(catSel!==was)renderItems(false)}}
   return true}
+/* v190 「取消」：數字打錯時，一鍵改回輸入之前的數字（原本沒填就清空），並把游標放回數量欄方便重打 */
+function cancelWarn(id){
+  const c=cards[id],k=curDate+'|'+id,base=warnBase[k];
+  if(!c||!c.commit||base===undefined)return;
+  if(isLocked(curDate)){lockHint();return}
+  const had=hasVal(base);
+  delete warnTxt[k];delete warnBase[k];
+  c.commit(had?String(base):'');
+  delete editBase[k];alerted[k]=valOf(curDate,id);   // 改回去的數字視為已確認過，不要又跳提醒；之後再輸入新的數字仍會照常檢查
+  c.inp.value=had?String(base):'';
+  paintWarn(id);renderChips();
+  toast(had?'已取消，改回 '+base:'已取消，數字已清空');
+  try{c.inp.focus()}catch(e){}
+}
 function showWarn(id,text){warnTxt[curDate+'|'+id]=text;renderChips();return paintWarn(id)}
 function checkAnomaly(it){
   const key=curDate+'|'+it.id,v=valOf(curDate,it.id);
+  const base=editBase[key];delete editBase[key];
   if(alerted[key]===v)return;            // 同一個數字不重複提醒
   alerted[key]=v;
   const t=anomaly(it,curDate);if(!t)return;
+  if(base!==undefined)warnBase[key]=base;else delete warnBase[key];
   showWarn(it.id,t);
   const ts=Date.now();seenAlert[key]=ts;   // 同步給其他人（自己不會再重複跳）
   try{Promise.resolve(store.setField(curDate,'alert/'+it.id,{t:ts,x:t})).catch(()=>{})}catch(e){}
@@ -1904,6 +1926,7 @@ function renderItemsInner(){
       const prev=valOf(curDate,it.id);
       if((hasVal(prev)?Number(prev):'')===v)return;           // 沒有改變
       const day=dayOf(curDate);day.values=day.values||{};if(hasVal(v))day.values[it.id]=v;else delete day.values[it.id];
+      {const bk=curDate+'|'+it.id;if(editBase[bk]===undefined)editBase[bk]=hasVal(prev)?prev:'';delete warnBase[bk]}
       delete warnTxt[curDate+'|'+it.id];writeField(curDate,'v',it.id,v);flashEl(inp);
       pushUndo(curDate,[{id:it.id,prev:hasVal(prev)?prev:'',next:v}]);
       refreshCard(it.id);renderChips();updateProg();scheduleDone();
@@ -1936,7 +1959,7 @@ function renderItemsInner(){
     });
     ni.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();ni.blur()}});
     ni.addEventListener('blur',()=>{ne.classList.add('hidden');refreshCard(it.id)});
-    parent.appendChild(el);cards[it.id]={el,inp};refreshCard(it.id,true);
+    parent.appendChild(el);cards[it.id]={el,inp,commit};refreshCard(it.id,true);
   };
   const grouped=groupOn&&!query&&catSel==='全部';box.classList.toggle('grouped',!!grouped);
   const _gk=grouped?[...new Set(list.map(it=>it.cat||'未分類'))]:[];
