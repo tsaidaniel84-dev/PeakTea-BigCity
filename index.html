@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#41695b">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="192">
+<meta name="app-version" content="196">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -1236,6 +1236,11 @@ html.introShort #splash.out{animation-duration:.25s!important}
 #histTable tr.closed td .sp{opacity:.55}
 .htab .clsTag{display:inline-block;max-width:72px;overflow:hidden;text-overflow:ellipsis;vertical-align:middle;font-size:12px;font-weight:700;color:var(--clsfg);letter-spacing:.5px}
 #closedBanner .cbt{flex:1;min-width:0;overflow-wrap:anywhere}
+.warnline .wt{min-width:0}
+.htab .clsTag.sub{display:block;margin:2px auto 0;font-size:11px;font-weight:600}
+/* v196 提示訊息：靠左 50% 定位時可用寬度只剩半個螢幕，文字一長就被擠成好幾行、「復原」鈕被壓成直的 → 依內容撐開寬度、按鈕不換行 */
+.toast{width:max-content}
+.toast .tact{white-space:nowrap;flex:none}
 .dlg.clsdlg{align-items:flex-start;padding-top:calc(10vh + env(safe-area-inset-top,0px))}
 .clsin{width:100%;height:46px;font-size:16px;padding:0 12px;margin:0 0 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);box-sizing:border-box}
 .clsin:focus{outline:0;border-color:var(--accent)}
@@ -1361,7 +1366,7 @@ html.introShort #splash.out{animation-duration:.25s!important}
   <div class="st-side" id="stSide"></div>
   <div class="st-foot">
     <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-    <div class="muted stnote v">網頁版本：v192</div>
+    <div class="muted stnote v">網頁版本：v196</div>
   </div>
   <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
@@ -1629,7 +1634,10 @@ function updateDateUI(){
    不受「過去日期鎖定」限制（只是標記，不會改到任何數字），按「復原」可還原。 */
 function closedWhy(d){const r=S.days[d];if(!r||!r.closed)return '';const v=String(r.closed).trim();return v==='1'?'公休':v.slice(0,20)}
 function isClosed(d){return !!closedWhy(d)}
+/* v193 休息日而且還沒填任何數字 = 「休息中」：進度條顯示原因、不顯示「未填」分類、分組不顯示 0/N（有人在休息日照樣盤點就當一般的一天） */
+function restDay(d){return isClosed(d)&&!dayItems(d).some(i=>hasVal(valOf(d,i.id)))}
 function renderClosed(){
+  refreshRest();
   const why=closedWhy(curDate),bn=$('closedBanner'),mb=$('btnClosed');
   if(mb)mb.textContent=why?'修改休息原因':'設為休息日';
   if(!bn)return;
@@ -1641,6 +1649,8 @@ function renderClosed(){
   const c=document.createElement('button');c.type='button';c.className='bbtn';c.textContent='取消休息';c.onclick=()=>setClosed(curDate,'');
   a.appendChild(e);a.appendChild(c);bn.appendChild(s);bn.appendChild(a);
 }
+let _restKey='';
+function refreshRest(){const k=curDate+'|'+(restDay(curDate)?closedWhy(curDate):'');if(k===_restKey)return;_restKey=k;try{updateProg();renderChips()}catch(e){}}
 function setClosed(d,why){   // why 為空字串＝取消休息日
   if(!store){toast('還在連線中，請稍後再試');return}
   why=String(why||'').trim().slice(0,8);
@@ -1702,12 +1712,16 @@ function goToItem(date,itemId){
 $('prevDay').onclick=()=>shift(-1);$('nextDay').onclick=()=>shift(1);
 $('btnToday').onclick=()=>loadDate(todayStr);
 $('datePick').onchange=e=>{if(e.target.value)loadDate(e.target.value)};
-/* v189 電腦版：日期欄是疊在日期列上的透明輸入框。手機點下去會直接跳出月曆，電腦瀏覽器點下去只會選到「年／月／日」其中一格、
-   不會開月曆（月曆小圖示又被藏起來了）→ 用滑鼠（或按 Enter／空白鍵）時主動打開月曆。觸控裝置維持原本的行為，免得月曆開兩次。 */
+/* v189／v195 電腦版：日期欄是疊在日期列上的透明輸入框。手機點下去會直接跳出月曆，電腦瀏覽器點下去只會選到「年／月／日」其中一格、
+   不會開月曆（月曆小圖示又被藏起來了）→ 滑鼠、觸控筆、鍵盤（Enter／空白鍵）操作時主動打開月曆。
+   用「這一下是不是手指點的」來判斷，不用「這台裝置有沒有滑鼠」（觸控螢幕筆電、遠端桌面那種判斷會不準）；手指點維持原本行為，免得月曆開兩次。 */
 (function(){const dp=$('datePick');if(!dp)return;
-  const open=()=>{try{if(window.matchMedia&&matchMedia('(hover:hover) and (pointer:fine)').matches&&dp.showPicker)dp.showPicker()}catch(_){}};
-  dp.addEventListener('click',open);
-  dp.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open()}});
+  const open=pt=>{
+    if(pt==='touch')return;
+    if(pt===undefined&&window.matchMedia&&matchMedia('(pointer:coarse)').matches)return;   // 舊瀏覽器的 click 沒有 pointerType：退而用「主要輸入是手指」判斷
+    try{if(dp.showPicker)dp.showPicker()}catch(_){}};
+  dp.addEventListener('click',e=>open(e.pointerType));
+  dp.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();open('key')}});
 })();
 
 /* ---------- 停用品項 ---------- */
@@ -1755,7 +1769,7 @@ function renderChips(){
   const NI=dayItems(curDate);
   const unfilled=NI.filter(i=>!hasVal(valOf(curDate,i.id)));
   // 全部填完就隱藏「未填」鈕；正在看「未填」時先保留（不然畫面會突然空掉），切到別的分類後才消失
-  const list=[['全部',NI],...(unfilled.length||catSel==='未填'?[['未填',unfilled]]:[]),...cats().map(c=>[c,NI.filter(i=>i.cat===c)])];
+  const list=[['全部',NI],...((unfilled.length&&!restDay(curDate))||catSel==='未填'?[['未填',unfilled]]:[]),...cats().map(c=>[c,NI.filter(i=>i.cat===c)])];
   const hasAnyMin=NI.some(hasMin);const wn=NI.filter(i=>warnTxt[curDate+'|'+i.id]);if(catSel==='待確認'&&!wn.length)catSel='全部';
   if(hasAnyMin)list.splice(list[1]&&list[1][0]==='未填'?2:1,0,['需叫貨',NI.filter(isLow)]);
   if(catSel==='需叫貨'&&!hasAnyMin)catSel='全部';
@@ -1765,7 +1779,7 @@ function renderChips(){
   list.forEach(([c,its])=>{
     const b=document.createElement('button');b.className='chip'+(catSel===c?' on':'')+(c==='需叫貨'&&its.length?' alert':'')+(c==='待確認'?' warnchip':'')+(c==='未填'&&its.length?' unf':'');
     const filled=its.filter(i=>hasVal(valOf(curDate,i.id))).length;
-    b.dataset.n=Math.min([...c].length,6);b.innerHTML='<span class="cl">'+esc(c)+'</span><small>'+((c==='未填'||c==='需叫貨'||c==='待確認')?its.length:filled+'/'+its.length)+'</small>';
+    b.dataset.n=Math.min([...c].length,6);b.innerHTML='<span class="cl">'+esc(c)+'</span><small>'+((c==='未填'||c==='需叫貨'||c==='待確認'||restDay(curDate))?its.length:filled+'/'+its.length)+'</small>';   // 休息日：只顯示品項數，不顯示「0/22」
     b.onclick=()=>{catSel=c;renderChips();renderItems(false)};
     box.appendChild(b);
   });
@@ -1815,7 +1829,7 @@ const alerted={},warnTimers={},seenAlert={},warnTxt={};let alertsInit=false;
 const editBase={},warnBase={};   // v190 取消鈕用：editBase＝這一輪輸入「之前」的數字；warnBase＝跳出提醒的那次輸入之前的數字（只有自己輸入的才有，別人同步來的提醒沒有）
 function paintWarn(id){const c=cards[id];if(!c)return false;const wl=c.el.querySelector('.warnline'),k=curDate+'|'+id,t=warnTxt[k];
   c.el.classList.toggle('warn',!!t);wl.classList.toggle('hidden',!t);
-  if(t){wl.innerHTML=ICN('alert');wl.appendChild(document.createTextNode(' 請再確認：'+t));
+  if(t){wl.innerHTML='';const tx=document.createElement('span');tx.className='wt';tx.innerHTML=ICN('alert');tx.appendChild(document.createTextNode(' 請再確認：'+t));wl.appendChild(tx);   // 圖示和文字放同一個區塊，才不會圖示自己佔一行
     const b=document.createElement('button');b.type='button';b.className='okbtn';b.textContent='確認';wl.appendChild(b);
     if(warnBase[k]!==undefined&&c.commit){const x=document.createElement('button');x.type='button';x.className='okbtn cxbtn';x.textContent='取消';wl.appendChild(x)}
     wl.onclick=e=>{
@@ -1989,7 +2003,7 @@ function syncGall(){const b=document.querySelector('#items .gall');if(b&&b._sync
 function updateGroupHeads(auto){
   document.querySelectorAll('#items .grp').forEach(g=>{
     const c=g.dataset.cat,cs=[...g.querySelectorAll('.item')],n=cs.filter(x=>x.classList.contains('filled')).length;
-    g.querySelector('.gt').textContent=c;g.querySelector('.gc').textContent=(cs.length>0&&n===cs.length?'✓ ':'')+n+'/'+cs.length;
+    g.querySelector('.gt').textContent=c;g.querySelector('.gc').textContent=restDay(curDate)?'':(cs.length>0&&n===cs.length?'✓ ':'')+n+'/'+cs.length;
     const done=cs.length>0&&n===cs.length;g.classList.toggle('done',done);
     if(false&&auto===true&&done&&wasDone[c]===false&&!g.contains(document.activeElement)){const gh=g.querySelector('.gh'),t0=gh.getBoundingClientRect().top,y0=window.scrollY;g.classList.add('closed');
       const maxY=Math.max(0,document.documentElement.scrollHeight-window.innerHeight);
@@ -2205,7 +2219,7 @@ function updateProg(){
   const its=dayItems(curDate);const n=its.filter(i=>hasVal(valOf(curDate,i.id))).length;
   const pc=its.length?n/its.length*100:0,bar=$('progBar');
   bar.style.width=pc+'%';bar.style.setProperty('--p',Math.max(pc,1));
-  {const pt=document.querySelector('#prog .pt');if(pt){pt.textContent=pc>0?'PEAK TEA · '+Math.round(pc)+'%':'PEAK TEA';const pw=document.querySelector('#prog .ptw');if(pw)pw.textContent=pt.textContent;pt.style.clipPath='inset(0 0 0 '+pc+'%)';setPW()}
+  {const pt=document.querySelector('#prog .pt');if(pt){pt.textContent=restDay(curDate)?'PEAK TEA · '+closedWhy(curDate):pc>0?'PEAK TEA · '+Math.round(pc)+'%':'PEAK TEA';const pw=document.querySelector('#prog .ptw');if(pw)pw.textContent=pt.textContent;pt.style.clipPath='inset(0 0 0 '+pc+'%)';setPW()}
    const all=its.length>0&&n===its.length;
    if(progDone===false&&all){const pg=$('prog');pg.classList.add('cele');setTimeout(()=>pg.classList.remove('cele'),1600); if(navigator.vibrate)navigator.vibrate([20,50,20])}
    progDone=all}
@@ -2302,7 +2316,7 @@ function renderHistory(scrollToday){
   for(let d=1;d<=days;d++){
     const ds=y+'-'+pad(m)+'-'+pad(d),r=S.days[ds];
     if(hStaff&&!(r&&r.staff===hStaff))continue;   // 人員篩選：只留這個人盤點的日子
-    h+='<tr class="'+(hasData(r)?'has':'')+(ds===curDate?' cur':'')+(r&&r.closed?' closed':'')+'"><td class="day'+(ds===todayStr?' tdy':'')+'" data-d="'+ds+'">'+d+'</td><td>'+WD[new Date(y,m-1,d).getDay()]+'</td><td class="stf"'+(r&&(r.staff||typeof r.updatedAt==='number')?(()=>{const lt=typeof r.updatedAt==='number'?'最後編輯 '+fmtEditFull(r.updatedAt):'最後編輯時間未記錄';return' title="'+esc((+ds.slice(5,7))+'/'+(+ds.slice(8))+(r.staff?' '+r.staff:'')+(r.closed?'（休息：'+closedWhy(ds)+'）':'')+'；'+lt)+'" data-tip="'+esc((+ds.slice(5,7))+'/'+(+ds.slice(8))+(r.staff?' '+r.staff:'')+(r.closed?'（休息：'+closedWhy(ds)+'）':'')+'\n'+lt)+'"'})():'')+'>'+(r&&r.staff?'<span class="sp" style="--c:var(--pc-'+histTone(ds,r.staff)+')">'+esc(r.staff)+'</span>':(r&&r.closed?'<span class="clsTag">'+esc(closedWhy(ds))+'</span>':''))+'</td>'+
+    h+='<tr class="'+(hasData(r)?'has':'')+(ds===curDate?' cur':'')+(r&&r.closed?' closed':'')+'"><td class="day'+(ds===todayStr?' tdy':'')+'" data-d="'+ds+'">'+d+'</td><td>'+WD[new Date(y,m-1,d).getDay()]+'</td><td class="stf"'+(r&&(r.staff||typeof r.updatedAt==='number')?(()=>{const lt=typeof r.updatedAt==='number'?'最後編輯 '+fmtEditFull(r.updatedAt):'最後編輯時間未記錄';return' title="'+esc((+ds.slice(5,7))+'/'+(+ds.slice(8))+(r.staff?' '+r.staff:'')+(r.closed?'（休息：'+closedWhy(ds)+'）':'')+'；'+lt)+'" data-tip="'+esc((+ds.slice(5,7))+'/'+(+ds.slice(8))+(r.staff?' '+r.staff:'')+(r.closed?'（休息：'+closedWhy(ds)+'）':'')+'\n'+lt)+'"'})():'')+'>'+(r&&r.staff?'<span class="sp" style="--c:var(--pc-'+histTone(ds,r.staff)+')">'+esc(r.staff)+'</span>'+(r&&r.closed?'<span class="clsTag sub">'+esc(closedWhy(ds))+'</span>':''):(r&&r.closed?'<span class="clsTag">'+esc(closedWhy(ds))+'</span>':''))+'</td>'+
       its.map(i=>{const v=r&&r.values?r.values[i.id]:'';const nt=r&&r.inotes&&r.inotes[i.id]?r.inotes[i.id]:'';const an=(r&&r.values)?anomOf(i.id,ds):null;const cl=((lowVal(i,v)?'lowc ':'')+(nt?'hasn ':'')+(an?'anom'+an.lvl:'')).trim();const tip=[an?an.text:'',lowVal(i,v)?'低於最低量（最低 '+i.min+'）':'',nt?'備註：'+nt:''].filter(Boolean);return'<td'+(cl?' class="'+cl+'"':'')+(tip.length?' title="'+esc(tip.join('；'))+'" data-tip="'+esc(ds.slice(5).replace('-','/')+' '+i.name+'\n'+tip.join('\n'))+'"':'')+'>'+(hasVal(v)?esc(v):'')+'</td>'}).join('')+'</tr>';
   }
   t.innerHTML=h+'</tbody>';
@@ -2619,7 +2633,7 @@ $('cfgSave').onclick=()=>{
 };
 
 /* ---------- 匯出 Excel（ExcelJS：分類分組排序、顏色、凍結欄列、低庫存標示） ---------- */
-const XC={green:'FF3F6B5A',greenDk:'FF2F5446',greenBg:'FFEAF2EE',orange:'FFC4551B',line:'FFD6DED9',zebra:'FFF6F9F7',text:'FF24332D',muted:'FF5F7068',red:'FFC0392B',redBg:'FFFDE3DE',up:'FF2F7D4F',wkBg:'FFFDF1E6',white:'FFFFFFFF'};
+const XC={green:'FF3F6B5A',greenDk:'FF2F5446',greenBg:'FFEAF2EE',orange:'FFC4551B',line:'FFD6DED9',zebra:'FFF6F9F7',text:'FF24332D',muted:'FF5F7068',red:'FFC0392B',redBg:'FFFDE3DE',up:'FF2F7D4F',wkBg:'FFFDF1E6',white:'FFFFFFFF',restBg:'FFE6E4DC',restFg:'FF7C837E'};
 const XPAL=[['FFDDEFE5','FF2F6B4F'],['FFFBE6D3','FFB0510F'],['FFDEE9F7','FF2B5C9A'],['FFEFE2F2','FF7A3E8A'],['FFFFF1C7','FF8A6A00'],['FFD9F0F0','FF1E6E6E'],['FFFAD9E1','FFA03A56'],['FFE3EAEE','FF47606E']];
 const XF='Microsoft JhengHei';
 const xfont=o=>Object.assign({name:XF,size:11,color:{argb:XC.text}},o||{});
@@ -2658,11 +2672,11 @@ function xGrid(wb,name,title,items,rows,o){   // 日期 × 品項 的方格表�
   const lines=Math.max(1,...sorted.map((it,k)=>Math.ceil(strW(it.name+(it.unit?'('+it.unit+')':''))/(wd[k]-1))));
   ws.getRow(2).height=22;ws.getRow(3).height=Math.min(84,16*lines+8);
   const firstCols=new Set();let cc=4;gs.forEach(g=>{firstCols.add(cc);cc+=g.items.length});
-  rows.forEach((r,ri)=>{const rn=4+ri,row=ws.getRow(rn),bg=r.wk?XC.wkBg:(ri%2?XC.zebra:XC.white);
-    [r.label,r.wd,r.staff||''].forEach((v,k)=>{const c=row.getCell(k+1);c.value=v;c.font=xfont({bold:k===0,color:{argb:r.wk&&k<2?XC.orange:XC.text}});c.fill=xfill(bg);
-      c.alignment={vertical:'middle',horizontal:'center'};c.border=xbox});
+  rows.forEach((r,ri)=>{const rn=4+ri,row=ws.getRow(rn),bg=r.closed?XC.restBg:r.wk?XC.wkBg:(ri%2?XC.zebra:XC.white);   // 休息日整列灰底，人員欄寫原因
+    [r.label,r.wd,r.closed?(r.staff?r.staff+'（'+r.closed+'）':r.closed):(r.staff||'')].forEach((v,k)=>{const c=row.getCell(k+1);c.value=v;c.font=xfont({bold:k===0,color:{argb:r.closed?XC.restFg:r.wk&&k<2?XC.orange:XC.text}});c.fill=xfill(bg);
+      c.alignment={vertical:'middle',horizontal:'center',shrinkToFit:k===2&&!!r.closed};c.border=xbox});
     sorted.forEach((it,k)=>{const c=row.getCell(4+k),v=r.values&&r.values[it.id],nv=num(v),low=lowVal(it,v);
-      c.value=nv;c.numFmt='General';c.font=xfont({bold:low,color:{argb:low?XC.red:XC.text}});c.fill=xfill(low?XC.redBg:bg);
+      c.value=nv;c.numFmt='General';c.font=xfont({bold:low,color:{argb:low?XC.red:r.closed?XC.restFg:XC.text}});c.fill=xfill(low?XC.redBg:bg);
       c.alignment={vertical:'middle',horizontal:'center'};c.border=Object.assign({},xbox,firstCols.has(4+k)?{left:{style:'medium',color:{argb:gs.find(g=>g.items.includes(it)).fg}}}:{})});
   });
   xPage(ws,true,'2:3');return ws;
@@ -2678,7 +2692,7 @@ async function buildWorkbook(){
     const N=9,ws=wb.addWorksheet('當日盤點',{properties:{tabColor:{argb:XC.green},defaultRowHeight:21},views:[{state:'frozen',ySplit:4,showGridLines:false}]});
     ws.columns=[{width:10},{width:24},{width:8},{width:15},{width:12},{width:10},{width:9},{width:10},{width:30}];
     xBanner(ws,1,N,(CONFIG.storeName?CONFIG.storeName+'　':'')+'每日盤點表',17,XC.green,34);
-    xBanner(ws,2,N,'日期　'+curDate+'（週'+WD[parse(curDate).getDay()]+'）　　盤點人員　'+(cur.staff||'—'),11,XC.greenBg,24,XC.greenDk);
+    xBanner(ws,2,N,'日期　'+curDate+'（週'+WD[parse(curDate).getDay()]+'）'+(isClosed(curDate)?'　休息日：'+closedWhy(curDate):'')+'　　盤點人員　'+(cur.staff||'—'),11,XC.greenBg,24,XC.greenDk);
     ws.getRow(3).height=6;
     ['分類','品項','單位','前次'+(p?'\n'+p.date:''),'今日盤點','增減','最低量','狀態','備註'].forEach((t,k)=>xHead(ws.getCell(4,k+1),t));ws.getRow(4).height=36;
     let r=5,filled=0,low=0;
@@ -2706,7 +2720,7 @@ async function buildWorkbook(){
     const [yy,mm]=curDate.split('-').map(Number),dn=new Date(yy,mm,0).getDate(),r1=v=>Math.round(v*10)/10,N=14;
     const ws=wb.addWorksheet('月彙整',{properties:{tabColor:{argb:XC.orange},defaultRowHeight:21},views:[{state:'frozen',ySplit:4,showGridLines:false}]});
     ws.columns=[{width:10},{width:24},{width:8},{width:11},{width:9},{width:9},{width:9},{width:9},{width:9},{width:9},{width:11},{width:11},{width:9},{width:13}];
-    xBanner(ws,1,N,'月彙整　'+yy+'年'+mm+'月',16,XC.orange,32);
+    {const nc=monthDates(yy+'-'+pad(mm)).filter(isClosed).length;xBanner(ws,1,N,'月彙整　'+yy+'年'+mm+'月'+(nc?'　（休息 '+nc+' 天）':''),16,XC.orange,32)}
     xBanner(ws,2,N,'估計用量／進貨：把相鄰兩次盤點的減少量／增加量加總。同一段時間內有進貨又有用量時會互相抵銷，僅供參考。',10,'FFFDF1E6',30,XC.muted);
     ws.getRow(3).height=6;
     ['分類','品項','單位','有紀錄\n天數','月初','月底','增減','平均','最高','最低','估計用量','估計進貨','最低量','低於最低量\n天數'].forEach((t,k)=>xHead(ws.getCell(4,k+1),t,XC.greenDk));ws.getRow(4).height=36;
@@ -2733,10 +2747,10 @@ async function buildWorkbook(){
   /* 3. 本月每日、4. 全部歷史：方格表 */
   {
     const [y,m]=curDate.split('-').map(Number),days=new Date(y,m,0).getDate(),rows=[];
-    for(let d=1;d<=days;d++){const r=S.days[y+'-'+pad(m)+'-'+pad(d)]||{},w=new Date(y,m-1,d).getDay();rows.push({label:m+'/'+d,wd:'週'+WD[w],wk:w===0||w===6,staff:r.staff,values:r.values})}
-    xGrid(wb,y+'年'+m+'月',y+'年'+m+'月　每日盤點紀錄',itsM,rows,{tab:'FF4A86D8',dateW:8});
-    const ra=Object.keys(S.days).filter(d=>hasData(S.days[d])).sort().map(d=>{const r=S.days[d],w=parse(d).getDay();return{label:d,wd:'週'+WD[w],wk:w===0||w===6,staff:r.staff,values:r.values}});
-    xGrid(wb,'全部歷史','全部歷史紀錄　共 '+ra.length+' 天',itsA,ra,{tab:'FF8A6BB8',dateW:12});
+    for(let d=1;d<=days;d++){const r=S.days[y+'-'+pad(m)+'-'+pad(d)]||{},w=new Date(y,m-1,d).getDay();rows.push({label:m+'/'+d,wd:'週'+WD[w],wk:w===0||w===6,staff:r.staff,values:r.values,closed:closedWhy(y+'-'+pad(m)+'-'+pad(d))})}
+    xGrid(wb,y+'年'+m+'月',y+'年'+m+'月　每日盤點紀錄'+(rows.some(x=>x.closed)?'（灰列＝休息日）':''),itsM,rows,{tab:'FF4A86D8',dateW:8});
+    const ra=Object.keys(S.days).filter(d=>hasData(S.days[d])||isClosed(d)).sort().map(d=>{const r=S.days[d],w=parse(d).getDay();return{label:d,wd:'週'+WD[w],wk:w===0||w===6,staff:r.staff,values:r.values,closed:closedWhy(d)}});
+    xGrid(wb,'全部歷史','全部歷史紀錄　共 '+ra.length+' 天'+(ra.some(x=>x.closed)?'（灰列＝休息日）':''),itsA,ra,{tab:'FF8A6BB8',dateW:12});
   }
 
   /* 5. 品項備註 */
