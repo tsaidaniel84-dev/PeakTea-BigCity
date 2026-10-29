@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#41695b">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="196">
+<meta name="app-version" content="198">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -1240,6 +1240,23 @@ html.introShort #splash.out{animation-duration:.25s!important}
 .htab .clsTag.sub{display:block;margin:2px auto 0;font-size:11px;font-weight:600}
 /* v196 提示訊息：靠左 50% 定位時可用寬度只剩半個螢幕，文字一長就被擠成好幾行、「復原」鈕被壓成直的 → 依內容撐開寬度、按鈕不換行 */
 .toast{width:max-content}
+/* v197 文字大小「特大」：以前日期列／盤點人員／歷史標題／設定頁的放大倍率被卡在「大」(1.15)，選特大看起來跟大一樣。
+   現在這些地方跟著放大到 1.3，放大時讓選項、按鈕自動換行，免得手機上被擠壞；品項清單那張卡片欄位很多，仍維持 1.15。 */
+html[data-big] #tab-settings .st-items{zoom:1.15}
+html[data-big]:not([data-layout="desktop"]) .swrow2{flex-wrap:wrap;row-gap:6px}
+html[data-big]:not([data-layout="desktop"]) .swrow2 .seg,html[data-big]:not([data-layout="desktop"]) .swrow2 .seg#themeSeg{flex:1 1 190px;min-width:0}   /* 電腦版右欄本來就是直排、選項寬度 100%，不用這條 */
+html[data-big] .seg button{padding-left:3px;padding-right:3px}
+html[data-big] .expbar{flex-wrap:wrap!important}
+html[data-big] .expbar .btn,html[data-big] .st-side .st-export .expbar .btn{flex:1 1 auto;min-width:max-content;white-space:nowrap}
+html[data-big] .swrow{gap:10px}
+#dateLabel .dmd,#dateLabel .dwk,#dateLabel .dtd{white-space:nowrap}
+/* v198 狀態列那一帶（iPhone 瀏海／時間／電量後面）：歷史頁、設定頁往下滑時，資料列會從那裡直接透出來，還會有模糊殘影。
+   盤點頁頂上本來就有一條霧面列蓋住；這裡補一層同樣的霧面，所有頁面一致。電腦版 safe-area 是 0，高度為 0，看不到。 */
+body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);z-index:9;background:var(--glass);-webkit-backdrop-filter:saturate(1.3) blur(14px);backdrop-filter:saturate(1.3) blur(14px);pointer-events:none;transition:opacity .15s}
+body.ptring::before{opacity:0}   /* 下拉重新整理時先收起，logo 才會放在沒有底色的空白處 */   /* 日期太長要換行時，只在「日期／（週幾）／今天」之間斷，不要斷在「（週」「三）」中間 */
+.banner{font-size:max(12px,calc(var(--fs-sm)*var(--k,1)))}
+.banner .bbtn{font-size:max(12px,calc(var(--fs-sm)*var(--k,1)))}
+
 .toast .tact{white-space:nowrap;flex:none}
 .dlg.clsdlg{align-items:flex-start;padding-top:calc(10vh + env(safe-area-inset-top,0px))}
 .clsin{width:100%;height:46px;font-size:16px;padding:0 12px;margin:0 0 12px;border-radius:10px;border:1.5px solid var(--line);background:var(--card);color:var(--ink);box-sizing:border-box}
@@ -1366,7 +1383,7 @@ html.introShort #splash.out{animation-duration:.25s!important}
   <div class="st-side" id="stSide"></div>
   <div class="st-foot">
     <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-    <div class="muted stnote v">網頁版本：v196</div>
+    <div class="muted stnote v">網頁版本：v198</div>
   </div>
   <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
@@ -1623,7 +1640,7 @@ function applyLock(){
 }
 function updateDateUI(){
   const d=parse(curDate);
-  $('dateLabel').innerHTML=(d.getMonth()+1)+'月'+d.getDate()+'日<span class="dwk">（週'+WD[d.getDay()]+'）</span>'+(curDate===todayStr?'<span class="dtd"> · 今天</span>':'');
+  $('dateLabel').innerHTML='<span class="dmd">'+(d.getMonth()+1)+'月'+d.getDate()+'日</span><span class="dwk">（週'+WD[d.getDay()]+'）</span>'+(curDate===todayStr?'<span class="dtd"> · 今天</span>':'');
   $('datePick').value=curDate;
   $('btnToday').classList.toggle('hidden',curDate===todayStr);
   applyLock();renderClosed();
@@ -1737,7 +1754,7 @@ const setPref=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
 let groupOn=getPref('pt_group','1')==='1';
 let collapsed={};try{collapsed=JSON.parse(getPref('pt_collapsed','{}'))||{}}catch(e){}
 const saveCollapsed=()=>setPref('pt_collapsed',JSON.stringify(collapsed));
-document.documentElement.style.setProperty('--k',getPref('pt_fs','1'));
+{const _k=+getPref('pt_fs','1')||1;document.documentElement.style.setProperty('--k',_k);document.documentElement.toggleAttribute('data-big',_k>1.15)}
 const noteOf=(date,id)=>{const d=S.days[date];return d&&d.inotes&&d.inotes[id]?String(d.inotes[id]):''};
 
 /* ---------- 復原（只存在這次開啟的網頁，每支手機各自） ---------- */
@@ -2610,8 +2627,8 @@ document.addEventListener('keydown',e=>{   // 電腦版快捷鍵：←→ 換日
   if(inQty&&(e.key==='ArrowDown'||e.key==='ArrowUp')){const all=[...document.querySelectorAll('#items input.qty')].filter(i=>!i.closest('.grp.closed')),n=all[all.indexOf(t)+(e.key==='ArrowDown'?1:-1)];if(n){n.focus();n.select();e.preventDefault()}}
 });
 function paintFs(){const k=getPref('pt_fs','1');document.querySelectorAll('#fsSeg button').forEach(b=>b.classList.toggle('on',b.dataset.k===k))}
-document.querySelectorAll('#fsSeg button').forEach(b=>b.onclick=()=>{setPref('pt_fs',b.dataset.k);document.documentElement.style.setProperty('--k',b.dataset.k);document.documentElement.style.setProperty('--kz',Math.min(+b.dataset.k,1.15));paintFs()});
-paintFs();document.documentElement.style.setProperty('--kz',Math.min(+getPref('pt_fs','1')||1,1.15));
+document.querySelectorAll('#fsSeg button').forEach(b=>b.onclick=()=>{setPref('pt_fs',b.dataset.k);document.documentElement.style.setProperty('--k',b.dataset.k);document.documentElement.style.setProperty('--kz',+b.dataset.k);document.documentElement.toggleAttribute('data-big',+b.dataset.k>1.15);paintFs()});
+paintFs();document.documentElement.style.setProperty('--kz',+getPref('pt_fs','1')||1);
 $('swGroup').checked=groupOn;
 $('swGroup').onchange=e=>{groupOn=e.target.checked;setPref('pt_group',groupOn?'1':'0');renderItems()};
 /* ---------- 同步設定 UI ---------- */
@@ -2937,7 +2954,7 @@ if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){window.add
   let sy=0,sx=0,pull=0,on=false,go=false;const TH=80;
   const wrap=document.querySelector('.wrap');
   const push=(k,p)=>'translateY(calc('+k.toFixed(1)+'px + env(safe-area-inset-top,0px)*'+p.toFixed(3)+'))';   // 頁面往下推開，logo 放在露出的空白處（沒有底色）
-  const hide=()=>{el.style.opacity=0;el.classList.remove('rdy');wrap.style.transition='transform .22s ease';wrap.style.transform=''};
+  const hide=()=>{el.style.opacity=0;el.classList.remove('rdy');wrap.style.transition='transform .22s ease';wrap.style.transform='';document.body.classList.remove('ptring')};
   const curTabName=()=>['daily','history','settings'].find(x=>!$('tab-'+x).classList.contains('hidden'))||'daily';
   const markSkip=()=>{try{sessionStorage.setItem('pt_skip_intro',String(Date.now()));sessionStorage.setItem('pt_return_tab',curTabName())}catch(e){}};
   const sleep=ms=>new Promise(r=>setTimeout(r,ms));
@@ -2960,10 +2977,10 @@ if('serviceWorker' in navigator&&/^https?:$/.test(location.protocol)){window.add
   document.addEventListener('touchstart',e=>{on=!go&&e.touches.length===1&&window.scrollY<=0&&!window.__dragging&&!e.target.closest('input,textarea,.grip,.chips,.nlist,.pal,.tbl,table,.gg,.gdrag');pull=0;if(on){sy=e.touches[0].clientY;sx=e.touches[0].clientX}},{passive:true});
   document.addEventListener('touchmove',e=>{if(!on)return;if(window.__dragging||document.querySelector('.dragging,.gdrag')){on=false;pull=0;hide();return}const dy=e.touches[0].clientY-sy,dx=Math.abs(e.touches[0].clientX-sx);
     if(dy<=0||dx>dy||window.scrollY>0){pull=0;hide();return}
-    pull=dy;const p=Math.min(1,dy/TH);el.style.transition='none';wrap.style.transition='none';el.style.opacity=Math.min(1,dy/50);wrap.style.transform=push(Math.min(dy,TH*1.4)*0.6,p);
+    pull=dy;const p=Math.min(1,dy/TH);el.style.transition='none';wrap.style.transition='none';el.style.opacity=Math.min(1,dy/50);wrap.style.transform=push(Math.min(dy,TH*1.4)*0.6,p);document.body.classList.add('ptring');
     el.style.setProperty('--p',p);el.classList.toggle('rdy',dy>=TH)},{passive:true});
   document.addEventListener('touchend',()=>{if(!on)return;on=false;el.style.transition='opacity .2s';wrap.style.transition='transform .22s ease';
-    if(pull>=TH){go=true;el.classList.remove('rdy');el.classList.add('go');el.style.setProperty('--p',1);el.style.opacity=1;wrap.style.transform=push(TH*0.6,1);doRefresh()}else hide();pull=0},{passive:true});
+    if(pull>=TH){go=true;el.classList.remove('rdy');el.classList.add('go');el.style.setProperty('--p',1);el.style.opacity=1;wrap.style.transform=push(TH*0.6,1);document.body.classList.add('ptring');doRefresh()}else hide();pull=0},{passive:true});
 })();
 /* ---------- 節日點綴：依「快到的節日」在 logo 上加小裝飾。自動判斷：節日前 14 天（2 週）至節日當天顯示，過了當天就拿掉 ---------- */
 (function(){
