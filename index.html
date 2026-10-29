@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#41695b">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="198">
+<meta name="app-version" content="200">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -1234,7 +1234,9 @@ html.introShort #splash.out{animation-duration:.25s!important}
 :root[data-theme="dark"]{--clsbg:#2a2e2a;--clsfg:#7d857d}
 #histTable tr.closed td:not(.tdy){background:var(--clsbg)!important;color:var(--clsfg)!important;font-weight:400!important;box-shadow:none!important}
 #histTable tr.closed td .sp{opacity:.55}
-.htab .clsTag{display:inline-block;max-width:72px;overflow:hidden;text-overflow:ellipsis;vertical-align:middle;font-size:12px;font-weight:700;color:var(--clsfg);letter-spacing:.5px}
+#histTable.meas .sp{max-width:none;overflow:visible}
+#histTable.meas .clsTag{white-space:nowrap;max-width:none}
+.htab .clsTag{display:inline-block;max-width:100%;overflow:hidden;white-space:normal;overflow-wrap:anywhere;line-height:1.25;vertical-align:middle;font-size:12px;font-weight:700;color:var(--clsfg);letter-spacing:.5px}
 #closedBanner .cbt{flex:1;min-width:0;overflow-wrap:anywhere}
 .warnline .wt{min-width:0}
 .htab .clsTag.sub{display:block;margin:2px auto 0;font-size:11px;font-weight:600}
@@ -1253,7 +1255,21 @@ html[data-big] .swrow{gap:10px}
 /* v198 狀態列那一帶（iPhone 瀏海／時間／電量後面）：歷史頁、設定頁往下滑時，資料列會從那裡直接透出來，還會有模糊殘影。
    盤點頁頂上本來就有一條霧面列蓋住；這裡補一層同樣的霧面，所有頁面一致。電腦版 safe-area 是 0，高度為 0，看不到。 */
 body::before{content:"";position:fixed;top:0;left:0;right:0;height:env(safe-area-inset-top,0px);z-index:9;background:var(--glass);-webkit-backdrop-filter:saturate(1.3) blur(14px);backdrop-filter:saturate(1.3) blur(14px);pointer-events:none;transition:opacity .15s}
-body.ptring::before{opacity:0}   /* 下拉重新整理時先收起，logo 才會放在沒有底色的空白處 */   /* 日期太長要換行時，只在「日期／（週幾）／今天」之間斷，不要斷在「（週」「三）」中間 */
+body.ptring::before{opacity:0}
+.hbar{position:fixed;top:env(safe-area-inset-top,0px);left:0;right:0;height:44px;z-index:10;display:flex;align-items:center;gap:6px;padding:0 max(12px,calc((100% - 720px)/2 + 12px));background:var(--glass);-webkit-backdrop-filter:saturate(1.3) blur(14px);backdrop-filter:saturate(1.3) blur(14px);border-bottom:1px solid var(--line);transform:translateY(-8px);opacity:0;pointer-events:none;transition:transform .18s ease,opacity .18s ease}
+.hbar.show{transform:none;opacity:1;pointer-events:auto}
+.hbar .hbb,.hbar .hbm{height:34px;border:1px solid var(--line);border-radius:11px;background:var(--card);color:var(--ink);display:flex;align-items:center;justify-content:center;flex:none}
+.hbar .hbb{width:36px;color:var(--accent);position:relative}
+.hbar .hbm{padding:0 12px;gap:4px;font-weight:800;font-size:15px;min-width:0}
+.hbar .i{width:18px;height:18px}
+.hbar .hbm .i{width:14px;height:14px;color:var(--muted)}
+.hbar .hbsp{flex:1}
+.hbar .hbdot{display:none;position:absolute;top:5px;right:5px;width:8px;height:8px;border-radius:50%;background:var(--sun)}
+.hbar .hbf.on .hbdot{display:block}
+html[data-layout="desktop"] .hbar{display:none!important}
+#tab-history.hbar-on .hhead{top:calc(env(safe-area-inset-top,0px) + 44px)}
+.hhead{transition:box-shadow .15s}
+.hhead.stuck{border-radius:0;box-shadow:0 7px 12px -9px rgba(0,0,0,.45)}   /* 下拉重新整理時先收起，logo 才會放在沒有底色的空白處 */   /* 日期太長要換行時，只在「日期／（週幾）／今天」之間斷，不要斷在「（週」「三）」中間 */
 .banner{font-size:max(12px,calc(var(--fs-sm)*var(--k,1)))}
 .banner .bbtn{font-size:max(12px,calc(var(--fs-sm)*var(--k,1)))}
 
@@ -1383,7 +1399,7 @@ body.ptring::before{opacity:0}   /* 下拉重新整理時先收起，logo 才會
   <div class="st-side" id="stSide"></div>
   <div class="st-foot">
     <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-    <div class="muted stnote v">網頁版本：v198</div>
+    <div class="muted stnote v">網頁版本：v200</div>
   </div>
   <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
@@ -2315,6 +2331,7 @@ function renderHistory(scrollToday){
   ensureFrom(need(histMonth+'-01'));   // 切到較早的月份：自動往前載入
   anCache={};anDates=null;
   $('monthPick').value=histMonth;
+  hbarUpdate();
   renderHChips();renderHStaff();
   document.querySelectorAll('#hSeg button').forEach(b=>b.classList.toggle('on',b.dataset.m===hMode));
   $('hTableWrap').classList.toggle('hidden',hMode!=='table');
@@ -2344,9 +2361,62 @@ function renderHistory(scrollToday){
     const date=td.parentElement.querySelector('td.day').dataset.d;
     goToItem(date,th&&th.dataset.id);
   });
+  fitStaffCol(hh,t,W);
   $('histHead').scrollLeft=$('histBody').scrollLeft;
   if(scrollToday===true)scrollToTodayRow(t);
 }
+/* v200 「人員」欄寬：表格畫好之後，量每個名字實際佔多寬，欄位撐到剛好放得下最長的名字（名字不可以被縮短成「螺…」）。
+   名字都很短（例如一個英文字母）時欄位才會變窄，最窄 46。休息原因可以折成兩行，所以只算一半寬。
+   （v199 用 canvas 估算，在 iPhone 上估得太小，名字被擠掉，已改掉。） */
+function fitStaffCol(hh,t,W){
+  if(!t.offsetParent)return;                         // 分頁還沒顯示（量不到）：維持預設 88，等切到歷史頁再量
+  t.classList.add('meas');
+  let need=0;
+  t.querySelectorAll('td.stf .sp').forEach(sp=>{need=Math.max(need,sp.offsetWidth)});
+  t.querySelectorAll('td.stf .clsTag').forEach(tg=>{const n=(tg.textContent||'').length||1;need=Math.max(need,Math.ceil(tg.offsetWidth/n)*Math.ceil(n/2))});
+  t.classList.remove('meas');
+  if(!need)return;
+  const w=Math.max(46,Math.min(150,Math.ceil(need)+18));      // 儲存格左右留白 16 + 邊框 2
+  if(w===W[2])return;
+  W[2]=w;const total=W.reduce((p,c)=>p+c,0);
+  [hh,t].forEach(el=>{const c=el.querySelectorAll('col')[2];if(c)c.style.width=w+'px';el.style.width=el.style.minWidth=total+'px'});
+}
+/* v199 歷史頁（手機版）往下滑時，上面那一整塊（標題、月份、篩選）都捲走了，看不出是幾月、要換月得捲回最上面。
+   → 捲過去之後黏一條細長列：‹ 2026年10月 › ＋ 篩選鈕（點了回到最上面看篩選；有篩選條件時亮一個小點）。
+   表頭改黏在這條列下面；表頭黏住時改成直角＋底下一道淡淡的陰影。電腦版版面不同，不顯示。 */
+const hbar=document.createElement('div');hbar.id='hBar';hbar.className='hbar';hbar.setAttribute('role','toolbar');hbar.setAttribute('aria-label','月份與篩選');
+hbar.innerHTML='<button type="button" class="hbb" data-a="prev" aria-label="上個月">'+ICN('chev-l')+'</button>'
+  +'<button type="button" class="hbm" data-a="pick" aria-label="選擇月份"><span id="hBarMon"></span>'+ICN('chev-d')+'</button>'
+  +'<button type="button" class="hbb" data-a="next" aria-label="下個月">'+ICN('chev-r')+'</button><span class="hbsp"></span>'
+  +'<button type="button" class="hbb hbf" data-a="filter" aria-label="回到最上面看篩選">'+ICN('search')+'<i class="hbdot"></i></button>';
+document.body.appendChild(hbar);
+const hbProbe=document.createElement('div');hbProbe.style.cssText='position:fixed;top:0;left:0;width:0;height:env(safe-area-inset-top,0px);visibility:hidden;pointer-events:none';document.body.appendChild(hbProbe);
+const HBAR_H=44;let _hbRaf=0;
+function hbarUpdate(){
+  const [y,m]=histMonth.split('-');$('hBarMon').textContent=y+'年'+(+m)+'月';
+  hbar.querySelector('.hbf').classList.toggle('on',!!(hQ||hStaff||hCat!=='全部'));
+  requestAnimationFrame(hbarSync);
+}
+function hbarSync(){
+  const tab=$('tab-history');if(!tab)return;
+  const on=!tab.classList.contains('hidden')&&!isDesk();
+  let show=false,stuck=false;
+  if(on){
+    const safe=hbProbe.offsetHeight||0,ref=hMode==='table'?$('hTableWrap'):$('hItemWrap');
+    show=window.scrollY>0&&ref.getBoundingClientRect().top<safe+HBAR_H+4;      // 篩選區已經捲出畫面
+    if(hMode==='table')stuck=$('histHead').getBoundingClientRect().top<=safe+(show?HBAR_H:0)+.5;
+  }
+  hbar.classList.toggle('show',show);tab.classList.toggle('hbar-on',show);
+  $('histHead').classList.toggle('stuck',stuck);
+}
+hbar.addEventListener('click',e=>{
+  const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a;
+  if(a==='prev')shiftMonth(-1);else if(a==='next')shiftMonth(1);
+  else if(a==='filter')window.scrollTo({top:0,behavior:'smooth'});
+  else if(a==='pick'){const mp=$('monthPick');try{if(mp.showPicker)mp.showPicker();else{mp.focus();mp.click()}}catch(_){try{mp.focus();mp.click()}catch(__){}}}
+});
+window.addEventListener('scroll',()=>{if(!_hbRaf)_hbRaf=requestAnimationFrame(()=>{_hbRaf=0;hbarSync()})},{passive:true});
+window.addEventListener('resize',hbarSync);
 function scrollToTodayRow(t){
   requestAnimationFrame(()=>{
     const tdy=t.querySelector('td.day.tdy');if(!tdy){window.scrollTo(0,0);return}
@@ -2598,6 +2668,7 @@ function switchTab(t){
   window.scrollTo(0,0);
   if(t==='history')renderHistory(false);
   if(t==='settings'){renderItemEditor();renderCfg();updateExpCount()}
+  try{hbarSync()}catch(e){}
 }
 document.querySelectorAll('#nav button').forEach(b=>b.onclick=()=>switchTab(b.dataset.t));
 
