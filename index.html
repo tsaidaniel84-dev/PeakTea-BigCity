@@ -8,7 +8,7 @@
 <meta name="theme-color" content="#41695b">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="mobile-web-app-capable" content="yes">
-<meta name="app-version" content="200">
+<meta name="app-version" content="201">
 <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
@@ -1269,7 +1269,23 @@ body.ptring::before{opacity:0}
 html[data-layout="desktop"] .hbar{display:none!important}
 #tab-history.hbar-on .hhead{top:calc(env(safe-area-inset-top,0px) + 44px)}
 .hhead{transition:box-shadow .15s}
-.hhead.stuck{border-radius:0;box-shadow:0 7px 12px -9px rgba(0,0,0,.45)}   /* 下拉重新整理時先收起，logo 才會放在沒有底色的空白處 */   /* 日期太長要換行時，只在「日期／（週幾）／今天」之間斷，不要斷在「（週」「三）」中間 */
+.hhead.stuck{border-radius:0;box-shadow:0 7px 12px -9px rgba(0,0,0,.45)}
+/* v201 (2) 盤點人員已填好時收成一行：名字、色盤、「全部收合」排在同一列 */
+.metarow .gall{margin:0 0 0 auto;flex:none;white-space:nowrap}
+html:not([data-layout="desktop"]) .metarow:has(#staff:not(:placeholder-shown)){flex-wrap:nowrap;gap:6px;padding:4px 8px 4px 10px;margin-bottom:8px}
+html:not([data-layout="desktop"]) .metarow:has(#staff:not(:placeholder-shown)) .mi{font-size:12px;color:var(--muted)}
+html:not([data-layout="desktop"]) .metarow:has(#staff:not(:placeholder-shown)) .avatar{width:22px;height:22px;margin-right:5px}
+html:not([data-layout="desktop"]) .metarow:has(#staff:not(:placeholder-shown)) input{flex:1 1 auto;width:auto;min-width:56px;height:32px;font-weight:700}
+html:not([data-layout="desktop"]) .metarow:has(#staff:not(:placeholder-shown)) .palbtn{width:32px;height:32px}
+html:not([data-layout="desktop"]) .metarow:has(#staff:not(:placeholder-shown)) .gall{padding:4px 10px}
+/* v201 (3) 品名旁「＋」備註鈕：看得到的圖示不變，可以點的範圍從 24×16 放大到 40×36（上下往外延伸，下面壓到「前次」那一列時由「前次」優先） */
+.item .nbtn{min-width:40px;min-height:36px;margin:-10px -8px -10px -6px;padding:0 12px;justify-content:flex-start}
+/* v201 (6) 「回到今天」浮動鈕 */
+.htoday{position:fixed;right:14px;bottom:calc(env(safe-area-inset-bottom,0px) + 78px);z-index:15;display:flex;align-items:center;gap:5px;height:38px;padding:0 14px 0 11px;border-radius:19px;border:1px solid var(--line);background:var(--card);color:var(--accent);font-weight:800;font-size:14px;box-shadow:0 6px 18px rgba(34,51,44,.18)}
+.htoday.hidden{display:none}
+.htoday .i{width:16px;height:16px}
+html[data-layout="desktop"] .htoday{display:none!important}
+   /* 下拉重新整理時先收起，logo 才會放在沒有底色的空白處 */   /* 日期太長要換行時，只在「日期／（週幾）／今天」之間斷，不要斷在「（週」「三）」中間 */
 .banner{font-size:max(12px,calc(var(--fs-sm)*var(--k,1)))}
 .banner .bbtn{font-size:max(12px,calc(var(--fs-sm)*var(--k,1)))}
 
@@ -1399,7 +1415,7 @@ html[data-layout="desktop"] .hbar{display:none!important}
   <div class="st-side" id="stSide"></div>
   <div class="st-foot">
     <div class="muted stnote">加入主畫面：iPhone 用 Safari 點「分享」再點「加入主畫面」；Android 用 Chrome 點選單再點「安裝應用程式」。</div>
-    <div class="muted stnote v">網頁版本：v200</div>
+    <div class="muted stnote v">網頁版本：v201</div>
   </div>
   <details class="card sync st-sync" id="syncBox">
     <summary><span><svg class="i" aria-hidden="true"><use href="#i-cloud"/></svg>同步設定</span></summary>
@@ -1955,7 +1971,7 @@ function renderItems(keep){   // keep!==false：保留捲動位置；換日期�
 }
 function renderItemsInner(){
   updateProg();
-  const box=$('items');box.innerHTML='';cards={};
+  const box=$('items');box.innerHTML='';cards={};document.querySelectorAll('.metarow .gall').forEach(x=>x.remove());
   const list=dayItems(curDate).filter(visible);
   if(!list.length){box.innerHTML='<div class="empty">'+(S.items.length?'沒有符合的品項':'尚無品項，請到「設定」新增')+'</div>';return}
   const buildCard=(it,parent)=>{
@@ -2026,13 +2042,13 @@ function renderItemsInner(){
     if(_gk.length>1){const ga=document.createElement('button');ga.type='button';ga.className='gall';
       const sync=()=>{ga.innerHTML=_gk.every(c=>collapsed[c])?ICN('chev-d')+' 全部展開':ICN('chev-u')+' 全部收合'};ga._sync=sync;sync();
       ga.onclick=()=>{const close=!_gk.every(c=>collapsed[c]);_gk.forEach(c=>collapsed[c]=close);document.querySelectorAll('#items .grp').forEach(g=>g.classList.toggle('closed',close));saveCollapsed();sync()};
-      box.insertBefore(ga,box.firstChild);
+      document.querySelector('.metarow').appendChild(ga);   // v201 放在「盤點人員」那一列的右邊，不再獨佔一整列
       box.addEventListener('click',e=>{if(e.target.closest('.gh'))sync()});}
   }else list.forEach(it=>buildCard(it,box));
   updateGroupHeads('init');
 }
 const wasDone={};let doneT=0;
-function syncGall(){const b=document.querySelector('#items .gall');if(b&&b._sync)b._sync()}
+function syncGall(){const b=document.querySelector('.metarow .gall');if(b&&b._sync)b._sync()}
 function updateGroupHeads(auto){
   document.querySelectorAll('#items .grp').forEach(g=>{
     const c=g.dataset.cat,cs=[...g.querySelectorAll('.item')],n=cs.filter(x=>x.classList.contains('filled')).length;
@@ -2397,18 +2413,43 @@ function hbarUpdate(){
   hbar.querySelector('.hbf').classList.toggle('on',!!(hQ||hStaff||hCat!=='全部'));
   requestAnimationFrame(hbarSync);
 }
+/* v201 「回到今天」浮動鈕：今天那一列不在畫面上（捲過頭了），或正在看別的月份時出現；點了回到今天 */
+const hToday=document.createElement('button');hToday.id='hTodayBtn';hToday.type='button';hToday.className='htoday hidden';document.body.appendChild(hToday);
+let _tbKey='';
 function hbarSync(){
   const tab=$('tab-history');if(!tab)return;
   const on=!tab.classList.contains('hidden')&&!isDesk();
-  let show=false,stuck=false;
+  let show=false,stuck=false,tb='';
   if(on){
     const safe=hbProbe.offsetHeight||0,ref=hMode==='table'?$('hTableWrap'):$('hItemWrap');
     show=window.scrollY>0&&ref.getBoundingClientRect().top<safe+HBAR_H+4;      // 篩選區已經捲出畫面
-    if(hMode==='table')stuck=$('histHead').getBoundingClientRect().top<=safe+(show?HBAR_H:0)+.5;
+    if(hMode==='table'){
+      stuck=$('histHead').getBoundingClientRect().top<=safe+(show?HBAR_H:0)+.5;
+      if(histMonth!==todayStr.slice(0,7))tb='month';
+      else{
+        const tdy=$('histTable').querySelector('td.day.tdy');
+        if(tdy){const r=tdy.getBoundingClientRect(),topEdge=safe+(show?HBAR_H:0)+$('histHead').offsetHeight,botEdge=innerHeight-($('nav').offsetHeight||64);
+          if(r.bottom<topEdge)tb='up';else if(r.top>botEdge)tb='down'}
+      }
+    }
   }
   hbar.classList.toggle('show',show);tab.classList.toggle('hbar-on',show);
   $('histHead').classList.toggle('stuck',stuck);
+  if(tb!==_tbKey){_tbKey=tb;hToday.dataset.k=tb;hToday.classList.toggle('hidden',!tb);
+    hToday.innerHTML=tb==='month'?ICN('chev-l')+'<span>回到本月</span>':tb?ICN(tb==='up'?'arrow-up':'arrow-down')+'<span>今天</span>':''}
 }
+hToday.addEventListener('click',()=>{
+  if(hToday.dataset.k==='month'){histMonth=todayStr.slice(0,7);renderHistory(true)}
+  else scrollToTodayRow($('histTable'));
+});
+// 左右滑換月：只在「標題區」和「黏住的月份列」上有效。表格本身要左右滑動看更多品項，所以不能拿來換月
+function bindMonthSwipe(el){
+  if(!el)return;let sx=0,sy=0,t0=0,ok=false;
+  el.addEventListener('touchstart',e=>{if(e.touches.length!==1||isDesk()){ok=false;return}const p=e.touches[0];sx=p.clientX;sy=p.clientY;t0=Date.now();ok=true},{passive:true});
+  el.addEventListener('touchend',e=>{if(!ok)return;ok=false;const p=e.changedTouches[0],dx=p.clientX-sx,dy=p.clientY-sy;
+    if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.8&&Date.now()-t0<700)shiftMonth(dx>0?-1:1)},{passive:true});
+}
+bindMonthSwipe(hbar);bindMonthSwipe(document.querySelector('#tab-history .hhdr'));
 hbar.addEventListener('click',e=>{
   const b=e.target.closest('[data-a]');if(!b)return;const a=b.dataset.a;
   if(a==='prev')shiftMonth(-1);else if(a==='next')shiftMonth(1);
@@ -2421,8 +2462,9 @@ function scrollToTodayRow(t){
   requestAnimationFrame(()=>{
     const tdy=t.querySelector('td.day.tdy');if(!tdy){window.scrollTo(0,0);return}
     const tr=tdy.parentElement,headH=$('histHead').offsetHeight;
-    const top=tr.getBoundingClientRect().top+window.pageYOffset-headH-70;
-    window.scrollTo(0,Math.max(0,top));
+    // v201 今天那一列要落在「狀態列＋月份列＋表頭」下面，再多留幾列看前面的紀錄（以前沒算月份列，會被表頭蓋住）
+    const above=(hbProbe.offsetHeight||0)+(isDesk()?0:HBAR_H)+headH+56;
+    window.scrollTo(0,Math.max(0,tr.getBoundingClientRect().top+window.pageYOffset-above));
   });
 }
 function renderHItem(list){
@@ -2666,7 +2708,7 @@ function switchTab(t){
   try{updateNavDot()}catch(e){}
   ['daily','history','settings'].forEach(x=>$('tab-'+x).classList.toggle('hidden',x!==t));
   window.scrollTo(0,0);
-  if(t==='history')renderHistory(false);
+  if(t==='history')renderHistory(!isDesk()&&histMonth===todayStr.slice(0,7));   // v201 手機版：打開歷史頁自動捲到今天那一列
   if(t==='settings'){renderItemEditor();renderCfg();updateExpCount()}
   try{hbarSync()}catch(e){}
 }
